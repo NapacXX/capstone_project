@@ -1,0 +1,4 @@
+case_id,model_short,n_rows
+DM026,Claude Opus 4.6,3
+DM026,Claude Sonnet 4.6,3
+DM026,GPT-5.4,3

@@ -1,30 +1,134 @@
 ---
 title: "Comparison of Models"
-author: "ChangchangPan"
 date: "2026-05-31"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+# Libraries
+library(dplyr)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(tidyr)
+library(forcats)
+
+# Path
+p <- "../data/processed/changchangpan/capstone_llm_data_explore_r_outputs"
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+# Recommendation Rates by Model
+```{r recc-rates-model}
+read_csv(file.path(p, "recommendation_rates_by_model.csv"), show_col_types = FALSE)%>%
+  rename(Model = model_short) %>%
+  kable(caption = "Recommendation Rates (%) by Model (n = 100 per model)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+## Heatmap
+```{r, fig.align = "center"}
+knitr::include_graphics(file.path(p, "medication_rates_by_model_heatmap.png"))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+# Range Across Models
+```{r range-models}
+read_csv(file.path(p, "model_to_model_feature_ranges.csv"), show_col_types = FALSE)%>%
+  arrange(desc(range_pct_points)) %>%
+  rename(Feature = feature, `Min %` = min_pct, `Max %` = max_pct,
+         `Range (pp)` = range_pct_points) %>%
+  kable(caption = "Range in Recommendation Rates Across Models (percentage
+        points)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+# Inter-Model Agreement
+```{r intermodel-agreement}
+read_csv(file.path(p, "model_agreement_summary.csv"), show_col_types = FALSE) %>%
+  arrange(pct_agree) %>%
+  rename(Feature = feature, `N vignettes` = n_cases,
+         `All agree` = n_agree, `Any disagreement` = n_disagree,
+         `% agreement` = pct_agree) %>%
+  kable(caption = "Agreement Across all 3 Models (97 evaluable vignettes)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+
+# High-Disagreement Cases
+```{r high-disagreement-cases}
+read_csv(file.path(p, "high_disagreement_cases.csv"), show_col_types = FALSE) %>%
+  filter(disagreement_score >= 3) %>%
+  arrange(desc(disagreement_score)) %>%
+  rename(`Case ID` = case_id, `# drugs disagreed` = disagreement_score,
+         `Disagreed features` = disagreed_features) %>%
+  kable(caption = "Cases with Disagreement on 3+ Drug Classes") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+
+# Guideline Adherence by Model
+```{r guideline-adherence-model}
+read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE) %>%
+  rename(Condition = condition, Feature = feature, Model = model_short,
+         N = n, `%` = pct) %>%
+  kable(caption = "Guideline Adherence Flags by Condition and Model") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  collapse_rows(columns = 1:2, valign = "top")
+```
+
+## Guideline Adherence Plot
+```{r guideline-adherence-plot, fig.width = 10, fig.height = 6}
+read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE) %>%
+  mutate(label = paste0(condition, "\n(", feature, ")")) %>%
+  ggplot(aes(x = model_short, y = pct, fill = model_short)) +
+  geom_col(width = 0.6) +
+  facet_wrap(~ label, scales = "free_y", ncol = 3) +
+  scale_fill_manual(values = c(
+    "Claude Opus 4.6" = "blue",
+    "Claude Sonnet 4.6" = "purple",
+    "GPT-5.4" = "pink"
+  )) +
+  labs(title = "Guideline adherence rates by condition and model",
+       x = NULL, y = "% of vignettes", fill = "Model") +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        strip.text = element_text(size = 8),
+        legend.position = "bottom")
+```
+
+
+# Exploratory Regression Results
+
+## GEE Results
+```{r}
+read_csv(file.path(p, "exploratory_gee_results.csv"), show_col_types = FALSE) %>%
+  mutate(across(where(is.numeric), ~ round(., 3))) %>%
+  rename(Outcome = outcome, Term = term, OR = estimate,
+         SE = std.error, Statistic = statistic,
+         `p-value` = p.value, `CI low` = conf.low, `CI high` = conf.high) %>%
+  kable(caption = "GEE Results (odds ratios) - Exploratory") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 11) %>%
+  scroll_box(height = "400px")
+```
+
+## Logistic Regression Results
+```{r}
+read_csv(file.path(p, "exploratory_logistic_regression_results.csv"),
+         show_col_types = FALSE) %>%
+  mutate(across(where(is.numeric), ~ round(., 3))) %>%
+  rename(Outcome = outcome, Term = term, OR = estimate,
+         SE = std.error, Statistic = statistic,
+         `p-value` = p.value, `CI low` = conf.low, `CI high` = conf.high) %>%
+  kable(caption = "Logistic Regression Results (odds ratios) - Exploratory") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 11) %>%
+  scroll_box(height = "400px")
+```
+
+
+

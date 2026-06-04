@@ -89,11 +89,11 @@ read_csv(file.path(p, "high_disagreement_cases.csv"), show_col_types = FALSE) %>
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-**Key Takeaway:** 13 vignettes had disagreement across 3 or more drug classes,
-with DM025, DM049, and DM070 showing the highest disagreement (5 drug classes
-each). These cases likely represent clinically ambiguous scenarios, such as
-patients with competing contraindications, where clinicians might
-also disagree.
+**Key Takeaway:** 13 out of 97 evaluable vignettes (13%) had disagreement across 3
+or more drug classes, with DM025, DM049, and DM070 showing the highest
+disagreement (5 drug classes each). These cases likely represent clinically
+ambiguous scenarios, such as patients with competing contraindications, where
+clinicians might also disagree.
 
 
 # Guideline Adherence by Model
@@ -133,7 +133,7 @@ eGFR < 30 (15%), compared to 92% for Claude Opus 4.6 and 85% for Claude Sonnet
 30, and represents a potentially significant patient safety difference across
 models. Claude Opus also recommended GLP-1 RAs in 83% of injection-reluctant
 patients vs. 17% for the other two models, suggesting it may lower/underweight
-patient preferences in its recommendations.
+patient preferences in its recommendations. By contrast, all three models showed strong adherence for heart failure, recommending SGLT2i in 75-100% of heart failure cases.
 
 
 # Manual Review Flags
@@ -202,6 +202,8 @@ read_csv(file.path(p, "exploratory_logistic_regression_results.csv"),
 **Key Takeaway:** The GEE and logistic regression models are not reliable in
 their current form due to complete separation. This is a statistical problem that
 occurs when a predictor perfectly predicts an outcome in a small subgroup.
-Future analysis should consider penalized regression, exact logistic regression,
-or collapsing clinical subgroups to address this.
+This affects both the GEE and logistic regression results, with many estimates
+showing infinite odds ratios and very large standard errors. Future analysis
+should consider penalized regression, exact logistic regression, or collapsing
+clinical subgroups to address this.
 

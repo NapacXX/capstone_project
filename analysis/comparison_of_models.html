@@ -1527,11 +1527,12 @@ glp1_active; metformin_active; sglt2i_active
 </tr>
 </tbody>
 </table>
-<p><strong>Key Takeaway:</strong> 13 vignettes had disagreement across 3
-or more drug classes, with DM025, DM049, and DM070 showing the highest
-disagreement (5 drug classes each). These cases likely represent
-clinically ambiguous scenarios, such as patients with competing
-contraindications, where clinicians might also disagree.</p>
+<p><strong>Key Takeaway:</strong> 13 out of 97 evaluable vignettes (13%)
+had disagreement across 3 or more drug classes, with DM025, DM049, and
+DM070 showing the highest disagreement (5 drug classes each). These
+cases likely represent clinically ambiguous scenarios, such as patients
+with competing contraindications, where clinicians might also
+disagree.</p>
 </div>
 <div id="guideline-adherence-by-model" class="section level1">
 <h1>Guideline Adherence by Model</h1>
@@ -2171,7 +2172,9 @@ violation, metformin is contraindicated below eGFR 30, and represents a
 potentially significant patient safety difference across models. Claude
 Opus also recommended GLP-1 RAs in 83% of injection-reluctant patients
 vs. 17% for the other two models, suggesting it may lower/underweight
-patient preferences in its recommendations.</p>
+patient preferences in its recommendations. By contrast, all three
+models showed strong adherence for heart failure, recommending SGLT2i in
+75-100% of heart failure cases.</p>
 </div>
 </div>
 <div id="manual-review-flags" class="section level1">
@@ -10459,9 +10462,11 @@ reluctant_injectionsYes
 <p><strong>Key Takeaway:</strong> The GEE and logistic regression models
 are not reliable in their current form due to complete separation. This
 is a statistical problem that occurs when a predictor perfectly predicts
-an outcome in a small subgroup. Future analysis should consider
-penalized regression, exact logistic regression, or collapsing clinical
-subgroups to address this.</p>
+an outcome in a small subgroup. This affects both the GEE and logistic
+regression results, with many estimates showing infinite odds ratios and
+very large standard errors. Future analysis should consider penalized
+regression, exact logistic regression, or collapsing clinical subgroups
+to address this.</p>
 </div>
 </div>
 

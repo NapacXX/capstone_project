@@ -28,6 +28,8 @@ p <- "../data/processed/changchangpan/capstone_llm_data_explore_r_outputs"
 
 
 # Vignette Characteristics
+100 synthetic clinical vignettes evaluated by three LLMs: Claude Opus 4.6,
+Claude Sonnet 4.6, and GPT-5.4 (300 total responses).
 
 ## Continuous Variables
 ```{r continuous-vignettes}
@@ -79,69 +81,5 @@ read_csv(file.path(p, "data_quality_basic_summary.csv"), show_col_types = FALSE)
   kable(caption = "Data Quality Summary") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
-
-
-# Recommendation Rates by Model
-```{r recc-rates-model}
-read_csv(file.path(p, "recommendation_rates_by_model.csv"), show_col_types =
-           FALSE) %>%
-  rename(Model = model_short) %>%
-  kable(caption = "Recommendation Rates (%) by Model (n = 100 per model)") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-## Heatmap
-```{r, fig.align = "center"}
-knitr::include_graphics(file.path(p, "medication_rates_by_model_heatmap.png"))
-```
-
-
-# Range Across Models
-```{r feature-ranges}
-read_csv(file.path(p, "model_to_model_feature_ranges.csv"), show_col_types = FALSE) %>%
-  arrange(desc(range_pct_points)) %>%
-  rename(Feature = feature, `Min %` = min_pct, `Max %` = max_pct,
-         `Range (pp)` = range_pct_points) %>%
-  kable(caption = "Range in Recommendation Rates Across Models (percentage points)") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
-```
-
-
-# Model Agreement
-```{r model-agreement}
-read_csv(file.path(p, "model_agreement_summary.csv"), show_col_types = FALSE) %>%
-  arrange(pct_agree) %>%
-  rename(Feature = feature, `N vignettes` = n_cases,
-         `All agree` = n_agree, `Any disagreement` = n_disagree,
-         `% agreement` = pct_agree) %>%
-  kable(caption = "Model Agreement Across all 3 Models (97 evaluable vignettes)")%>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-
-# High-Disagreement Cases
-```{r high-disagreement}
-read_csv(file.path(p, "high_disagreement_cases.csv"), show_col_types = FALSE) %>%
-  filter(disagreement_score >= 3) %>%
-  arrange(desc(disagreement_score)) %>%
-  rename(`Case ID` = case_id, `# drugs disagreed` = disagreement_score,
-         `Disagreed features` = disagreed_features) %>%
-  kable(caption = "Cases with Disagreement on 3+ Drug Classes") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-
-```{r guideline-flags}
-read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE)%>%
-  rename(Condition = condition, Feature = feature, Model = model_short,
-         N = n, `%` = pct) %>%
-  kable(caption = "Guideline Adherence Flags by Condition and Model") %>%
-  kable_styling(bootstrap_options = c("striped", "hover")) %>%
-  collapse_rows(columns = 1:2, valign = "top")
-```
-
-
-
-
 
 

@@ -81,7 +81,7 @@ read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE
   collapse_rows(columns = 1:2, valign = "top")
 ```
 
-## Guideline Adherence Plot
+## Guideline Adherence Plots
 ```{r guideline-adherence-plot, fig.width = 10, fig.height = 6}
 read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE) %>%
   mutate(label = paste0(condition, "\n(", feature, ")")) %>%
@@ -91,7 +91,7 @@ read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE
   scale_fill_manual(values = c(
     "Claude Opus 4.6" = "blue",
     "Claude Sonnet 4.6" = "purple",
-    "GPT-5.4" = "pink"
+    "GPT-5.4" = "red"
   )) +
   labs(title = "Guideline adherence rates by condition and model",
        x = NULL, y = "% of vignettes", fill = "Model") +
@@ -103,10 +103,41 @@ read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE
 ```
 
 
+# Manual Review Flags
+```{r manual-review}
+read_csv(file.path(p, "manual_review_flags.csv"), show_col_types = FALSE) %>%
+  select(case_id, model_short, egfr_ml_min_1_73m2, hba1c_percent,
+         possible_low_egfr_metformin_issue, metformin_parser_conflict,
+         sglt2i_parser_conflict, glp1_parser_conflict,
+         severe_hyperglycemia_no_insulin, financial_no_cost_mention) %>%
+  filter(if_any(c(possible_low_egfr_metformin_issue, metformin_parser_conflict,
+                  sglt2i_parser_conflict, glp1_parser_conflict,
+                  severe_hyperglycemia_no_insulin, financial_no_cost_mention),
+                ~ . == TRUE)) %>%
+  rename(`Case ID` = case_id, Model = model_short,
+         
+         eGFR = egfr_ml_min_1_73m2, HbA1c = hba1c_percent,
+         
+         `Low eGFR/metformin` = possible_low_egfr_metformin_issue,
+         
+         `Metformin conflict` = metformin_parser_conflict,
+         
+         `SGLT2i conflict` = sglt2i_parser_conflict,
+         
+         `GLP-1 conflict` = glp1_parser_conflict,
+         
+         `Severe HG/no insulin` = severe_hyperglycemia_no_insulin,
+         
+         `Financial/no cost mention` = financial_no_cost_mention) %>%
+  kable(caption = "Cases Flagged for Potential Guideline Issues or Parser Conflicts") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 11)
+```
+
+
 # Exploratory Regression Results
 
 ## GEE Results
-```{r}
+```{r gee-results}
 read_csv(file.path(p, "exploratory_gee_results.csv"), show_col_types = FALSE) %>%
   mutate(across(where(is.numeric), ~ round(., 3))) %>%
   rename(Outcome = outcome, Term = term, OR = estimate,
@@ -118,7 +149,7 @@ read_csv(file.path(p, "exploratory_gee_results.csv"), show_col_types = FALSE) %>
 ```
 
 ## Logistic Regression Results
-```{r}
+```{r log-reg-results}
 read_csv(file.path(p, "exploratory_logistic_regression_results.csv"),
          show_col_types = FALSE) %>%
   mutate(across(where(is.numeric), ~ round(., 3))) %>%

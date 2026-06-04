@@ -1356,6 +1356,12 @@ reluctant_injections
 </tr>
 </tbody>
 </table>
+<p><strong>Key Takeaway:</strong> The vignette population is complex at
+a clinical level and skewed toward high-risk patients - 54% have CKD,
+70% have hypertension, and 67% have hyperlipidemia. Mean HbA1c is 8.3%
+and mean eGFR is 59 mL/min/1.73m², placing many patients in the CKD
+stage 3 range where medication choices (especially metformin and SGLT2
+inhibitors) require consideration.</p>
 </div>
 </div>
 <div id="clinical-subgroup-distributions" class="section level1">
@@ -1571,6 +1577,11 @@ UACR
 </tr>
 </tbody>
 </table>
+<p><strong>Key Takeaway:</strong> The majority of vignettes (58%) fall
+in the HbA1c 8-8.9% range, reflecting moderately uncontrolled diabetes.
+On the renal side, 52% of vignettes have eGFR below 60 (CKD stages 3-5)
+and 70% have at least microalbuminuria (UACR &gt;= 30 mg/g). Both are
+strong guideline indications for SGLT2 inhibitor or GLP-1 RA use.</p>
 </div>
 <div id="missingness" class="section level1">
 <h1>Missingness</h1>
@@ -1803,9 +1814,11 @@ uacr_mg_g
 </tr>
 </tbody>
 </table>
-<p><strong>Note:</strong> <code>current_dm_drugs</code> is missing in
-49% of rows because newly diagnosed patients had no prior diabetes
-medications.</p>
+<p><strong>Key Takeaway:</strong> Missingness is minimal for all
+clinical variables. The only substantial missing data is
+<code>current_dm_drugs</code> (49%), which is expected. Newly diagnosed
+patients had no prior diabetes medications. All key covariates used in
+analysis (HbA1c, eGFR, UACR, comorbidities) are complete.</p>
 </div>
 <div id="data-quality" class="section level1">
 <h1>Data Quality</h1>
@@ -1978,6 +1991,10 @@ GPT-5.4
 </tr>
 </tbody>
 </table>
+<p><strong>Key Takeaway:</strong> Data quality is generally good. The
+main known issue is DM026, which has 3 distinct vignette contents mapped
+to one case ID and should be treated with caution. Cases DM085-DM088 are
+entirely absent from the dataset.</p>
 </div>
 </div>
 

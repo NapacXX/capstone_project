@@ -1,27 +1,22 @@
 ---
 title: "Descriptive Statistics"
-date: "2026-06-03"
+date: "2026-05-31"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # Set-Up
-```{r packages}
-# Packages
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+# Libraries
 library(dplyr)
-library(tidyr)
 library(readr)
 library(knitr)
 library(kableExtra)
 library(ggplot2)
-library(stringr)
+library(tidyr)
 library(forcats)
-```
 
-```{r Path}
 # Path
 p <- "../data/processed/changchangpan/capstone_llm_data_explore_r_outputs"
 ```

@@ -34,6 +34,12 @@ read_csv(file.path(p, "recommendation_rates_by_model.csv"), show_col_types = FAL
 knitr::include_graphics(file.path(p, "medication_rates_by_model_heatmap.png"))
 ```
 
+**Key Takeaway:** GLP-1 RA recommendation rates varied most across models
+(Claude Opus 4.6: 66%, Claude Sonnet 4.6: 56%, GPT-5.4: 43%). GPT-5.4
+recommended metformin most frequently (64%) while recommending GLP-1 RAs
+least. All three models mentioned urgent evaluation in 100% of cases,
+suggesting strong agreement on urgency but divergence on specific drug selection.
+
 
 # Range Across Models
 ```{r range-models}
@@ -45,6 +51,11 @@ read_csv(file.path(p, "model_to_model_feature_ranges.csv"), show_col_types = FAL
         points)") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
+
+**Key Takeaway:** GLP-1 RA shows the largest spread across models at 23
+percentage points, followed by metformin (14 pp) and SGLT2i (12 pp). These
+three drug classes, all heavily guideline-driven in patients with CKD and
+cardiovascular disease, are where model behavior diverges the most.
 
 
 # Inter-Model Agreement
@@ -58,6 +69,14 @@ read_csv(file.path(p, "model_agreement_summary.csv"), show_col_types = FALSE) %>
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
+**Key Takeaway:** GLP-1 RA and SGLT2i had the lowest inter-model agreement
+at 65%. This means all three models gave the same recommendation on only 2 in
+3 cases. These are also the drug classes with the strongest guideline
+indications in high-risk patients, making this disagreement
+meaningful at a clinical level. In contrast, the agreement was very high for less
+commonly used agents (sulfonylurea 97%, TZD 98%), likely because all models rarely
+recommended them.
+
 
 # High-Disagreement Cases
 ```{r high-disagreement-cases}
@@ -69,6 +88,12 @@ read_csv(file.path(p, "high_disagreement_cases.csv"), show_col_types = FALSE) %>
   kable(caption = "Cases with Disagreement on 3+ Drug Classes") %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
+
+**Key Takeaway:** 13 vignettes had disagreement across 3 or more drug classes,
+with DM025, DM049, and DM070 showing the highest disagreement (5 drug classes
+each). These cases likely represent clinically ambiguous scenarios, such as
+patients with competing contraindications, where clinicians might
+also disagree.
 
 
 # Guideline Adherence by Model
@@ -102,6 +127,14 @@ read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE
         legend.position = "bottom")
 ```
 
+**Key Takeaway:** GPT-5.4 has a low rate of flagging metformin stop/caution when
+eGFR < 30 (15%), compared to 92% for Claude Opus 4.6 and 85% for Claude Sonnet
+4.6. This is a ADA guideline violation, metformin is contraindicated below eGFR
+30, and represents a potentially significant patient safety difference across
+models. Claude Opus also recommended GLP-1 RAs in 83% of injection-reluctant
+patients vs. 17% for the other two models, suggesting it may lower/underweight
+patient preferences in its recommendations.
+
 
 # Manual Review Flags
 ```{r manual-review}
@@ -133,6 +166,11 @@ read_csv(file.path(p, "manual_review_flags.csv"), show_col_types = FALSE) %>%
   kable_styling(bootstrap_options = c("striped", "hover"), font_size = 11)
 ```
 
+**Key Takeaway:** Parser conflicts, where a medication was both flagged as
+active and as stopped/cautioned, show ambiguous model outputs that
+require manual review before making any conclusions. The cases should
+be reviewed before finalizing guideline adherence analyses.
+
 
 # Exploratory Regression Results
 
@@ -161,5 +199,9 @@ read_csv(file.path(p, "exploratory_logistic_regression_results.csv"),
   scroll_box(height = "400px")
 ```
 
-
+**Key Takeaway:** The GEE and logistic regression models are not reliable in
+their current form due to complete separation. This is a statistical problem that
+occurs when a predictor perfectly predicts an outcome in a small subgroup.
+Future analysis should consider penalized regression, exact logistic regression,
+or collapsing clinical subgroups to address this.
 

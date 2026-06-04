@@ -46,7 +46,7 @@ read_csv(file.path(p, "vignette_numeric_summary.csv"), show_col_types = FALSE) %
 read_csv(file.path(p, "vignette_binary_summary.csv"), show_col_types = FALSE) %>%
   filter(value == "Yes") %>%
   select(Variable = variable, `n (Yes)` = n, `% (Yes)` = pct) %>%
-  kable(caption = "Binary Characteristics — % present (n = 100 vignettes)") %>%
+  kable(caption = "Binary Characteristics - % present (n = 100 vignettes)") %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
@@ -76,9 +76,31 @@ patients had no prior diabetes medications.
 
 
 # Data Quality
+
+## Summary
 ```{r data-quality}
 read_csv(file.path(p, "data_quality_basic_summary.csv"), show_col_types = FALSE)%>%
   kable(caption = "Data Quality Summary") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+## Case Completeness
+```{r case-completeness}
+read_csv(file.path(p, "case_completeness_by_case_id.csv"), show_col_types = FALSE)%>%
+  rename(`Case ID` = case_id, `N models observed` = n_models_observed,
+         `Expected N models` = expected_n_models,
+         `Complete` = complete_case_id) %>%
+  filter(Complete == FALSE) %>%
+  kable(caption = "Incomplete Cases (fewer than 3 model responses)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+## Duplicated Case-Model Combinations
+```{r duplicates}
+read_csv(file.path(p, "duplicated_case_model_combinations.csv"),
+         show_col_types = FALSE) %>%
+  rename(`Case ID` = case_id, Model = model_short, `N rows` = n_rows) %>%
+  kable(caption = "Duplicated Case-Model Combinations (expected = 1 row each)")%>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 

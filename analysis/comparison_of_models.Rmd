@@ -82,7 +82,7 @@ read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE
 ```
 
 ## Guideline Adherence Plots
-```{r guideline-adherence-plot, fig.width = 10, fig.height = 6}
+```{r guideline-adherence-plot, fig.width = 12, fig.height = 10}
 read_csv(file.path(p, "exploratory_guideline_flags.csv"), show_col_types = FALSE) %>%
   mutate(label = paste0(condition, "\n(", feature, ")")) %>%
   ggplot(aes(x = model_short, y = pct, fill = model_short)) +

@@ -16,12 +16,6 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 
-project_root <- normalizePath(file.path(getwd(), ".."), mustWork = TRUE)
-if (basename(getwd()) != "data") {
-  project_root <- normalizePath(getwd(), mustWork = TRUE)
-}
-knitr::opts_knit$set(root.dir = project_root)
-
 required_packages <- c(
   "httr2", "jsonlite", "readr", "dplyr", "purrr",
   "tibble", "stringr", "knitr", "tidyr"
@@ -44,220 +38,198 @@ library(stringr)
 library(knitr)
 library(tidyr)
 
+find_project_root <- function(start_dir = getwd()) {
+  candidates <- normalizePath(
+    file.path(start_dir, c(".", "..", "../..", "../../..")),
+    mustWork = FALSE
+  )
+
+  matched <- candidates[
+    file.exists(file.path(candidates, "data/raw/final_results_gpt_claude_models.csv"))
+  ]
+
+  if (length(matched) == 0) {
+    stop("Could not find project root containing data/raw/final_results_gpt_claude_models.csv.")
+  }
+
+  matched[[1]]
+}
+
+project_root <- find_project_root()
+knitr::opts_knit$set(root.dir = project_root)
+dir.create(file.path(project_root, "data/inner model validation"), showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(project_root, "data/processed"), showWarnings = FALSE, recursive = TRUE)
-input_path <- "data/final_results_gpt_claude_models.csv"
 ```
 
 # Purpose
 
-This file generates repeated `treatment_plan` outputs for intra-model consistency analysis using either the OpenAI Responses API or the Anthropic Messages API.
+This workflow creates a new dataset for intra-model validation. It reads the original model-output dataset, extracts one row per clinical vignette, combines each vignette with the original diabetes medication prompt, expands each case to repeated runs, and optionally calls a local or remote model endpoint to generate new `treatment_plan` responses.
 
-The intended workflow is:
+The main output needed before any model call is the prompt request dataset:
 
-1. Prepare an input file that already contains `prompt_text`.
-2. Supply the API credentials and endpoint values in the configuration section.
-3. Load the prompt input table.
-4. Expand rows to repeated requests if needed.
-5. Export the results to a flat CSV for later consistency scoring.
+`data/inner model validation/intra_model_validation_prompt_requests.csv`
 
 # Configuration
 
 ```{r configuration}
-# Safety switch. Leave FALSE while checking the file structure and data quality.
+# Keep FALSE to only create the validation prompt dataset.
+# Set TRUE only when model endpoint settings below are ready.
 run_generation <- FALSE
 
-# Example configurations:
-# model_id <- "gpt-5.4"
-# base_url <- "https://api.openai.com/v1/responses"
-#
-# model_id <- "claude-opus-4-20250514"
-# base_url <- "https://api.anthropic.com/v1/messages"
+source_data_path <- "data/raw/final_results_gpt_claude_models.csv"
+prompt_request_output_path <- "data/inner model validation/intra_model_validation_prompt_requests.csv"
+response_output_path <- NULL
 
-api_key <- ""
-model_id <- ""
-base_url <- ""
+# Use one model per run. This value is written into the prompt request dataset.
+model_id <- "local-model"
 
-prompt_type <- "baseline"
-configured_prompt_type <- prompt_type
 n_repeats <- 5
+prompt_type <- "baseline"
 temperature <- 0
-prompt_input_path <- "data/final_results_gpt_claude_models.csv"
-output_path <- NULL
-request_pause_seconds <- 1
 max_output_tokens <- 2500
-overwrite_existing <- FALSE
+request_pause_seconds <- 1
+overwrite_existing <- TRUE
+
+# Optional: limit cases for a small test dataset. Use NULL for all cases.
+max_cases <- NULL
+
+# Local model endpoints usually expose an OpenAI-compatible API, for example:
+# base_url <- "http://localhost:11434/v1/chat/completions"
+# base_url <- "http://localhost:1234/v1/chat/completions"
+# api_key can often be blank for local models.
+base_url <- ""
+api_key <- ""
 ```
 
-# Input Contract
+# Original Prompt
 
-```{r input-contract}
-required_input_columns <- c("case_id", "prompt_text", "model_type")
-
-input_contract <- tibble(
-  column_name = c("case_id", "vignette_text", "prompt_text", "model_type", "repeat_id", "prompt_type"),
-  required = c("yes", "no", "yes", "yes", "no", "no"),
-  description = c(
-    "Unique case identifier.",
-    "Optional source vignette for reference only.",
-    "Fully prepared prompt sent directly to the model.",
-    "Target model name, such as gpt-5.4 or claude-opus-4-20250514.",
-    "Optional repeat number. If missing, the file will generate 1:n_repeats automatically.",
-    "Optional prompt label. If missing, it defaults to the configured prompt_type."
-  )
+```{r original-prompt}
+original_prompt <- paste(
+  "You are a primary care provider helping this patient manage their diabetes.",
+  "They present for a visit in your office with the following history.",
+  "Please recommend changes or additions to their diabetes medications.",
+  "Please output one row per medication.",
+  "If the medication dose or frequency is being changed, describe the change and the final dose and frequency.",
+  "If the medication is being continued without change, say so and give the continued dose and frequency.",
+  "If the medication is being stopped note this.",
+  "If a new medication is being added, give the name of the medication and the dose and frequency.",
+  "If titration is planned in the next few months, please simply state that the medication will be titrated up.",
+  "For rapid acting insulin regimens, please summarize the dosing schedule concisely but it is fine to take 2-3 lines of text if needed.",
+  "Do NOT give contingency plans or choices between several options.",
+  "We need the patient to walk out with a single plan to implement.",
+  "ONLY provide recommendations for antihyperglycemic drugs - no vitamins, blood pressure medications, lipid lowering medications, for example.",
+  "Per medication, this output should all go in a single cell of a table.",
+  "The output should include a table with one column and one row per medication that can be easily copied and pasted into a CSV file.",
+  sep = " "
 )
 
-input_contract %>% kable()
+build_prompt_text <- function(vignette_text) {
+  paste(
+    original_prompt,
+    "",
+    "Patient Vignette:",
+    vignette_text,
+    sep = "\n"
+  )
+}
 ```
 
-# Input Preparation
+# Build Validation Prompt Dataset
 
-```{r load-and-prepare}
-raw_data <- read_csv(prompt_input_path, show_col_types = FALSE)
+```{r build-prompt-requests}
+raw_data <- read_csv(source_data_path, show_col_types = FALSE)
 
 blank_names <- names(raw_data) == ""
 if (any(blank_names)) {
   names(raw_data)[blank_names] <- paste0("blank_column_", seq_len(sum(blank_names)))
 }
 
-missing_columns <- setdiff(required_input_columns, names(raw_data))
+required_source_columns <- c("case_id", "vignette_text")
+missing_source_columns <- setdiff(required_source_columns, names(raw_data))
 
-if (length(missing_columns) > 0) {
-  template_example <- tibble(
-    case_id = c("DM020", "DM020"),
-    vignette_text = c("Optional source vignette text.", "Optional source vignette text."),
-    prompt_text = c("Paste the full prompt to send to the model.", "Paste the full prompt to send to the model."),
-    model_type = c("gpt-5.4", "claude-opus-4-20250514")
-  )
-
-  missing_column_message <- paste(
-    "The input file is missing required columns:",
-    paste(missing_columns, collapse = ", ")
-  )
-} else {
-  missing_column_message <- NULL
+if (length(missing_source_columns) > 0) {
+  stop("Missing required source columns: ", paste(missing_source_columns, collapse = ", "))
 }
 
-if (is.null(missing_column_message)) {
-  raw_data <- raw_data %>%
-    mutate(
-      case_id = as.character(case_id),
-      prompt_text = as.character(prompt_text),
-      model_type = as.character(model_type)
+case_vignettes <- raw_data %>%
+  distinct(case_id, vignette_text) %>%
+  arrange(case_id, vignette_text) %>%
+  group_by(case_id) %>%
+  mutate(
+    case_variant_id = row_number(),
+    n_case_variants = n(),
+    validation_case_id = if_else(
+      n_case_variants == 1,
+      case_id,
+      paste0(case_id, "_variant", case_variant_id)
     )
+  ) %>%
+  ungroup()
+
+if (!is.null(max_cases)) {
+  case_vignettes <- case_vignettes %>%
+    slice_head(n = max_cases)
 }
 
-if (is.null(missing_column_message)) {
-  if (!"prompt_type" %in% names(raw_data)) {
-    raw_data <- raw_data %>%
-      mutate(prompt_type = configured_prompt_type)
-  } else {
-    raw_data <- raw_data %>%
-      mutate(prompt_type = dplyr::coalesce(as.character(prompt_type), configured_prompt_type))
-  }
+prompt_requests <- case_vignettes %>%
+  transmute(
+    original_case_id = case_id,
+    case_id = validation_case_id,
+    case_variant_id = case_variant_id,
+    vignette_text = vignette_text,
+    prompt_text = map_chr(vignette_text, build_prompt_text),
+    model_type = model_id,
+    prompt_type = prompt_type
+  ) %>%
+  tidyr::uncount(weights = n_repeats, .id = "repeat_id") %>%
+  mutate(repeat_id = as.integer(repeat_id)) %>%
+  arrange(case_id, model_type, repeat_id)
+
+duplicate_request_keys <- prompt_requests %>%
+  count(case_id, model_type, repeat_id, name = "n") %>%
+  filter(n > 1)
+
+if (nrow(duplicate_request_keys) > 0) {
+  stop("Duplicate case_id + model_type + repeat_id rows were created.")
 }
 
-if (is.null(missing_column_message)) {
-  blank_prompt_rows <- raw_data %>%
-    filter(is.na(prompt_text) | !nzchar(str_squish(prompt_text)))
-} else {
-  blank_prompt_rows <- tibble()
-}
+write_csv(prompt_requests, prompt_request_output_path)
 
-if (is.null(missing_column_message) && nrow(blank_prompt_rows) > 0) {
-  stop("Some rows have blank prompt_text values. Clean the input file before running generation.")
-}
-
-if (is.null(missing_column_message)) {
-  if ("repeat_id" %in% names(raw_data)) {
-    prompt_requests <- raw_data %>%
-      mutate(repeat_id = suppressWarnings(as.integer(repeat_id))) %>%
-      arrange(case_id, model_type, provider, repeat_id)
-
-    if (any(is.na(prompt_requests$repeat_id))) {
-      stop("repeat_id exists in the input file but contains missing or non-integer values.")
-    }
-  } else {
-    prompt_requests <- raw_data %>%
-      arrange(case_id, model_type, provider) %>%
-      tidyr::uncount(weights = n_repeats, .id = "repeat_id") %>%
-      mutate(repeat_id = as.integer(repeat_id))
-  }
-} else {
-  prompt_requests <- tibble()
-}
-
-if (is.null(missing_column_message)) {
-  duplicate_request_keys <- prompt_requests %>%
-    count(case_id, model_type, provider, repeat_id, name = "n") %>%
-    filter(n > 1)
-} else {
-  duplicate_request_keys <- tibble()
-}
-
-if (is.null(missing_column_message) && nrow(duplicate_request_keys) > 0) {
-  stop("Duplicate case_id + model_type + provider + repeat_id combinations were found in the request input.")
-}
-
-if (is.null(missing_column_message)) {
-  prompt_requests <- prompt_requests %>%
-    select(any_of(c("case_id", "vignette_text", "prompt_text", "model_type", "provider", "repeat_id", "prompt_type"))) %>%
-    arrange(case_id, model_type, provider, repeat_id)
-}
-
-  validation_overview <- tibble(
+validation_overview <- tibble(
   metric = c(
-    "Input rows",
-    "Distinct case IDs",
-    "Distinct model_type values",
-    "Rows after repeat expansion",
-    "Rows with blank prompt_text",
-    "Duplicate request keys"
+    "Source rows",
+    "Distinct original case IDs",
+    "Distinct case/vignette pairs",
+    "Case IDs with multiple vignette texts",
+    "Prompt request rows",
+    "Repeats per case/model",
+    "Prompt request output"
   ),
   value = c(
     nrow(raw_data),
     n_distinct(raw_data$case_id),
-    n_distinct(raw_data$model_type),
+    nrow(case_vignettes),
+    sum(case_vignettes$n_case_variants > 1),
     nrow(prompt_requests),
-    nrow(blank_prompt_rows),
-    nrow(duplicate_request_keys)
+    n_repeats,
+    prompt_request_output_path
   )
 )
 
 validation_overview %>% kable()
-
-if (!is.null(missing_column_message)) {
-  cat(missing_column_message, "\n\n")
-  cat("Use an input file shaped like this:\n\n")
-  template_example %>% kable()
-}
 ```
 
-```{r input-preview}
-input_preview_n <- min(10, nrow(prompt_requests))
-
-if (nrow(prompt_requests) > 0) {
-  prompt_requests %>%
-    mutate(prompt_text = str_trunc(prompt_text, 140)) %>%
-    slice_head(n = input_preview_n) %>%
-    kable(caption = "Prompt request preview")
-}
+```{r prompt-preview}
+prompt_requests %>%
+  mutate(prompt_text = str_trunc(prompt_text, 250)) %>%
+  select(case_id, original_case_id, model_type, repeat_id, prompt_text) %>%
+  slice_head(n = min(10, nrow(prompt_requests))) %>%
+  kable(caption = "Prompt request dataset preview")
 ```
 
 # API Helpers
 
 ```{r api-helpers}
-validate_configuration <- function(api_key, base_url, n_repeats) {
-  if (!is.character(api_key) || !nzchar(api_key)) {
-    stop("api_key is blank. Paste a valid API key into the configuration section.")
-  }
-  if (!is.character(base_url) || !nzchar(base_url)) {
-    stop("base_url is blank. Set the provider endpoint in the configuration section.")
-  }
-  if (!is.numeric(n_repeats) || length(n_repeats) != 1 || n_repeats < 1) {
-    stop("n_repeats must be a positive integer.")
-  }
-}
-
 detect_provider_from_url <- function(base_url) {
   url_lower <- str_to_lower(base_url)
 
@@ -265,111 +237,85 @@ detect_provider_from_url <- function(base_url) {
     return(NA_character_)
   }
 
-  if (str_detect(url_lower, "openai\\.com")) {
-    return("openai")
+  if (str_detect(url_lower, "openai\\.com") || str_detect(url_lower, "/chat/completions")) {
+    return("openai_compatible_chat")
   }
 
   if (str_detect(url_lower, "anthropic\\.com")) {
     return("anthropic")
   }
 
-  stop("Unsupported base_url. This file only supports OpenAI and Anthropic endpoints.")
+  stop("Unsupported base_url. Use an OpenAI-compatible chat completions endpoint or Anthropic endpoint.")
 }
 
-extract_openai_text <- function(body) {
-  if (!is.null(body$output_text) && nzchar(body$output_text)) {
-    return(body$output_text)
+validate_generation_configuration <- function(base_url, model_id, n_repeats) {
+  if (!is.character(base_url) || !nzchar(base_url)) {
+    stop("base_url is blank. Set a local or remote model endpoint before running generation.")
   }
+  if (!is.character(model_id) || !nzchar(model_id)) {
+    stop("model_id is blank.")
+  }
+  if (!is.numeric(n_repeats) || length(n_repeats) != 1 || n_repeats < 1) {
+    stop("n_repeats must be a positive integer.")
+  }
+}
 
-  if (!is.null(body$output) && length(body$output) > 0) {
-    content_text <- unlist(
-      purrr::map(
-        body$output,
-        function(item) {
-          if (!is.null(item$content)) {
-            unlist(
-              purrr::map(
-                item$content,
-                function(content_item) {
-                  if (!is.null(content_item$text)) {
-                    content_item$text
-                  } else if (!is.null(content_item$`text`)) {
-                    content_item$`text`
-                  } else {
-                    NULL
-                  }
-                }
-              )
-            )
-          } else {
-            NULL
-          }
-        }
-      )
-    )
-
-    if (length(content_text) > 0) {
-      return(paste(content_text, collapse = "\n"))
+extract_openai_chat_text <- function(body) {
+  if (!is.null(body$choices) && length(body$choices) > 0) {
+    out <- body$choices[[1]]$message$content
+    if (!is.null(out)) {
+      return(out)
     }
   }
-
   ""
 }
 
 extract_anthropic_text <- function(body) {
   if (!is.null(body$content) && length(body$content) > 0) {
     text_parts <- unlist(
-      purrr::map(
-        body$content,
-        function(item) if (!is.null(item$text)) item$text else NULL
-      )
+      map(body$content, function(item) if (!is.null(item$text)) item$text else NULL)
     )
     if (length(text_parts) > 0) {
       return(paste(text_parts, collapse = "\n"))
     }
   }
-
   ""
 }
 
-call_openai_response <- function(prompt_text, model_id, api_key, base_url, temperature, max_output_tokens) {
+call_openai_compatible_chat <- function(prompt_text, model_id, api_key, base_url, temperature, max_output_tokens) {
   body <- list(
     model = model_id,
-    input = list(
-      list(
-        role = "user",
-        content = prompt_text
-      )
+    messages = list(
+      list(role = "user", content = prompt_text)
     ),
     temperature = temperature,
-    text = list(
-      format = list(type = "text")
-    ),
-    max_output_tokens = max_output_tokens
+    max_tokens = max_output_tokens
   )
 
-  response <- request(base_url) %>%
-    req_headers(
-      Authorization = paste("Bearer", api_key),
-      `Content-Type` = "application/json"
-    ) %>%
-    req_body_json(body, auto_unbox = TRUE) %>%
-    req_perform()
+  req <- request(base_url) %>%
+    req_headers(`Content-Type` = "application/json") %>%
+    req_body_json(body, auto_unbox = TRUE)
 
+  if (nzchar(api_key)) {
+    req <- req %>% req_headers(Authorization = paste("Bearer", api_key))
+  }
+
+  response <- req %>% req_perform()
   parsed <- resp_body_json(response, simplifyVector = FALSE)
-  extract_openai_text(parsed)
+  extract_openai_chat_text(parsed)
 }
 
 call_anthropic_response <- function(prompt_text, model_id, api_key, base_url, temperature, max_output_tokens) {
+  if (!nzchar(api_key)) {
+    stop("Anthropic API calls require api_key.")
+  }
+
   body <- list(
     model = model_id,
     max_tokens = max_output_tokens,
     temperature = temperature,
     messages = list(
-      list(
-        role = "user",
-        content = prompt_text
-      )
+      list(role = "user", content = prompt_text)
     )
   )
 
@@ -387,8 +333,8 @@ call_anthropic_response <- function(prompt_text, model_id, api_key, base_url, te
 }
 
 generate_treatment_plan <- function(prompt_text, provider, model_id, api_key, base_url, temperature, max_output_tokens) {
-  if (provider == "openai") {
-    return(call_openai_response(
+  if (provider == "openai_compatible_chat") {
+    return(call_openai_compatible_chat(
       prompt_text = prompt_text,
       model_id = model_id,
       api_key = api_key,
@@ -419,52 +365,24 @@ safe_model_id <- function(x) {
 }
 ```
 
-# Request Grid
-
-```{r request-grid}
-request_grid <- prompt_requests %>%
-  mutate(
-    provider = detect_provider_from_url(base_url),
-    prompt_type = dplyr::coalesce(prompt_type, configured_prompt_type)
-  )
-
-request_grid_preview_n <- min(10, nrow(request_grid))
-
-if (nrow(request_grid) > 0) {
-  request_grid %>%
-    select(case_id, model_type, provider, prompt_type, repeat_id) %>%
-    slice_head(n = request_grid_preview_n) %>%
-    kable()
-}
-```
-
-# Generation
+# Optional Response Generation
 
 ```{r generation}
 repeated_outputs_tbl <- tibble()
 repeated_outputs_list <- list()
 
 if (run_generation) {
-  validate_configuration(
-    api_key = api_key,
+  validate_generation_configuration(
     base_url = base_url,
+    model_id = model_id,
     n_repeats = n_repeats
   )
 
-  if (is.na(detect_provider_from_url(base_url))) {
-    stop("base_url must point to a supported OpenAI or Anthropic endpoint before running generation.")
-  }
-
-  missing_model_rows <- request_grid %>%
-    filter(is.na(model_type) | !nzchar(str_squish(model_type)))
-
-  if (nrow(missing_model_rows) > 0) {
-    stop("Some rows have blank model_type values.")
-  }
+  provider <- detect_provider_from_url(base_url)
 
   repeated_outputs_tbl <- pmap_dfr(
-    request_grid,
-    function(case_id, prompt_text, model_type, provider, repeat_id, prompt_type, ...) {
+    prompt_requests,
+    function(case_id, original_case_id, case_variant_id, vignette_text, prompt_text, model_type, prompt_type, repeat_id) {
       result <- tryCatch(
         {
           response_text <- generate_treatment_plan(
@@ -479,6 +397,7 @@ if (run_generation) {
 
           tibble(
             case_id = case_id,
+            original_case_id = original_case_id,
             model_type = model_type,
             provider = provider,
             prompt_type = prompt_type,
@@ -491,6 +410,7 @@ if (run_generation) {
         error = function(e) {
           tibble(
             case_id = case_id,
+            original_case_id = original_case_id,
             model_type = model_type,
             provider = provider,
             prompt_type = prompt_type,
@@ -511,98 +431,63 @@ if (run_generation) {
 }
 ```
 
-# Validation
+# Response Validation and Export
 
-```{r post-generation-validation}
+```{r response-validation-export}
 if (run_generation) {
-  expected_rows <- nrow(request_grid)
+  expected_rows <- nrow(prompt_requests)
   actual_rows <- nrow(repeated_outputs_tbl)
 
-  duplicate_keys <- repeated_outputs_tbl %>%
-    count(case_id, model_type, provider, repeat_id, name = "n") %>%
+  duplicate_response_keys <- repeated_outputs_tbl %>%
+    count(case_id, model_type, repeat_id, name = "n") %>%
     filter(n > 1)
 
-  repeat_check <- repeated_outputs_tbl %>%
-    group_by(case_id, model_type, provider) %>%
-    summarise(
-      observed_repeats = paste(sort(unique(repeat_id)), collapse = ","),
-      n_rows = n(),
-      .groups = "drop"
-    )
-
-  validation_summary <- tibble(
+  response_validation <- tibble(
     check = c(
-      "Expected rows",
-      "Actual rows",
-      "Duplicate case_id + model_type + provider + repeat_id keys",
+      "Expected response rows",
+      "Actual response rows",
+      "Duplicate response keys",
       "Non-empty treatment_plan rows",
       "Rows with error_message"
     ),
     value = c(
       expected_rows,
       actual_rows,
-      nrow(duplicate_keys),
+      nrow(duplicate_response_keys),
       sum(nzchar(repeated_outputs_tbl$treatment_plan)),
       sum(nzchar(repeated_outputs_tbl$error_message))
     )
   )
 
-  validation_summary %>% kable()
-
-  generated_preview_n <- min(5, nrow(repeated_outputs_tbl))
-  error_preview_n <- min(10, nrow(filter(repeated_outputs_tbl, nzchar(error_message))))
+  response_validation %>% kable()
 
   if (actual_rows != expected_rows) {
-    stop("Generated row count does not match expected_rows.")
+    stop("Generated response row count does not match expected rows.")
   }
-
-  if (nrow(duplicate_keys) > 0) {
-    stop("Duplicate case_id + model_type + provider + repeat_id combinations detected in repeated_outputs_tbl.")
+  if (nrow(duplicate_response_keys) > 0) {
+    stop("Duplicate case_id + model_type + repeat_id rows detected in responses.")
   }
-
   if (sum(nzchar(repeated_outputs_tbl$treatment_plan)) == 0) {
-    stop("All generated treatment_plan values are blank. Check credentials, base_url, and model_id.")
+    stop("All generated treatment_plan values are blank. Check base_url, model_id, and local model status.")
   }
 
-  repeated_outputs_tbl %>%
-    select(case_id, model_type, provider, repeat_id, treatment_plan, error_message) %>%
-    slice_head(n = generated_preview_n) %>%
-    mutate(treatment_plan = str_trunc(treatment_plan, 180)) %>%
-    kable(caption = "Preview of generated outputs")
-
-  repeated_outputs_tbl %>%
-    filter(nzchar(error_message)) %>%
-    slice_head(n = error_preview_n) %>%
-    mutate(error_message = str_trunc(error_message, 180)) %>%
-    kable(caption = "Preview of API failures, if any")
-}
-```
-
-# Export
-
-```{r export}
-if (run_generation) {
-  resolved_output_path <- output_path
-  if (is.null(resolved_output_path)) {
-    resolved_output_path <- file.path(
-      "data/processed",
-      paste0("intra_model_consistency_", provider, "_", safe_model_id(model_id), ".csv")
+  resolved_response_output_path <- response_output_path
+  if (is.null(resolved_response_output_path)) {
+    resolved_response_output_path <- file.path(
+      "data/inner model validation",
+      paste0("intra_model_validation_responses_", safe_model_id(model_id), ".csv")
     )
   }
 
-  if (file.exists(resolved_output_path) && !overwrite_existing) {
-    stop("Output file already exists and overwrite_existing is FALSE: ", resolved_output_path)
+  if (file.exists(resolved_response_output_path) && !overwrite_existing) {
+    stop("Response output file already exists and overwrite_existing is FALSE: ", resolved_response_output_path)
   }
 
-  write_csv(repeated_outputs_tbl, resolved_output_path)
+  write_csv(repeated_outputs_tbl, resolved_response_output_path)
 
   tibble(
-    output = c("Results CSV", "In-memory tibble", "Split list by case_id"),
-    value = c(
-      resolved_output_path,
-      "repeated_outputs_tbl",
-      "repeated_outputs_list"
-    )
+    output = c("Prompt request dataset", "Generated response dataset"),
+    path = c(prompt_request_output_path, resolved_response_output_path)
   ) %>%
     kable()
 }
@@ -610,4 +495,4 @@ if (run_generation) {
 
 # Run Notes
 
-Set `max_cases <- 2` before the first live test. Once the configuration works and the returned `treatment_plan` values follow the expected Markdown-table format, increase `max_cases` or set it to `NULL` for the full run.
+The prompt request dataset is generated every time this R Markdown is rendered. To run a local model, set `run_generation <- TRUE`, set `model_id`, and set `base_url` to an OpenAI-compatible local endpoint such as `http://localhost:11434/v1/chat/completions` or `http://localhost:1234/v1/chat/completions`.

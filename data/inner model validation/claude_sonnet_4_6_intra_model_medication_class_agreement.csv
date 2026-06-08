@@ -1,0 +1,8 @@
+med_id,mean_repeat_level_agreement,median_repeat_level_agreement
+sitagliptin,0.99,1
+basal_insulin,0.98,1
+insulin_glargine,0.98,1
+insulin,0.95,1
+metformin,0.95,1
+glp1_receptor_agonist,0.92,1
+sglt2_inhibitor,0.88,0.9

@@ -1,0 +1,7 @@
+action_type,mean_repeat_level_agreement,median_repeat_level_agreement
+continue,0.9917073170731707,1
+reduce,0.9907317073170732,1
+stop,0.9892682926829268,1
+start,0.9863414634146341,1
+increase,0.9848780487804878,1
+titrate,0.9812195121951219,1

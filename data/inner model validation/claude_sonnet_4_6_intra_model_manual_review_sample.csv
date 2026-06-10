@@ -1,0 +1,232 @@
+row_id,case_id,original_case_id,case_variant_id,model,prompt_type,repeat_id,treatment_plan,treatment_signature,parsed_summary
+1,DM020,DM020,1,claude-sonnet-4-6,baseline,1,"I'll analyze this case carefully before providing the medication table.
+
+**Key considerations:**
+- HbA1c 8.9% — needs improvement
+- HFpEF with recent hospitalization — SGLT2 inhibitor strongly indicated (empagliflozin/dapagliflozin have HF benefit; dapagliflozin has specific HFpEF trial data - DELIVER)
+- CKD stage 3a, eGFR 48, UACR 240 — SGLT2 inhibitor also nephroprotective; eGFR 48 is above the threshold for initiation
+- MASH — GLP-1 RA beneficial for NASH/MASH; also aids weight loss and CV protection
+- Obesity (BMI 35) — weight loss beneficial
+- Metformin: eGFR 48 is acceptable for continuation at reduced dose (eGFR 30-45 would require dose reduction; eGFR 48 is okay at full dose, though some guidelines suggest caution — can continue)
+- Sitagliptin: DPP-4 inhibitors have neutral-to-possible negative signal in HF (saxagliptin); sitagliptin is generally considered neutral but with a GLP-1 RA being added, it is redundant and should be stopped
+- Basal insulin: with addition of GLP-1 RA, can reduce dose; patient prefers fewer injections — a weekly GLP-1 RA (semaglutide) minimizes injection burden
+- Cost concern: semaglutide is expensive; however, dapagliflozin has generic competition emerging and manufacturer savings programs exist. Given clinical necessity (HFpEF, CKD, MASH), these are strongly indicated. Will recommend and note cost assistance resources implicitly through drug choice (dapagliflozin slightly more cost accessible; empagliflozin also acceptable)
+- Spironolactone + eGFR 48 + K 4.6: potassium is borderline; SGLT2i can help lower potassium slightly
+- Reduce basal insulin modestly when starting GLP-1 RA to reduce hypoglycemia risk
+
+---
+
+```
+""Metformin 1000 mg twice daily — continue at current dose and frequency""
+""Sitagliptin 100 mg daily — STOP (redundant with addition of GLP-1 receptor agonist)""
+""Insulin glargine — reduce dose from 26 units to 18 units nightly at initiation of semaglutide; dose will be titrated based on fasting glucose readings""
+""Semaglutide (Ozempic) — START at 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up over coming months""
+""Dapagliflozin — START 10 mg orally once daily""
+```
+
+| Medication Plan |
+|---|
+| Metformin 1000 mg twice daily — continue at current dose and frequency |
+| Sitagliptin 100 mg daily — STOP (redundant with addition of GLP-1 receptor agonist) |
+| Insulin glargine — reduce dose from 26 units to 18 units nightly at time of semaglutide initiation; will be titrated based on ongoing fasting glucose monitoring |
+| Semaglutide (Ozempic) 0.25 mg subcutaneously once weekly for the first 4 weeks, then increase to 0.5 mg once weekly; will be titrated up over the coming months |
+| Dapagliflozin — START 10 mg orally once daily |",basal_insulin::0::1::1::1::1::1::1::1000::mg::weekly || dapagliflozin::0::1::1::1::1::1::1::1000::mg::weekly || dpp4_inhibitor::0::1::1::1::1::1::1::1000::mg::weekly || empagliflozin::0::1::1::1::1::1::1::1000::mg::weekly || glp1_receptor_agonist::0::1::1::1::1::1::1::1000::mg::weekly || insulin::0::1::1::1::1::1::1::1000::mg::weekly || insulin_glargine::0::1::1::1::1::1::1::1000::mg::weekly || metformin::0::1::1::1::1::1::1::1000::mg::weekly || saxagliptin::0::1::1::1::1::1::1::1000::mg::weekly || semaglutide::0::1::1::1::1::1::1::1000::mg::weekly || sglt2_inhibitor::0::1::1::1::1::1::1::1000::mg::weekly || sitagliptin::0::1::1::1::1::1::1::1000::mg::weekly,"metformin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || sglt2_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || empagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || dapagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || glp1_receptor_agonist [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || semaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || dpp4_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || sitagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || saxagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || basal_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly] || insulin_glargine [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=weekly]"
+2,DM020,DM020,1,claude-sonnet-4-6,baseline,2,"I'll analyze this case carefully before providing the medication table.
+
+**Key considerations:**
+- HbA1c 8.9% — needs improvement
+- HFpEF with recent hospitalization → SGLT2 inhibitor strongly indicated (empagliflozin/dapagliflozin have HF benefit; dapagliflozin has specific HFpEF trial data - DELIVER)
+- eGFR 48, UACR 240 → CKD with albuminuria; SGLT2i also nephroprotective; eGFR 48 is above the threshold for dapagliflozin (≥25) and empagliflozin (≥20) for HF indication
+- MASH → GLP-1 RA (semaglutide) has evidence for MASH benefit; also aids weight loss (BMI 35)
+- Obesity → GLP-1 RA beneficial
+- Sitagliptin — should be stopped if adding GLP-1 RA (same incretin pathway, redundant); also DPP-4i have neutral-to-possible negative signal in HF with saxagliptin (though sitagliptin was neutral, replacing with more beneficial agents is preferred)
+- Metformin — eGFR 48 is acceptable for continuation at current dose (threshold for caution is <45, stop <30); continue
+- Insulin glargine — can potentially reduce dose as GLP-1 RA is added; patient prefers fewer injections; semaglutide SC weekly is once weekly injection which is acceptable; glargine can be continued but dose should be reduced to mitigate hypoglycemia risk
+- Cost concern — semaglutide and SGLT2i are expensive; however, given HFpEF hospitalization and MASH, these are medically necessary; manufacturer savings programs exist; this is the single best plan
+- Spironolactone already on board — potassium 4.6, watch with SGLT2i (generally okay)
+- Peripheral neuropathy and retinopathy symptoms noted — better glycemic control needed
+
+**Plan:** Stop sitagliptin, add dapagliflozin (HFpEF DELIVER trial data), add semaglutide SC (MASH, obesity, glycemic control), reduce glargine dose to reduce hypoglycemia risk, continue metformin.
+
+---
+
+```
+""Medication Plan""
+""Metformin 1000 mg twice daily — CONTINUE at current dose and frequency""
+""Sitagliptin 100 mg daily — STOP (discontinuing in favor of GLP-1 receptor agonist therapy, which provides superior glycemic, weight, and liver benefit)""
+""Dapagliflozin 10 mg once daily — START; this is being added for heart failure with preserved ejection fraction, CKD with albuminuria, and additional glycemic control""
+""Semaglutide subcutaneous injection — START at 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up toward 1 mg once weekly over subsequent months based on tolerability and glycemic response""
+""Insulin glargine — REDUCE dose from 26 units to 16 units at bedtime given addition of semaglutide; dose will be further adjusted based on fasting glucose monitoring""
+```",basal_insulin::0::1::1::1::1::1::1::1000::mg::tid || dapagliflozin::0::1::1::1::1::1::1::1000::mg::tid || dpp4_inhibitor::0::1::1::1::1::1::1::1000::mg::tid || empagliflozin::0::1::1::1::1::1::1::1000::mg::tid || glp1_receptor_agonist::0::1::1::1::1::1::1::1000::mg::tid || insulin::0::1::1::1::1::1::1::1000::mg::tid || insulin_glargine::0::1::1::1::1::1::1::1000::mg::tid || metformin::0::1::1::1::1::1::1::1000::mg::tid || saxagliptin::0::1::1::1::1::1::1::1000::mg::tid || semaglutide::0::1::1::1::1::1::1::1000::mg::tid || sglt2_inhibitor::0::1::1::1::1::1::1::1000::mg::tid || sitagliptin::0::1::1::1::1::1::1::1000::mg::tid,"metformin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || empagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dapagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || semaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dpp4_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sitagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || saxagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || basal_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin_glargine [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid]"
+3,DM020,DM020,1,claude-sonnet-4-6,baseline,3,"Here is the recommended antihyperglycemic medication plan:
+
+| Medication Plan |
+|---|
+| Metformin 1000 mg twice daily — STOP. Discontinuing due to eGFR of 48 mL/min/1.73m2 (CKD stage 3a with ACR 240 mg/g indicating progressive diabetic nephropathy), which places her at increased risk for lactic acidosis, and because simplifying the regimen is a priority. |
+| Sitagliptin 100 mg daily — STOP. Discontinuing because it requires dose adjustment in CKD and provides modest glycemic benefit without cardiorenal advantages; replacing with agents that have proven heart failure and kidney protective benefits. |
+| Insulin glargine 26 units subcutaneously every night — CONTINUE at current dose for now. Will titrate up by 2 units every 3 days if fasting glucose remains above 130 mg/dL. Patient to monitor fasting glucose daily. |
+| Empagliflozin 10 mg orally once daily with morning meal — START. Indicated for heart failure with preserved ejection fraction (hospitalization 8 months ago), CKD with albuminuria (ACR 240 mg/g), obesity, and MASH. eGFR of 48 is above the threshold for initiation. Will provide glycemic benefit, reduce HbA1c, reduce heart failure hospitalizations, and slow CKD progression. Counsel patient on genital hygiene and signs of urinary tract infection. Hold if patient is ill or fasting. |",basal_insulin::1::0::1::0::1::0::1::26::units::every night || dpp4_inhibitor::0::0::0::1::0::0::0::100::mg::daily || empagliflozin::0::1::0::1::0::1::0::10::mg::once daily || insulin::1::0::1::0::1::0::1::26::units::every night || insulin_glargine::1::0::1::0::1::0::1::26::units::every night || metformin::0::0::0::1::0::0::0::1000::mg::twice daily || sglt2_inhibitor::0::1::0::1::0::1::0::10::mg::once daily || sitagliptin::0::0::0::1::0::0::0::100::mg::daily,"metformin [rec=0, start=0, continue=0, stop=1, increase=0, reduce=0, titrate=0, dose=1000 mg, freq=twice daily] || sglt2_inhibitor [rec=0, start=1, continue=0, stop=1, increase=0, reduce=1, titrate=0, dose=10 mg, freq=once daily] || empagliflozin [rec=0, start=1, continue=0, stop=1, increase=0, reduce=1, titrate=0, dose=10 mg, freq=once daily] || dpp4_inhibitor [rec=0, start=0, continue=0, stop=1, increase=0, reduce=0, titrate=0, dose=100 mg, freq=daily] || sitagliptin [rec=0, start=0, continue=0, stop=1, increase=0, reduce=0, titrate=0, dose=100 mg, freq=daily] || insulin [rec=1, start=0, continue=1, stop=0, increase=1, reduce=0, titrate=1, dose=26 units, freq=every night] || basal_insulin [rec=1, start=0, continue=1, stop=0, increase=1, reduce=0, titrate=1, dose=26 units, freq=every night] || insulin_glargine [rec=1, start=0, continue=1, stop=0, increase=1, reduce=0, titrate=1, dose=26 units, freq=every night]"
+4,DM020,DM020,1,claude-sonnet-4-6,baseline,4,"I'll analyze this case carefully before providing the medication table.
+
+**Key considerations:**
+- HbA1c 8.9% — needs improvement
+- HFpEF with recent hospitalization — SGLT2 inhibitor strongly indicated (empagliflozin/dapagliflozin have HFpEF trial data; dapagliflozin has DELIVER trial data specifically for HFpEF)
+- eGFR 48, UACR 240 — SGLT2 inhibitor also nephroprotective; eGFR 48 is above the threshold for dapagliflozin (≥25) and empagliflozin (≥20) for heart failure indication
+- MASH — GLP-1 RA (semaglutide) has emerging benefit; also helps with weight and glycemia
+- Obesity (BMI 35) — GLP-1 RA beneficial
+- Cost concerns / simplicity preference — need to balance; however, the cardiovascular/renal/hepatic stakes are high. Semaglutide weekly injection minimizes injection burden. Generic metformin is cheap.
+- Sitagliptin — DPP-4i should be stopped if GLP-1 RA is added (redundant/overlapping mechanism); also modest benefit profile
+- Metformin — eGFR 48 is acceptable for continuation at current dose (threshold for caution is <45, stop <30); continue
+- Basal insulin glargine — may be able to reduce/simplify if GLP-1 RA added, but given HbA1c 8.9%, keep for now and reassess; minimize injection burden by keeping once-daily basal
+- Spironolactone already on board — potassium 4.6, adding SGLT2i is reasonable; monitor potassium
+- No thiazolidinediones given HF history
+
+**Plan:** Stop sitagliptin, add dapagliflozin (HFpEF DELIVER data, renal protection, glycemia), add semaglutide subcutaneous weekly (MASH, obesity, glycemia, CV benefit), continue metformin and glargine (reassess insulin dose at next visit as GLP-1 RA takes effect).
+
+---
+
+```
+""Metformin 1000 mg twice daily — continue without change.""
+""Sitagliptin 100 mg daily — STOP. Discontinuing due to addition of GLP-1 receptor agonist (redundant mechanism) and limited cardiorenal benefit given her heart failure, CKD, and MASH.""
+""Insulin glargine 26 units subcutaneously every night — continue at current dose for now; plan to reassess and likely titrate down as semaglutide is uptitrated over coming months.""
+""Dapagliflozin 10 mg orally once daily — START. Indicated for heart failure with preserved ejection fraction, CKD with albuminuria, and additional glycemic benefit.""
+""Semaglutide (Ozempic) subcutaneous injection once weekly — START at 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up toward 1 mg once weekly over subsequent months as tolerated. Indicated for glycemic control, obesity, and MASH benefit.""
+```",basal_insulin::0::1::1::1::1::1::1::1000::mg::tid || dapagliflozin::0::1::1::1::1::1::1::1000::mg::tid || dpp4_inhibitor::0::1::1::1::1::1::1::1000::mg::tid || empagliflozin::0::1::1::1::1::1::1::1000::mg::tid || glp1_receptor_agonist::0::1::1::1::1::1::1::1000::mg::tid || insulin::0::1::1::1::1::1::1::1000::mg::tid || insulin_glargine::0::1::1::1::1::1::1::1000::mg::tid || metformin::0::1::1::1::1::1::1::1000::mg::tid || semaglutide::0::1::1::1::1::1::1::1000::mg::tid || sglt2_inhibitor::0::1::1::1::1::1::1::1000::mg::tid || sitagliptin::0::1::1::1::1::1::1::1000::mg::tid,"metformin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || empagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dapagliflozin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || semaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dpp4_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sitagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || basal_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin_glargine [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid]"
+5,DM020,DM020,1,claude-sonnet-4-6,baseline,5,"I'll analyze this case carefully before providing the medication table.
+
+**Key clinical drivers:**
+- HbA1c 8.9% — needs intensification
+- HFpEF with recent hospitalization — SGLT2i has strong indication (empagliflozin/dapagliflozin have HF benefit; dapagliflozin has FDA indication for HFpEF specifically)
+- CKD stage 3a, eGFR 48, ACR 240 — SGLT2i also cardiorenal protective; eGFR 48 is above threshold for dapagliflozin (≥25) and empagliflozin (≥20)
+- MASH — GLP-1 RA (semaglutide) has emerging benefit in MASH; also helps weight and glycemia
+- Obesity (BMI 35) — GLP-1 RA beneficial
+- Cost/simplicity concerns — prefer generics where possible; minimize injections
+- Sitagliptin: should be stopped if adding GLP-1 RA (same incretin pathway, redundant); also relatively weak and costly
+- Metformin: eGFR 48 is acceptable for continuation at reduced dose (FDA allows down to eGFR 30, but caution; 1000mg BID is reasonable at eGFR 48, though some guidelines suggest reducing — I'll reduce to 500mg BID for safety margin and renal caution)
+- Spironolactone + SGLT2i: potassium 4.6 — monitor closely; acceptable to proceed with caution
+- Insulin glargine: can continue given HbA1c 8.9%; with addition of GLP-1 RA, may be able to reduce dose over time — reduce modestly now given hypoglycemia risk with GLP-1 RA addition
+- Weekly subcutaneous semaglutide = only one additional injection per week, acceptable given preference to minimize injections
+
+---
+
+""Metformin 500 mg twice daily — dose reduced from 1000 mg twice daily given eGFR of 48 mL/min/1.73m2 for renal safety""
+""Sitagliptin 100 mg daily — DISCONTINUED; redundant with addition of GLP-1 receptor agonist and provides minimal additional glycemic or organ-protective benefit""
+""Semaglutide (Ozempic) subcutaneous injection — NEW medication; start 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up toward target dose of 1 mg once weekly over subsequent months as tolerated. Indicated for glycemic control, weight reduction, MASH benefit, and cardiovascular risk reduction.""
+""Dapagliflozin (Farxiga) 10 mg orally once daily — NEW medication; indicated for glycemic control, heart failure with preserved ejection fraction (FDA-approved indication), and CKD with albuminuria (ACR 240 mg/g). eGFR 48 is above the threshold for use. Monitor potassium given concurrent spironolactone.""
+""Insulin glargine — dose reduced from 26 units to 18 units subcutaneously every night at bedtime; reduction made in anticipation of enhanced glycemic effect from newly added semaglutide and dapagliflozin to reduce hypoglycemia risk. Will titrate based on fasting glucose logs.""
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg twice daily — dose reduced from 1000 mg twice daily given eGFR of 48 mL/min/1.73m2 for renal safety |
+| Sitagliptin 100 mg daily — DISCONTINUED; redundant with addition of GLP-1 receptor agonist and provides minimal additional glycemic or cardio-renal organ-protective benefit |
+| Semaglutide (Ozempic) — NEW medication; start 0.25 mg subcutaneously once weekly x4 weeks, then increase to 0.5 mg once weekly; will titrate up toward 1 mg once weekly over subsequent months as tolerated. Indicated for glycemic control, weight reduction, MASH benefit, and cardiovascular risk reduction |
+| Dapagliflozin (Farxiga) 10 mg orally once daily — NEW medication; indicated for glycemic control, HFpEF (FDA-approved indication), and CKD with albuminuria. eGFR 48 is above the minimum threshold for initiation. Monitor potassium given concurrent spironolactone use |
+| Insulin glargine — dose reduced from 26 units to 18 units subcutaneously every night at bedtime; reduction made to lower hypoglycemia risk given addition of semaglutide and dapagliflozin. Will retitrate based on fasting glucose monitoring |",basal_insulin::1::1::1::0::1::1::1::1000::mg::tid || dapagliflozin::1::1::1::0::1::1::1::1000::mg::tid || dpp4_inhibitor::1::1::1::0::1::1::1::1000::mg::tid || empagliflozin::1::1::1::0::1::1::1::1000::mg::tid || glp1_receptor_agonist::1::1::1::0::1::1::1::1000::mg::tid || insulin::1::1::1::0::1::1::1::1000::mg::tid || insulin_glargine::1::1::1::0::1::1::1::1000::mg::tid || metformin::1::1::1::0::1::1::1::1000::mg::tid || semaglutide::1::1::1::0::1::1::1::1000::mg::tid || sglt2_inhibitor::1::1::1::0::1::1::1::1000::mg::tid || sitagliptin::1::1::1::0::1::1::1::1000::mg::tid,"metformin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sglt2_inhibitor [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || empagliflozin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dapagliflozin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || glp1_receptor_agonist [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || semaglutide [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || dpp4_inhibitor [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || sitagliptin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || basal_insulin [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid] || insulin_glargine [rec=1, start=1, continue=1, stop=0, increase=1, reduce=1, titrate=1, dose=1000 mg, freq=tid]"
+6,DM021,DM021,1,claude-sonnet-4-6,baseline,1,"I'll analyze this case:
+
+**Key considerations:**
+- Age 77, frail features (tremor, vision loss, neuropathy), hypoglycemia risk → simplification is appropriate and patient-preferred
+- HbA1c 7.9% — modestly above target; for a 77-year-old with CAD, CKD4, hypoglycemia history, a target of ~8–8.5% is reasonable; avoid over-tightening
+- CKD stage 4 (eGFR 24): GLP-1 RAs are usable (semaglutide dose-adjusted); SGLT2 inhibitors not effective/not indicated at this eGFR for glucose lowering; metformin contraindicated
+- CAD with prior MI (but no heart failure): GLP-1 RA has cardiovascular benefit
+- Recurrent hypoglycemia on bolus insulin + basal → simplify by eliminating mealtime insulin, reduce basal, add GLP-1 RA
+- BMI 26 — not obese, so weight loss not primary driver but GLP-1 RA still appropriate for CV/renal benefit
+- Bolus insulin removal addresses the complexity, injection burden, and hypoglycemia with delayed meals
+
+**Plan:** Discontinue insulin aspart, reduce insulin glargine dose, add once-weekly semaglutide (renal-safe, CV benefit, once weekly reduces injection burden)
+
+---
+
+```
+""Medication Plan""
+""Insulin glargine: REDUCE dose from 34 units to 18 units subcutaneously once nightly. Monitor for hypoglycemia; dose will be titrated based on fasting glucose levels over coming weeks.""
+""Insulin aspart: DISCONTINUE. Mealtime insulin injections are being stopped to simplify the regimen and reduce hypoglycemia risk.""
+""Semaglutide (Ozempic): START at 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly. Dose will be titrated up toward 1 mg once weekly as tolerated. (No dose adjustment required for CKD stage 4.)""
+```",basal_insulin::0::1::0::1::1::1::0::34::units::tid || glp1_receptor_agonist::0::1::0::1::1::1::0::34::units::tid || insulin::0::1::0::1::1::1::0::34::units::tid || insulin_aspart::0::1::0::1::1::1::0::34::units::tid || insulin_glargine::0::1::0::1::1::1::0::34::units::tid || metformin::0::1::0::1::1::1::0::34::units::tid || rapid_acting_insulin::0::1::0::1::1::1::0::34::units::tid || semaglutide::0::1::0::1::1::1::0::34::units::tid || sglt2_inhibitor::0::1::0::1::1::1::0::34::units::tid,"metformin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || semaglutide [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || basal_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin_glargine [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || rapid_acting_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin_aspart [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid]"
+7,DM021,DM021,1,claude-sonnet-4-6,baseline,2,"I'll analyze this case carefully:
+
+**Key considerations:**
+- Age 77, frail features (tremor, vision loss, neuropathy), hypoglycemia risk → simplification is appropriate and patient-preferred
+- HbA1c 7.9% — modestly above target; for a 77-year-old with complexity/frailty, a target of ~8–8.5% is reasonable, so aggressive tightening is not the goal
+- eGFR 24 (CKD stage 4): eliminates metformin, SGLT2 inhibitors (eGFR too low for glycemic benefit; also high-risk given CKD4 + CAD volume status concerns), and requires dose-adjusted GLP-1 if used
+- CAD with prior MI, no heart failure: GLP-1 RA (e.g., semaglutide) has cardiovascular benefit and is renally safe; however, at BMI 26 and age 77, weight loss risk must be weighed — low-dose GLP-1 could still provide CV benefit with caution
+- Recurrent hypoglycemia + functional limitations (tremor, vision) → strong indication to eliminate mealtime insulin; simplify to basal-only
+- Basal insulin simplification: reduce glargine modestly given hypoglycemia history and relaxed HbA1c target
+- Bolus insulin: discontinue given hypoglycemia, functional barriers, and patient preference
+
+**Plan:** Discontinue mealtime aspart, simplify to basal insulin alone, add low-dose semaglutide (renal-safe, CV benefit, helps offset HbA1c rise from removing bolus insulin), titrate semaglutide gradually given age/GI risk.
+
+---
+
+```
+""Insulin glargine 34 units subcutaneously at bedtime — DOSE REDUCED to 28 units subcutaneously at bedtime. Reducing dose given recurrent hypoglycemia history and age-appropriate relaxed HbA1c target (~8–8.5%). Monitor fasting glucose; further titration can be reassessed at follow-up.""
+""Insulin aspart — DISCONTINUED. Mealtime insulin is being stopped to reduce hypoglycemia risk (especially with delayed meals), simplify the regimen given impaired vision and hand tremor, and align with patient preference. Glycemic coverage will be supported by addition of semaglutide.""
+""Semaglutide (Ozempic) — NEW MEDICATION. Start 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg subcutaneously once weekly. Dose will be titrated up over coming months as tolerated. Chosen for cardiovascular benefit (established ASCVD with prior MI), renal safety in CKD stage 4, once-weekly dosing to simplify regimen, and to partially offset glycemic impact of discontinuing mealtime insulin.""
+```",basal_insulin::0::1::0::1::1::1::1::34::units::tid || glp1_receptor_agonist::0::1::0::1::1::1::1::34::units::tid || insulin::0::1::0::1::1::1::1::34::units::tid || insulin_aspart::0::1::0::1::1::1::1::34::units::tid || insulin_glargine::0::1::0::1::1::1::1::34::units::tid || metformin::0::1::0::1::1::1::1::34::units::tid || rapid_acting_insulin::0::1::0::1::1::1::1::34::units::tid || semaglutide::0::1::0::1::1::1::1::34::units::tid || sglt2_inhibitor::0::1::0::1::1::1::1::34::units::tid,"metformin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || semaglutide [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || basal_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin_glargine [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || rapid_acting_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin_aspart [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid]"
+8,DM021,DM021,1,claude-sonnet-4-6,baseline,3,"I'll analyze this case:
+
+**Key considerations:**
+- Age 77, frail features (tremor, vision loss, neuropathy), hypoglycemia risk → simplification is appropriate and guideline-supported
+- HbA1c 7.9% — modestly above target; but given age/frailty, a relaxed target (~8–8.5%) is reasonable; avoid over-treatment
+- CKD stage 4 (eGFR 24): eliminates metformin, SGLT2 inhibitors (below efficacy threshold, and high potassium already); GLP-1 RAs are renally safe but injectable adds complexity; semaglutide oral or dulaglutide once weekly could simplify
+- CAD with prior MI (but no heart failure): GLP-1 RA has cardiovascular benefit (LEADER, SUSTAIN-6, REWIND)
+- Recurrent hypoglycemia on bolus insulin + basal → strong reason to eliminate mealtime insulin
+- Patient preference: fewer injections
+- BMI 26 — not obese, so weight loss not a primary driver
+- Potassium 5.0 — borderline, avoid agents that raise K+
+- Retinopathy: note semaglutide initiation has theoretical concern with rapid A1c lowering, but this is manageable; dulaglutide also acceptable
+
+**Plan:** Discontinue insulin aspart (eliminates hypoglycemia risk, simplifies regimen). Reduce insulin glargine modestly given hypoglycemia history and planned addition of GLP-1 RA. Add once-weekly dulaglutide (renal dose adjustment not required; cardiovascular benefit; once-weekly injection simplifies regimen).
+
+---
+
+```
+""Medication Plan""
+""Insulin glargine: DOSE REDUCED from 34 units to 24 units subcutaneously once nightly. Rationale: reducing basal dose to mitigate hypoglycemia risk with addition of GLP-1 RA and discontinuation of mealtime insulin. Dose will be titrated based on fasting glucose monitoring.""
+""Insulin aspart: DISCONTINUED. Mealtime insulin is being stopped to reduce hypoglycemia risk, simplify the regimen, and address patient's difficulty managing multiple daily injections due to impaired vision and hand tremor.""
+""Dulaglutide (Trulicity): NEW MEDICATION. Start 0.75 mg subcutaneously once weekly. Will be titrated up to 1.5 mg once weekly after 4 weeks as tolerated. Provides cardiovascular benefit given history of CAD and prior MI, is renally safe at eGFR 24, and once-weekly dosing supports regimen simplification.""
+```",basal_insulin::0::1::0::1::1::1::0::34::units::tid || dulaglutide::0::1::0::1::1::1::0::34::units::tid || glp1_receptor_agonist::0::1::0::1::1::1::0::34::units::tid || insulin::0::1::0::1::1::1::0::34::units::tid || insulin_aspart::0::1::0::1::1::1::0::34::units::tid || insulin_glargine::0::1::0::1::1::1::0::34::units::tid || metformin::0::1::0::1::1::1::0::34::units::tid || rapid_acting_insulin::0::1::0::1::1::1::0::34::units::tid || semaglutide::0::1::0::1::1::1::0::34::units::tid || sglt2_inhibitor::0::1::0::1::1::1::0::34::units::tid,"metformin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || semaglutide [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || dulaglutide [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || basal_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin_glargine [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || rapid_acting_insulin [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid] || insulin_aspart [rec=0, start=1, continue=0, stop=1, increase=1, reduce=1, titrate=0, dose=34 units, freq=tid]"
+9,DM021,DM021,1,claude-sonnet-4-6,baseline,4,"I'll analyze this case:
+
+**Key considerations:**
+- Age 77, frail features (tremor, vision loss, neuropathy), hypoglycemia risk → simplification is appropriate and guideline-supported
+- HbA1c 7.9% — modestly above target; but given age/frailty, a relaxed target (~8–8.5%) is reasonable; avoid over-treatment
+- CKD stage 4 (eGFR 24): eliminates metformin, SGLT2 inhibitors (below efficacy threshold, and high potassium already); GLP-1 RAs are renally safe but injectable adds complexity; semaglutide oral or dulaglutide once weekly could simplify
+- CAD with prior MI (but no heart failure): GLP-1 RA has cardiovascular benefit (LEADER, SUSTAIN-6, REWIND)
+- Recurrent hypoglycemia on bolus insulin + basal → strong reason to eliminate mealtime insulin
+- Patient preference: fewer injections
+- BMI 26 — not obese, so weight loss not a primary driver
+- Potassium 5.0 — borderline, avoid agents that raise K+
+- Retinopathy: note semaglutide initiation with very high HbA1c can worsen retinopathy, but HbA1c here is 7.9% — lower risk; still worth monitoring
+
+**Plan:** Discontinue mealtime insulin aspart (major driver of hypoglycemia and complexity). Reduce and continue basal glargine at a lower dose. Add once-weekly dulaglutide (GLP-1 RA — renal-safe, cardiovascular benefit, once weekly injection reduces burden, no significant hypoglycemia risk as monotherapy).
+
+---
+
+```
+""Medication Plan""
+""Insulin glargine (Toujeo or Basaglar): DOSE REDUCED from 34 units to 18 units subcutaneously once nightly. Rationale: removing mealtime insulin will reduce overall insulin requirement; starting at ~50% of prior basal dose to reduce hypoglycemia risk. Titrate up by 2 units every 3 days if fasting glucose consistently above 130 mg/dL, targeting fasting glucose 100–140 mg/dL given age and hypoglycemia history.""
+""Insulin aspart: DISCONTINUED. Mealtime insulin is being stopped to reduce hypoglycemia risk, simplify the regimen, and address patient's difficulty with multiple daily injections due to impaired vision and hand tremor.""
+""Dulaglutide (Trulicity) 0.75 mg subcutaneously once weekly: NEW MEDICATION. GLP-1 receptor agonist added for additional glycemic control and cardiovascular risk reduction (established ASCVD with prior MI). Renal-safe at eGFR 24. Once-weekly injection minimizes injection burden. Dose will be titrated up to 1.5 mg once weekly after 4 weeks if tolerated.""
+```",basal_insulin::0::1::1::1::1::1::1::34::units::tid || dulaglutide::0::1::1::1::1::1::1::34::units::tid || glp1_receptor_agonist::0::1::1::1::1::1::1::34::units::tid || insulin::0::1::1::1::1::1::1::34::units::tid || insulin_aspart::0::1::1::1::1::1::1::34::units::tid || insulin_glargine::0::1::1::1::1::1::1::34::units::tid || metformin::0::1::1::1::1::1::1::34::units::tid || rapid_acting_insulin::0::1::1::1::1::1::1::34::units::tid || semaglutide::0::1::1::1::1::1::1::34::units::tid || sglt2_inhibitor::0::1::1::1::1::1::1::34::units::tid,"metformin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || semaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || dulaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || basal_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin_glargine [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || rapid_acting_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid] || insulin_aspart [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=34 units, freq=tid]"
+10,DM021,DM021,1,claude-sonnet-4-6,baseline,5,"I'll analyze this case carefully:
+
+**Key considerations:**
+- Age 77, frail features (tremor, vision loss, neuropathy), hypoglycemia risk → simplification is appropriate and patient-preferred
+- HbA1c 7.9% — modestly above target; for a 77-year-old with CAD, CKD4, hypoglycemia history, a target of ~8–8.5% is reasonable; avoid over-tightening
+- CKD stage 4 (eGFR 24): eliminates metformin, SGLT2 inhibitors (eGFR too low for glycemic benefit; also high-risk given CAD/volume status), and requires dose-adjusted GLP-1 or DPP-4 consideration
+- GLP-1 RAs: can be used in CKD4 (liraglutide, semaglutide do not require renal dose adjustment); cardiovascular benefit established; but GI side effects and weight loss (BMI 26 — already lean) are concerns; injectable adds complexity
+- DPP-4 inhibitors: saxagliptin avoided in HF risk patients (though no HF here, he has CAD); alogliptin and saxagliptin associated with possible HF signal; **linagliptin** requires no renal dose adjustment, weight neutral, low hypoglycemia risk, oral — good fit
+- Insulin simplification: converting basal-bolus to **basal-only** addresses the complexity and hypoglycemia from prandial dosing; may need modest basal uptitration
+- Stopping insulin aspart reduces injection burden, hypoglycemia risk, and complexity given vision/tremor
+
+**Plan:**
+- Stop insulin aspart (reduces injections, hypoglycemia, complexity)
+- Continue and potentially titrate insulin glargine (sole insulin, may need modest increase)
+- Add linagliptin (oral, no renal adjustment, low hypoglycemia, modest HbA1c lowering to compensate for removing aspart)
+
+```
+""Insulin aspart 10 units before each meal — DISCONTINUED. Stopping prandial insulin to simplify regimen, reduce hypoglycemia risk, and address difficulty with multiple daily injections given impaired vision and hand tremor.""
+""Insulin glargine — CONTINUED at 34 units subcutaneously every night. Dose will be titrated up gradually over coming weeks as needed based on fasting glucose logs, targeting fasting glucose 100–140 mg/dL, given that prandial insulin is being removed.""
+""Linagliptin — NEW MEDICATION. Start linagliptin 5 mg orally once daily. Added as oral adjunct to offset partial glycemic gap from discontinuing prandial insulin; requires no renal dose adjustment and is appropriate for eGFR of 24 mL/min/1.73m2; low hypoglycemia risk.""
+```",alogliptin::0::1::1::1::1::1::1::10::units::tid || basal_insulin::0::1::1::1::1::1::1::10::units::tid || dpp4_inhibitor::0::1::1::1::1::1::1::10::units::tid || glp1_receptor_agonist::0::1::1::1::1::1::1::10::units::tid || insulin::0::1::1::1::1::1::1::10::units::tid || insulin_aspart::0::1::1::1::1::1::1::10::units::tid || insulin_glargine::0::1::1::1::1::1::1::10::units::tid || linagliptin::0::1::1::1::1::1::1::10::units::tid || liraglutide::0::1::1::1::1::1::1::10::units::tid || metformin::0::1::1::1::1::1::1::10::units::tid || rapid_acting_insulin::0::1::1::1::1::1::1::10::units::tid || saxagliptin::0::1::1::1::1::1::1::10::units::tid || semaglutide::0::1::1::1::1::1::1::10::units::tid || sglt2_inhibitor::0::1::1::1::1::1::1::10::units::tid,"metformin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || sglt2_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || glp1_receptor_agonist [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || semaglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || liraglutide [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || dpp4_inhibitor [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || linagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || saxagliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || alogliptin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || basal_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || insulin_glargine [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || rapid_acting_insulin [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid] || insulin_aspart [rec=0, start=1, continue=1, stop=1, increase=1, reduce=1, titrate=1, dose=10 units, freq=tid]"

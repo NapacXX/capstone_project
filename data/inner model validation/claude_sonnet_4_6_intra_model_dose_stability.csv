@@ -1,0 +1,7 @@
+med_id,mean_exact_dose_match_rate,median_exact_dose_match_rate
+metformin,0.8777777777777778,1
+empagliflozin,0.7777777777777778,0.8
+insulin,0.7714285714285715,0.8
+basal_insulin,0.7,0.7
+insulin_glargine,0.7,0.7
+sitagliptin,0.6,0.6

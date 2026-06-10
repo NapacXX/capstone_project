@@ -1,0 +1,842 @@
+---
+title: "Claude Intra-Model Stability Analysis"
+author: "Group 30"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+required_packages <- c(
+  "readr", "dplyr", "tidyr", "stringr", "purrr",
+  "tibble", "knitr", "ggplot2"
+)
+missing_packages <- required_packages[
+  !vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
+]
+
+if (length(missing_packages) > 0) {
+  stop("Missing required packages: ", paste(missing_packages, collapse = ", "))
+}
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+library(tibble)
+library(knitr)
+library(ggplot2)
+
+find_project_root <- function(start_dir = getwd()) {
+  candidates <- normalizePath(
+    file.path(start_dir, c(".", "..", "../..", "../../..")),
+    mustWork = FALSE
+  )
+
+  matched <- candidates[
+    file.exists(file.path(candidates, "data/raw/final_results_gpt_claude_models.csv"))
+  ]
+
+  if (length(matched) == 0) {
+    stop("Could not find project root containing data/raw/final_results_gpt_claude_models.csv.")
+  }
+
+  matched[[1]]
+}
+
+project_root <- find_project_root()
+knitr::opts_knit$set(root.dir = project_root)
+dir.create(file.path(project_root, "data/inner model validation"), showWarnings = FALSE, recursive = TRUE)
+```
+
+# Purpose
+
+This workflow applies the structured `treatment_plan` parsing strategy to repeated Claude model outputs and computes intra-model stability metrics. The primary stability metric is variation ratio using a structured treatment signature derived from parsed medication, action, dose, and frequency fields.
+
+# Configuration
+
+```{r configuration}
+model_label <- "claude-sonnet-4-6"
+input_path <- "data/inner model validation/claude_intra_model_responses.csv"
+output_dir <- "data/inner model validation"
+expected_repeats_per_case <- 5L
+manual_review_n <- 10L
+```
+
+# Load Data
+
+```{r load-data}
+raw_data <- read_csv(input_path, show_col_types = FALSE)
+
+blank_names <- names(raw_data) == ""
+if (any(blank_names)) {
+  names(raw_data)[blank_names] <- paste0("blank_column_", seq_len(sum(blank_names)))
+}
+
+required_columns <- c(
+  "case_id", "original_case_id", "case_variant_id", "model_type",
+  "prompt_type", "repeat_id", "treatment_plan"
+)
+missing_columns <- setdiff(required_columns, names(raw_data))
+
+if (length(missing_columns) > 0) {
+  stop("Missing required columns: ", paste(missing_columns, collapse = ", "))
+}
+
+raw_data <- raw_data %>%
+  mutate(
+    row_id = row_number(),
+    model = model_type,
+    repeat_id = as.integer(repeat_id),
+    case_variant_id = as.integer(case_variant_id)
+  ) %>%
+  select(
+    row_id, case_id, original_case_id, case_variant_id, model,
+    prompt_type, repeat_id, treatment_plan, everything()
+  )
+
+duplicate_keys <- raw_data %>%
+  count(case_id, repeat_id, name = "n") %>%
+  filter(n > 1)
+
+if (nrow(duplicate_keys) > 0) {
+  stop("Duplicate case_id + repeat_id rows detected in the Claude response file.")
+}
+
+repeat_counts <- raw_data %>%
+  count(case_id, name = "n_repeats")
+
+invalid_repeat_counts <- repeat_counts %>%
+  filter(n_repeats != expected_repeats_per_case)
+
+if (nrow(invalid_repeat_counts) > 0) {
+  stop("Some case_id values do not have exactly ", expected_repeats_per_case, " repeats.")
+}
+
+raw_data %>%
+  summarise(
+    rows = n(),
+    cases = n_distinct(case_id),
+    original_cases = n_distinct(original_case_id),
+    missing_treatment_plan = sum(is.na(treatment_plan) | treatment_plan == "")
+  ) %>%
+  kable(caption = paste("Data overview —", model_label))
+```
+
+# Fixed Medication Dictionary
+
+```{r medication-dictionary}
+medication_dictionary <- tribble(
+  ~med_id, ~med_label, ~regex,
+  "metformin", "Metformin", "\\bmetformin\\b",
+  "sglt2_inhibitor", "SGLT2 inhibitor", "\\bsglt2\\b|sodium-glucose|empagliflozin|jardiance|dapagliflozin|farxiga|canagliflozin|invokana|ertugliflozin|steglatro",
+  "empagliflozin", "Empagliflozin", "\\bempagliflozin\\b|\\bjardiance\\b",
+  "dapagliflozin", "Dapagliflozin", "\\bdapagliflozin\\b|\\bfarxiga\\b",
+  "canagliflozin", "Canagliflozin", "\\bcanagliflozin\\b|\\binvokana\\b",
+  "ertugliflozin", "Ertugliflozin", "\\bertugliflozin\\b|\\bsteglatro\\b",
+  "glp1_receptor_agonist", "GLP-1 receptor agonist", "\\bglp-?1\\b|glp1|semaglutide|ozempic|rybelsus|dulaglutide|trulicity|liraglutide|victoza|exenatide|byetta|lixisenatide|adlyxin|tirzepatide|mounjaro",
+  "semaglutide", "Semaglutide", "\\bsemaglutide\\b|\\bozempic\\b|\\brybelsus\\b",
+  "dulaglutide", "Dulaglutide", "\\bdulaglutide\\b|\\btrulicity\\b",
+  "liraglutide", "Liraglutide", "\\bliraglutide\\b|\\bvictoza\\b",
+  "exenatide", "Exenatide", "\\bexenatide\\b|\\bbyetta\\b|\\bbydureon\\b",
+  "lixisenatide", "Lixisenatide", "\\blixisenatide\\b|\\badlyxin\\b",
+  "tirzepatide", "Tirzepatide", "\\btirzepatide\\b|\\bmounjaro\\b",
+  "dpp4_inhibitor", "DPP-4 inhibitor", "\\bdpp-?4\\b|sitagliptin|januvia|linagliptin|trajenta|saxagliptin|onglyza|alogliptin|nesina",
+  "sitagliptin", "Sitagliptin", "\\bsitagliptin\\b|\\bjanuvia\\b",
+  "linagliptin", "Linagliptin", "\\blinagliptin\\b|\\btrajenta\\b",
+  "saxagliptin", "Saxagliptin", "\\bsaxagliptin\\b|\\bonglyza\\b",
+  "alogliptin", "Alogliptin", "\\balogliptin\\b|\\bnesina\\b",
+  "insulin", "Insulin", "\\binsulin\\b|glargine|lantus|basaglar|aspart|novolog|lispro|humalog|degludec|tresiba|detemir|levemir|nph|regular insulin",
+  "basal_insulin", "Basal insulin", "basal insulin|glargine|lantus|basaglar|degludec|tresiba|detemir|levemir|nph",
+  "insulin_glargine", "Insulin glargine", "\\bglargine\\b|\\blantus\\b|\\bbasaglar\\b",
+  "insulin_degludec", "Insulin degludec", "\\bdegludec\\b|\\btresiba\\b",
+  "insulin_detemir", "Insulin detemir", "\\bdetemir\\b|\\blevemir\\b",
+  "rapid_acting_insulin", "Rapid-acting insulin", "rapid[- ]acting insulin|mealtime insulin|bolus insulin|prandial insulin|aspart|novolog|lispro|humalog|glulisine|apidra",
+  "insulin_aspart", "Insulin aspart", "\\baspart\\b|\\bnovolog\\b",
+  "insulin_lispro", "Insulin lispro", "\\blispro\\b|\\bhumalog\\b",
+  "insulin_glulisine", "Insulin glulisine", "\\bglulisine\\b|\\bapidra\\b",
+  "sulfonylurea", "Sulfonylurea", "\\bsulfonylurea\\b|glipizide|glyburide|glimepiride",
+  "glipizide", "Glipizide", "\\bglipizide\\b",
+  "glyburide", "Glyburide", "\\bglyburide\\b",
+  "glimepiride", "Glimepiride", "\\bglimepiride\\b",
+  "thiazolidinedione", "Thiazolidinedione", "\\bthiazolidinedione\\b|\\btzd\\b|pioglitazone|rosiglitazone",
+  "pioglitazone", "Pioglitazone", "\\bpioglitazone\\b",
+  "rosiglitazone", "Rosiglitazone", "\\brosiglitazone\\b",
+  "alpha_glucosidase_inhibitor", "Alpha-glucosidase inhibitor", "alpha[- ]glucosidase|acarbose|miglitol",
+  "acarbose", "Acarbose", "\\bacarbose\\b",
+  "miglitol", "Miglitol", "\\bmiglitol\\b",
+  "meglitinide", "Meglitinide", "\\bmeglitinide\\b|repaglinide|nateglinide",
+  "repaglinide", "Repaglinide", "\\brepaglinide\\b",
+  "nateglinide", "Nateglinide", "\\bnateglinide\\b",
+  "pramlintide", "Pramlintide", "\\bpramlintide\\b|\\bsymlin\\b"
+)
+```
+
+# Parsing Functions
+
+```{r parsing-functions}
+normalize_plan_text <- function(x) {
+  x %>%
+    coalesce("") %>%
+    str_replace_all("\r\n", "\n") %>%
+    str_replace_all("\r", "\n") %>%
+    str_replace_all("\u2014|\u2013", "-") %>%
+    str_squish()
+}
+
+split_plan_segments <- function(text) {
+  text <- coalesce(text, "")
+  raw_segments <- str_split(text, "\n|\\|")[[1]]
+
+  segments <- raw_segments %>%
+    str_replace_all("\u2014|\u2013", "-") %>%
+    str_remove_all("^[-: ]+$") %>%
+    str_squish()
+
+  segments <- segments[
+    segments != "" &
+      !str_detect(str_to_lower(segments), "^[-]+$|^medication|^recommendation|^plan$")
+  ]
+
+  if (length(segments) == 0) {
+    segments <- str_squish(text)
+  }
+
+  segments
+}
+
+has_pattern <- function(text, pattern) {
+  str_detect(text, regex(pattern, ignore_case = TRUE))
+}
+
+extract_matching_text <- function(text, pattern) {
+  segments <- split_plan_segments(text)
+  matched <- segments[has_pattern(segments, pattern)]
+
+  if (length(matched) == 0) {
+    return("")
+  }
+
+  paste(unique(matched), collapse = " || ")
+}
+
+detect_action <- function(text, action_pattern) {
+  text != "" & has_pattern(text, action_pattern)
+}
+
+extract_dose_value <- function(text) {
+  match <- str_match(
+    text,
+    regex("(\\d+(?:\\.\\d+)?)\\s*(mg|mcg|units?|unit)\\b", ignore_case = TRUE)
+  )
+
+  ifelse(is.na(match[, 2]), 0, as.numeric(match[, 2]))
+}
+
+extract_dose_unit <- function(text) {
+  match <- str_match(
+    text,
+    regex("(\\d+(?:\\.\\d+)?)\\s*(mg|mcg|units?|unit)\\b", ignore_case = TRUE)
+  )
+
+  ifelse(is.na(match[, 3]), "", str_to_lower(match[, 3]))
+}
+
+extract_frequency <- function(text) {
+  frequency_pattern <- paste(
+    c(
+      "twice daily", "once daily", "once weekly", "weekly", "daily",
+      "nightly", "every night", "at bedtime", "bedtime",
+      "before each meal", "before meals", "with meals",
+      "in the morning", "morning", "evening",
+      "bid", "tid", "qhs", "qam"
+    ),
+    collapse = "|"
+  )
+
+  out <- str_extract(text, regex(frequency_pattern, ignore_case = TRUE))
+  ifelse(is.na(out), "", str_to_lower(out))
+}
+
+action_patterns <- list(
+  start = "\\b(start|add|initiate|begin|new)\\b",
+  continue = "\\b(continue|maintain|keep)\\b",
+  stop = "\\b(stop|discontinue|hold|avoid|do not use|not restart)\\b",
+  reduce = "\\b(reduce|decrease|lower|dose reduction)\\b",
+  increase = "\\b(increase|uptitrate|up-titrate|titrate up|raise)\\b",
+  titrate = "\\b(titrate|uptitrate|up-titrate|adjust by)\\b"
+)
+
+parse_one_medication <- function(row_id, case_id, model, treatment_plan, med_id, med_label, regex) {
+  plan_text <- normalize_plan_text(treatment_plan)
+  raw_text <- extract_matching_text(plan_text, regex)
+
+  mentioned <- as.integer(raw_text != "")
+  stop <- as.integer(detect_action(raw_text, action_patterns$stop))
+  start <- as.integer(detect_action(raw_text, action_patterns$start))
+  continue <- as.integer(detect_action(raw_text, action_patterns$continue))
+  reduce <- as.integer(detect_action(raw_text, action_patterns$reduce))
+  increase <- as.integer(detect_action(raw_text, action_patterns$increase))
+  titrate <- as.integer(detect_action(raw_text, action_patterns$titrate))
+  dose_value <- if (mentioned == 1) extract_dose_value(raw_text) else 0
+  dose_unit <- if (mentioned == 1) extract_dose_unit(raw_text) else ""
+  frequency <- if (mentioned == 1) extract_frequency(raw_text) else ""
+
+  action_present <- start == 1 | continue == 1 | reduce == 1 | increase == 1 | titrate == 1
+  recommended <- as.integer(mentioned == 1 & stop == 0 & (action_present | dose_value > 0))
+  conflict_flag <- as.integer(stop == 1 & (start == 1 | continue == 1 | increase == 1 | titrate == 1))
+
+  tibble(
+    row_id = row_id,
+    case_id = case_id,
+    model = model,
+    med_id = med_id,
+    med_label = med_label,
+    mentioned = mentioned,
+    recommended = recommended,
+    start = start,
+    continue = continue,
+    stop = stop,
+    reduce = reduce,
+    increase = increase,
+    titrate = titrate,
+    dose_value = dose_value,
+    dose_unit = dose_unit,
+    frequency = frequency,
+    raw_text = ifelse(mentioned == 1, raw_text, ""),
+    conflict_flag = conflict_flag
+  )
+}
+```
+
+# Parse Repeated Responses
+
+```{r parse-treatment-plans}
+parsed_long <- pmap_dfr(
+  raw_data %>% select(row_id, case_id, model, treatment_plan),
+  function(row_id, case_id, model, treatment_plan) {
+    pmap_dfr(
+      medication_dictionary,
+      function(med_id, med_label, regex) {
+        parse_one_medication(
+          row_id = row_id,
+          case_id = case_id,
+          model = model,
+          treatment_plan = treatment_plan,
+          med_id = med_id,
+          med_label = med_label,
+          regex = regex
+        )
+      }
+    )
+  }
+)
+
+parsed_wide_medications <- parsed_long %>%
+  select(
+    row_id, med_id, mentioned, recommended, start, continue, stop, reduce,
+    increase, titrate, dose_value, dose_unit, frequency, raw_text, conflict_flag
+  ) %>%
+  pivot_wider(
+    id_cols = row_id,
+    names_from = med_id,
+    values_from = c(
+      mentioned, recommended, start, continue, stop, reduce, increase,
+      titrate, dose_value, dose_unit, frequency, raw_text, conflict_flag
+    ),
+    names_glue = "{med_id}_{.value}",
+    values_fill = list(
+      mentioned = 0,
+      recommended = 0,
+      start = 0,
+      continue = 0,
+      stop = 0,
+      reduce = 0,
+      increase = 0,
+      titrate = 0,
+      dose_value = 0,
+      dose_unit = "",
+      frequency = "",
+      raw_text = "",
+      conflict_flag = 0
+    )
+  )
+
+parsed_wide <- raw_data %>%
+  left_join(parsed_wide_medications, by = "row_id")
+```
+
+# Unmatched Medication Audit
+
+```{r unmatched-audit}
+dictionary_regex_union <- paste(medication_dictionary$regex, collapse = "|")
+
+candidate_stopwords <- c(
+  "start", "add", "continue", "stop", "reduce", "increase", "dose", "from",
+  "to", "then", "target", "goal", "maximum", "max", "minimum", "the",
+  "and", "with", "before", "after", "daily", "weekly", "morning", "nightly",
+  "bedtime", "titrate", "titration", "planned", "coming", "few", "months",
+  "glucose", "fasting", "uacr", "egfr", "ckd", "a1c"
+)
+
+non_drug_candidate_pattern <- paste(
+  c(
+    "dose from", "increase dose", "decrease dose", "and then",
+    "target", "goal", "glucose", "fasting", "postprandial",
+    "above", "below", "toward", "maximum", "minimum",
+    "few months", "coming months", "planned titration",
+    "morning glucose", "afternoon glucose", "bedtime glucose"
+  ),
+  collapse = "|"
+)
+
+extract_dose_adjacent_candidates <- function(row_id, case_id, model, treatment_plan) {
+  text <- normalize_plan_text(treatment_plan)
+  candidate_pattern <- regex(
+    "([a-z][a-z0-9/-]{2,}(?:\\s+[a-z][a-z0-9/-]{2,}){0,3})\\s+(?:xr\\s+|er\\s+)?\\d+(?:\\.\\d+)?\\s*(?:mg|mcg|units?|unit)\\b",
+    ignore_case = TRUE
+  )
+
+  matches <- str_match_all(text, candidate_pattern)[[1]]
+
+  if (nrow(matches) == 0) {
+    return(tibble())
+  }
+
+  tibble(
+    row_id = row_id,
+    case_id = case_id,
+    model = model,
+    candidate_phrase = str_squish(str_to_lower(matches[, 2])),
+    matched_full_text = str_squish(matches[, 1])
+  )
+}
+
+unmatched_candidates <- pmap_dfr(
+  raw_data %>% select(row_id, case_id, model, treatment_plan),
+  extract_dose_adjacent_candidates
+) %>%
+  mutate(
+    candidate_phrase = str_remove_all(candidate_phrase, "^\\b(start|add|continue|stop|reduce|increase|then|to|from)\\b\\s+"),
+    candidate_phrase = str_squish(candidate_phrase),
+    dictionary_matched = has_pattern(candidate_phrase, dictionary_regex_union),
+    stopword_only = candidate_phrase %in% candidate_stopwords,
+    non_drug_candidate = has_pattern(candidate_phrase, non_drug_candidate_pattern)
+  ) %>%
+  filter(!dictionary_matched, !stopword_only, !non_drug_candidate, candidate_phrase != "") %>%
+  count(candidate_phrase, matched_full_text, sort = TRUE, name = "n") %>%
+  arrange(desc(n), candidate_phrase)
+```
+
+# Build Treatment Signatures
+
+```{r build-signatures}
+signature_components <- parsed_long %>%
+  filter(mentioned == 1 | recommended == 1) %>%
+  mutate(
+    rounded_dose_value = round(dose_value, 2),
+    signature_component = paste(
+      med_id,
+      recommended,
+      start,
+      continue,
+      stop,
+      increase,
+      reduce,
+      titrate,
+      rounded_dose_value,
+      dose_unit,
+      frequency,
+      sep = "::"
+    )
+  ) %>%
+  arrange(row_id, med_id)
+
+treatment_signatures <- raw_data %>%
+  select(row_id, case_id, original_case_id, case_variant_id, model, prompt_type, repeat_id, treatment_plan) %>%
+  left_join(
+    signature_components %>%
+      group_by(row_id) %>%
+      summarise(
+        treatment_signature = paste(signature_component, collapse = " || "),
+        .groups = "drop"
+      ),
+    by = "row_id"
+  ) %>%
+  mutate(
+    treatment_signature = if_else(
+      is.na(treatment_signature) | treatment_signature == "",
+      "NO_MEDICATIONS_DETECTED",
+      treatment_signature
+    )
+  )
+```
+
+# Intra-Model Stability Metrics
+
+```{r stability-metrics}
+case_signature_counts <- treatment_signatures %>%
+  count(case_id, treatment_signature, name = "signature_count") %>%
+  arrange(case_id, desc(signature_count), treatment_signature)
+
+case_stability <- case_signature_counts %>%
+  group_by(case_id) %>%
+  summarise(
+    n_repeats = sum(signature_count),
+    modal_signature_count = max(signature_count),
+    n_unique_signatures = n(),
+    modal_treatment_signature = treatment_signature[which.max(signature_count)][1],
+    variation_ratio = 1 - (modal_signature_count / n_repeats),
+    .groups = "drop"
+  ) %>%
+  left_join(
+    raw_data %>%
+      distinct(case_id, original_case_id, case_variant_id),
+    by = "case_id"
+  ) %>%
+  arrange(desc(variation_ratio), case_id)
+
+variation_ratio_distribution <- case_stability %>%
+  count(variation_ratio, name = "n_cases") %>%
+  arrange(variation_ratio)
+
+stability_summary <- tibble(
+  metric = c(
+    "Cases analyzed",
+    "Expected repeats per case",
+    "Mean variation ratio",
+    "Median variation ratio",
+    "Exact-match rate"
+  ),
+  value = c(
+    nrow(case_stability),
+    expected_repeats_per_case,
+    round(mean(case_stability$variation_ratio), 3),
+    round(median(case_stability$variation_ratio), 3),
+    round(mean(case_stability$variation_ratio == 0), 3)
+  )
+)
+
+exact_match_cases <- sum(case_stability$variation_ratio == 0)
+high_instability_cases <- sum(case_stability$variation_ratio >= 0.4)
+top_unstable_case <- case_stability %>%
+  slice_head(n = 1)
+
+key_medications <- c(
+  "metformin", "sglt2_inhibitor", "glp1_receptor_agonist",
+  "insulin", "basal_insulin", "insulin_glargine", "sitagliptin"
+)
+
+medication_class_agreement <- parsed_long %>%
+  filter(med_id %in% key_medications) %>%
+  group_by(case_id, med_id) %>%
+  summarise(
+    dominant_recommended_count = max(sum(recommended == 0), sum(recommended == 1)),
+    repeat_level_agreement = dominant_recommended_count / n(),
+    .groups = "drop"
+  ) %>%
+  group_by(med_id) %>%
+  summarise(
+    mean_repeat_level_agreement = mean(repeat_level_agreement),
+    median_repeat_level_agreement = median(repeat_level_agreement),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(mean_repeat_level_agreement), med_id)
+
+action_level_agreement <- parsed_long %>%
+  pivot_longer(
+    cols = c(start, continue, stop, increase, reduce, titrate),
+    names_to = "action_type",
+    values_to = "action_value"
+  ) %>%
+  group_by(case_id, med_id, action_type) %>%
+  summarise(
+    dominant_action_count = max(sum(action_value == 0), sum(action_value == 1)),
+    repeat_level_agreement = dominant_action_count / n(),
+    .groups = "drop"
+  ) %>%
+  group_by(action_type) %>%
+  summarise(
+    mean_repeat_level_agreement = mean(repeat_level_agreement),
+    median_repeat_level_agreement = median(repeat_level_agreement),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(mean_repeat_level_agreement), action_type)
+
+dose_stability <- parsed_long %>%
+  filter(med_id %in% c("insulin", "basal_insulin", "insulin_glargine", "metformin", "empagliflozin", "sitagliptin")) %>%
+  group_by(case_id, med_id) %>%
+  filter(any(mentioned == 1 | recommended == 1)) %>%
+  summarise(
+    dominant_dose_count = max(table(paste(round(dose_value, 2), dose_unit, frequency, sep = "::"))),
+    n_repeats = n(),
+    exact_dose_match_rate = dominant_dose_count / n_repeats,
+    .groups = "drop"
+  ) %>%
+  group_by(med_id) %>%
+  summarise(
+    mean_exact_dose_match_rate = mean(exact_dose_match_rate),
+    median_exact_dose_match_rate = median(exact_dose_match_rate),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(mean_exact_dose_match_rate), med_id)
+```
+
+# Validation and Manual Review
+
+```{r validation}
+expected_rows <- nrow(raw_data)
+actual_rows <- nrow(parsed_wide)
+expected_long_rows <- nrow(raw_data) * nrow(medication_dictionary)
+actual_long_rows <- nrow(parsed_long)
+
+if (actual_rows != expected_rows) {
+  stop("Wide parsed output row count does not match input row count.")
+}
+
+if (actual_long_rows != expected_long_rows) {
+  stop("Long parsed output row count does not equal rows x medication dictionary size.")
+}
+
+stopped_but_recommended <- parsed_long %>%
+  filter(stop == 1, recommended == 1)
+
+if (nrow(stopped_but_recommended) > 0) {
+  stop("Some stopped medications were incorrectly marked as recommended.")
+}
+
+manual_review_sample <- treatment_signatures %>%
+  left_join(
+    parsed_long %>%
+      filter(mentioned == 1 | recommended == 1) %>%
+      group_by(row_id) %>%
+      summarise(
+        parsed_summary = paste(
+          paste0(
+            med_id, " [rec=", recommended,
+            ", start=", start,
+            ", continue=", continue,
+            ", stop=", stop,
+            ", increase=", increase,
+            ", reduce=", reduce,
+            ", titrate=", titrate,
+            ", dose=", round(dose_value, 2), " ", dose_unit,
+            ", freq=", frequency, "]"
+          ),
+          collapse = " || "
+        ),
+        .groups = "drop"
+      ),
+    by = "row_id"
+  ) %>%
+  mutate(parsed_summary = coalesce(parsed_summary, "NO_MEDICATIONS_DETECTED")) %>%
+  slice_head(n = min(manual_review_n, nrow(treatment_signatures)))
+
+validation_summary <- tibble(
+  check = c(
+    "Input response rows",
+    "Parsed wide rows",
+    "Medication dictionary size",
+    "Parsed long rows",
+    "Expected long rows",
+    "Cases with 5 repeats",
+    "Duplicate case_id + repeat_id rows",
+    "Stopped medications marked recommended",
+    "Unmatched candidate rows"
+  ),
+  value = c(
+    expected_rows,
+    actual_rows,
+    nrow(medication_dictionary),
+    actual_long_rows,
+    expected_long_rows,
+    nrow(repeat_counts),
+    nrow(duplicate_keys),
+    nrow(stopped_but_recommended),
+    nrow(unmatched_candidates)
+  )
+)
+
+validation_summary %>% kable()
+```
+
+# Key Outputs
+
+```{r key-outputs}
+stability_summary %>% kable(caption = "Overall stability summary")
+
+variation_ratio_distribution %>% kable(caption = "Variation ratio distribution")
+
+case_stability %>%
+  select(case_id, original_case_id, case_variant_id, n_repeats, n_unique_signatures, variation_ratio) %>%
+  slice_head(n = min(10, nrow(case_stability))) %>%
+  kable(caption = "Most unstable cases")
+
+medication_class_agreement %>%
+  kable(caption = "Medication-class repeat-level agreement")
+
+action_level_agreement %>%
+  kable(caption = "Action-level repeat agreement")
+```
+
+# Visual Summary and Interpretation
+
+```{r visual-summary-data}
+variation_ratio_plot_data <- variation_ratio_distribution %>%
+  mutate(
+    variation_ratio_label = factor(
+      sprintf("%.1f", variation_ratio),
+      levels = sprintf("%.1f", sort(unique(variation_ratio)))
+    )
+  )
+
+most_unstable_plot_data <- case_stability %>%
+  slice_head(n = min(10, nrow(case_stability))) %>%
+  mutate(case_id = factor(case_id, levels = rev(case_id)))
+
+medication_class_plot_data <- medication_class_agreement %>%
+  mutate(med_id = factor(med_id, levels = rev(med_id)))
+
+action_level_plot_data <- action_level_agreement %>%
+  mutate(action_type = factor(action_type, levels = rev(action_type)))
+```
+
+```{r interpretation, results='asis'}
+cat(
+  paste0(
+    "Across **", nrow(case_stability), "** ", model_label, " cases with **",
+    expected_repeats_per_case,
+    "** repeated generations each, the mean variation ratio was **",
+    sprintf("%.2f", mean(case_stability$variation_ratio)),
+    "** and the median was **",
+    sprintf("%.2f", median(case_stability$variation_ratio)),
+    "**. "
+  ),
+  paste0(
+    "**", exact_match_cases, "** cases (",
+    sprintf("%.0f", 100 * mean(case_stability$variation_ratio == 0)),
+    "%) had perfectly identical parsed treatment plans across all repeats, while **",
+    high_instability_cases,
+    "** cases had variation ratio **>= 0.40**, indicating noticeable within-model instability. "
+  ),
+  paste0(
+    "The most unstable case in the current sample was **",
+    top_unstable_case$case_id,
+    "** with variation ratio **",
+    sprintf("%.2f", top_unstable_case$variation_ratio),
+    "** and **",
+    top_unstable_case$n_unique_signatures,
+    "** unique parsed treatment signatures across 5 repeats."
+  ),
+  sep = ""
+)
+```
+
+```{r variation-ratio-plot, fig.width=7, fig.height=4.5}
+ggplot(variation_ratio_plot_data, aes(x = variation_ratio_label, y = n_cases)) +
+  geom_col(fill = "#2F6DB3", width = 0.7) +
+  geom_text(aes(label = n_cases), vjust = -0.3, size = 4) +
+  labs(
+    title = paste("Distribution of Case-Level Variation Ratio 2014", model_label),
+    x = "Variation Ratio",
+    y = "Number of Cases"
+  ) +
+  ylim(0, max(variation_ratio_plot_data$n_cases) + 1) +
+  theme_minimal(base_size = 12)
+```
+
+```{r unstable-cases-plot, fig.width=8, fig.height=5}
+ggplot(most_unstable_plot_data, aes(x = case_id, y = variation_ratio)) +
+  geom_col(fill = "#C44E52", width = 0.7) +
+  coord_flip() +
+  labs(
+    title = paste("Most Unstable Cases 2014", model_label),
+    x = "Case ID",
+    y = "Variation Ratio"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+```{r medication-agreement-plot, fig.width=8, fig.height=5}
+ggplot(medication_class_plot_data, aes(x = med_id, y = mean_repeat_level_agreement)) +
+  geom_col(fill = "#55A868", width = 0.7) +
+  coord_flip() +
+  labs(
+    title = paste("Medication-Class Repeat-Level Agreement 2014", model_label),
+    x = "Medication Class",
+    y = "Mean Agreement"
+  ) +
+  ylim(0, 1) +
+  theme_minimal(base_size = 12)
+```
+
+```{r action-agreement-plot, fig.width=7, fig.height=4.5}
+ggplot(action_level_plot_data, aes(x = action_type, y = mean_repeat_level_agreement)) +
+  geom_col(fill = "#8172B2", width = 0.7) +
+  coord_flip() +
+  labs(
+    title = paste("Action-Level Repeat Agreement 2014", model_label),
+    x = "Action Type",
+    y = "Mean Agreement"
+  ) +
+  ylim(0, 1) +
+  theme_minimal(base_size = 12)
+```
+
+# Export Processed Data
+
+```{r export}
+safe_label <- gsub("[^A-Za-z0-9]+", "_", model_label)
+
+write_csv(parsed_wide, file.path(output_dir, paste0(safe_label, "_intra_model_parsed_wide.csv")))
+write_csv(parsed_long, file.path(output_dir, paste0(safe_label, "_intra_model_parsed_long.csv")))
+write_csv(unmatched_candidates, file.path(output_dir, paste0(safe_label, "_intra_model_unmatched_candidates.csv")))
+write_csv(treatment_signatures, file.path(output_dir, paste0(safe_label, "_intra_model_treatment_signatures.csv")))
+write_csv(case_signature_counts, file.path(output_dir, paste0(safe_label, "_intra_model_signature_counts.csv")))
+write_csv(case_stability, file.path(output_dir, paste0(safe_label, "_intra_model_case_stability.csv")))
+write_csv(variation_ratio_distribution, file.path(output_dir, paste0(safe_label, "_intra_model_variation_ratio_distribution.csv")))
+write_csv(stability_summary, file.path(output_dir, paste0(safe_label, "_intra_model_stability_summary.csv")))
+write_csv(medication_class_agreement, file.path(output_dir, paste0(safe_label, "_intra_model_medication_class_agreement.csv")))
+write_csv(action_level_agreement, file.path(output_dir, paste0(safe_label, "_intra_model_action_level_agreement.csv")))
+write_csv(dose_stability, file.path(output_dir, paste0(safe_label, "_intra_model_dose_stability.csv")))
+write_csv(manual_review_sample, file.path(output_dir, paste0(safe_label, "_intra_model_manual_review_sample.csv")))
+saveRDS(parsed_wide, file.path(output_dir, paste0(safe_label, "_intra_model_parsed_wide.rds")))
+
+tibble(
+  output = c(
+    "Parsed wide data",
+    "Parsed long data",
+    "Unmatched candidate audit",
+    "Treatment signatures",
+    "Case stability metrics",
+    "Medication-class agreement",
+    "Action-level agreement",
+    "Dose stability",
+    "Manual review sample",
+    "Parsed wide RDS"
+  ),
+  path = c(
+    file.path(output_dir, paste0(safe_label, "_intra_model_parsed_wide.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_parsed_long.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_unmatched_candidates.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_treatment_signatures.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_case_stability.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_medication_class_agreement.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_action_level_agreement.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_dose_stability.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_manual_review_sample.csv")),
+    file.path(output_dir, paste0(safe_label, "_intra_model_parsed_wide.rds"))
+  )
+) %>%
+  kable()
+```

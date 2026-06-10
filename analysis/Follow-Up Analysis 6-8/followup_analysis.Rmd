@@ -138,7 +138,8 @@ case %>%
 
 
 ## GPT-5.4 Metformin Review (eGFR < 30)
-Pulling the GPT-5.4 plans for low-eGFR cases to check the metformin guideline-adherence finding.
+Pulling the GPT-5.4 plans for low-eGFR cases to see whether the apparent metformin
+gap is real.
 
 ```{r metformin-review}
 raw <- read_csv(raw_path, show_col_types = FALSE)
@@ -156,14 +157,15 @@ raw %>%
 ```
 
 **Comments:** The 15% figure is misleading. It comes from the
-metformin_stop_or_caution flag, which only goes when the text mentions stopping
-or cautioning metformin, divided by all 13 eGFR <30 cases. Only 2 of the 13 eGFR
-<30 cases (DM072, DM077) were on metformin at baseline; these are the only real
-metformin decisions, and GPT-5.4 discontinued the drug and cited the eGFR in both.
-The remaining 11 patients were never on metformin, so there was nothing to stop,
-and no model recommends starting metformin below eGFR 30. So GPT handled metformin
-correctly here; the low number is a counting issue, not a safety problem. The full
-`treatment_plan` text is below.
+metformin_stop_or_caution flag, which only triggers when the text mentions
+stopping or cautioning metformin, divided by all 13 eGFR <30 cases. Only 2 of the
+13 eGFR <30 cases (DM072, DM077) were on metformin at baseline; these are the only
+real metformin decisions, and GPT-5.4 discontinued the drug and cited the eGFR in
+both. The remaining 11 patients were never on metformin, so there was nothing to
+stop, and no model recommends starting metformin below eGFR 30. The 2/13 here is
+the 15% from the original flag, so this is the same data, just counted correctly.
+So GPT handled metformin correctly here. The low number is a counting issue, not a
+safety problem. The full treatment_plan text is below.
 
 
 ```{r metformin-text, results='asis'}
@@ -231,7 +233,7 @@ ind %>%
 ```
 
 **Comments:** The univariate models with eGFR >= 60 as reference have sensible
-CIs) unlike the multivariable models. Metformin is less likely as eGFR falls (OR =
+CIs, unlike the multivariable models. Metformin is less likely as eGFR falls (OR =
 0.24 at 45-59, 0.04 at 30-44). SGLT2 inhibitors peak in the moderate-CKD bands and
 drop below 30. Insulin rises at low eGFR. The metformin eGFR <30 cell
 remains a complete-separation case (0 of 39 responses recommend metformin) and is

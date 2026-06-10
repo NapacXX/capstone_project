@@ -238,3 +238,76 @@ CIs, unlike the multivariable models. Metformin is less likely as eGFR falls (OR
 drop below 30. Insulin rises at low eGFR. The metformin eGFR <30 cell
 remains a complete-separation case (0 of 39 responses recommend metformin) and is
 reported as a simple proportion rather than an odds ratio.
+
+
+
+## Guideline Flag (All Stop/Caution Flags)
+Checking whether the denominator problem found in the metformin flag also affects
+the other stop/caution flags. A flag should only count as a "miss" when the
+patient was actually on the drug.
+
+```{r flag-audit}
+drug_kw <- c(
+  metformin_stop_or_caution = "metformin",
+  sglt2i_stop_or_caution = "gliflozin",
+  glp1_stop_or_caution =
+    "semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|lixisenatide",
+  insulin_stop_or_caution =
+    "glargine|detemir|degludec|aspart|lispro|glulisine|insulin|NPH"
+  )
+
+drugs_lc <- tolower(coalesce(ind$current_dm_drugs, ""))
+
+audit <- lapply(names(drug_kw), function(flag) {
+  on_drug <- str_detect(drugs_lc, drug_kw[[flag]])
+  flagged <- ind[[flag]] == 1
+  tibble(
+    Flag = flag,
+    `Rows flagged` = sum(flagged, na.rm = TRUE),
+    `Flagged & on drug` = sum(flagged & on_drug, na.rm = TRUE),
+    `Flagged but NOT on drug` = sum(flagged & !on_drug, na.rm = TRUE)
+  )
+}) %>% bind_rows()
+
+audit %>%
+  kable(caption = "Stop/Caution Flag Audit: How Many Flagged Rows are Patients not on the Drug") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** The denominator problem is not specific to metformin. For all four
+stop/caution flags, the majority of flagged rows are patients who were not on the
+drug at baseline, so the flag is counting "did not mention stopping a drug the
+patient was not taking" as a failure. Any guideline-adherence rate built on these
+flags is inflated until it is restricted to patients actually on the drug.
+
+
+
+## Heart Failure as a Complexity 
+Heart failure as a source of competing indications.
+Looking at disagreement by HF status, and SGLT2i recommendation rates by HF
+status (HF is a guideline push toward SGLT2i).
+
+```{r hf-disagreement}
+case %>%
+  group_by(`Heart failure` = heart_failure_present) %>%
+  summarise(`Mean disagreement` = round(mean(disagreement_score), 2),
+            N = n(), .groups = "drop") %>%
+  kable(caption = "Mean Disagreement by Heart Failure Status") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+```{r hf-sglt2i}
+ind %>%
+  group_by(Model = model_short, `Heart failure` = heart_failure_present) %>%
+  summarise(`SGLT2i recommended (%)` = round(100 * mean(sglt2i_active, na.rm = TRUE), 0),
+            N = n(), .groups = "drop") %>%
+  kable(caption = "SGLT2i Recommendation Rate by Model and Heart Failure Status") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** HF cases do trend higher on disagreement (2.0 vs 1.6), but there
+are only 12 of them, so it is not significant (Mann-Whitney p = 0.57). All three
+models push SGLT2i much harder in HF cases (GPT and Opus to 100%, Sonnet to 75%),
+which is what guidelines call for, and the split between Sonnet and the other two
+is part of where the disagreement comes from.

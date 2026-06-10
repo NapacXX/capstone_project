@@ -1737,6 +1737,259 @@ Metformin is less likely as eGFR falls (OR = 0.24 at 45-59, 0.04 at
 complete-separation case (0 of 39 responses recommend metformin) and is
 reported as a simple proportion rather than an odds ratio.</p>
 </div>
+<div id="guideline-flag-all-stopcaution-flags" class="section level2">
+<h2>Guideline Flag (All Stop/Caution Flags)</h2>
+<p>Checking whether the denominator problem found in the metformin flag
+also affects the other stop/caution flags. A flag should only count as a
+“miss” when the patient was actually on the drug.</p>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Stop/Caution Flag Audit: How Many Flagged Rows are Patients not on the
+Drug
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Flag
+</th>
+<th style="text-align:right;">
+Rows flagged
+</th>
+<th style="text-align:right;">
+Flagged &amp; on drug
+</th>
+<th style="text-align:right;">
+Flagged but NOT on drug
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+metformin_stop_or_caution
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sglt2i_stop_or_caution
+</td>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+glp1_stop_or_caution
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+insulin_stop_or_caution
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comments:</strong> The denominator problem is not specific to
+metformin. For all four stop/caution flags, the majority of flagged rows
+are patients who were not on the drug at baseline, so the flag is
+counting “did not mention stopping a drug the patient was not taking” as
+a failure. Any guideline-adherence rate built on these flags is inflated
+until it is restricted to patients actually on the drug.</p>
+</div>
+<div id="heart-failure-as-a-complexity" class="section level2">
+<h2>Heart Failure as a Complexity</h2>
+<p>Heart failure as a source of competing indications. Looking at
+disagreement by HF status, and SGLT2i recommendation rates by HF status
+(HF is a guideline push toward SGLT2i).</p>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Mean Disagreement by Heart Failure Status
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Heart failure
+</th>
+<th style="text-align:right;">
+Mean disagreement
+</th>
+<th style="text-align:right;">
+N
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+1.6
+</td>
+<td style="text-align:right;">
+86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+SGLT2i Recommendation Rate by Model and Heart Failure Status
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Model
+</th>
+<th style="text-align:left;">
+Heart failure
+</th>
+<th style="text-align:right;">
+SGLT2i recommended (%)
+</th>
+<th style="text-align:right;">
+N
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Claude Opus 4.6
+</td>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Claude Opus 4.6
+</td>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Claude Sonnet 4.6
+</td>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Claude Sonnet 4.6
+</td>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GPT-5.4
+</td>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GPT-5.4
+</td>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Comments:</strong> HF cases do trend higher on disagreement
+(2.0 vs 1.6), but there are only 12 of them, so it is not significant
+(Mann-Whitney p = 0.57). All three models push SGLT2i much harder in HF
+cases (GPT and Opus to 100%, Sonnet to 75%), which is what guidelines
+call for, and the split between Sonnet and the other two is part of
+where the disagreement comes from.</p>
+</div>
 
 
 

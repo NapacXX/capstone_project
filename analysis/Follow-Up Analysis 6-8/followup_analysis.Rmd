@@ -3,6 +3,10 @@ title: "Follow-Up Analyses"
 output: html_document
 ---
 
+<style>
+h2 { margin-top: 60px; }
+</style>
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 

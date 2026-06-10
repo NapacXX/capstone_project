@@ -1,5 +1,5 @@
 ---
-title: "Follow-up Analyses"
+title: "Follow-Up Analyses"
 output: html_document
 ---
 
@@ -14,10 +14,9 @@ library(broom)
 library(tidyr)
 library(stringr)
 
-library(here)
-ind_path <- here("data/processed/changchangpan/capstone_llm_data_explore_r_outputs/processed_llm_treatment_indicators.csv")
-dis_path <- here("data/processed/changchangpan/capstone_llm_data_explore_r_outputs/high_disagreement_cases.csv")
-raw_path <- here("data/raw/final_results_gpt_claude_models.csv")
+ind_path <- "C:/Users/rosie/Documents/capstone_project/data/processed/changchangpan/capstone_llm_data_explore_r_outputs/processed_llm_treatment_indicators.csv"
+dis_path <- "C:/Users/rosie/Documents/capstone_project/data/processed/changchangpan/capstone_llm_data_explore_r_outputs/high_disagreement_cases.csv"
+raw_path <- "C:/Users/rosie/Documents/capstone_project/data/raw/final_results_gpt_claude_models.csv"
 
 ind <- read_csv(ind_path, show_col_types = FALSE)
 
@@ -25,10 +24,11 @@ ind <- read_csv(ind_path, show_col_types = FALSE)
 case <- ind %>% distinct(case_id, .keep_all = TRUE)
 ```
 
-# 1. Disagreement vs. Complexity
 
-Testing James's hypothesis that model disagreement rises with clinical
-complexity — operationalized as number of comorbidities and lower eGFR.
+
+## Disagreement vs. Complexity
+Hypothesis that model disagreement rises with clinical
+complexity; operationalized as number of comorbidities and lower eGFR.
 
 ```{r disagreement-corr}
 dis <- read_csv(dis_path, show_col_types = FALSE)
@@ -63,6 +63,7 @@ tibble(
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
+
 ```{r disagreement-by-egfr}
 case %>%
   mutate(egfr_band = cut(egfr_ml_min_1_73m2, c(0, 30, 45, 60, Inf),
@@ -75,26 +76,26 @@ case %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-**Key Takeaway:** Both correlations run in the direction James predicted —
-disagreement increases with comorbidity count (rho ~ +0.18) and decreases with
-eGFR (rho ~ -0.19) — but neither reaches significance at this sample size
-(both p ~ 0.07-0.08). The eGFR-band table is the clearer signal: mean
-disagreement is highest in the CKD groups (~2.1 at eGFR <30, ~1.9 at 30-44)
-and falls to ~1.5 once eGFR exceeds 45. This is consistent with the
-"guidelines are clear for simple patients, ambiguous for complex ones"
-interpretation, and supports the case for expanding the sample if we want to
-confirm it statistically.
+**Comments:** Both correlations run in the direction predicted.
+Disagreement increases with comorbidity count (rho ~ +0.18) and decreases with
+eGFR (rho ~ -0.19). Neither reaches significance at this sample size
+(both p ~ 0.07-0.08). Mean disagreement is highest in the CKD groups (~2.1 at eGFR
+<30, ~1.9 at 30-44) and falls to ~1.5 once eGFR exceeds 45. This is consistent
+with saying guidelines are clear for simple patients, ambiguous for complex ones
+and supports the case for expanding the sample if we want to confirm it
+sstatistically.
 
-# 2. Baseline Diabetes Medications
 
+
+## Baseline Diabetes Medications
 ```{r baseline-dm-drugs}
 drug_pat <- c(
-  "Metformin"        = "metformin",
-  "SGLT2 inhibitor"  = "gliflozin|empagliflozin|dapagliflozin|canagliflozin",
-  "GLP-1 RA"         = "semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|lixisenatide",
-  "DPP-4 inhibitor"  = "gliptin|sitagliptin|linagliptin|saxagliptin",
-  "Sulfonylurea"     = "glipizide|glyburide|glimepiride|gliclazide",
-  "Basal insulin"    = "glargine|detemir|degludec|NPH|isophane",
+  "Metformin" = "metformin",
+  "SGLT2 inhibitor" = "gliflozin|empagliflozin|dapagliflozin|canagliflozin",
+  "GLP-1 RA" = "semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|lixisenatide",
+  "DPP-4 inhibitor" = "gliptin|sitagliptin|linagliptin|saxagliptin",
+  "Sulfonylurea" = "glipizide|glyburide|glimepiride|gliclazide",
+  "Basal insulin" = "glargine|detemir|degludec|NPH|isophane",
   "Prandial insulin" = "aspart|lispro|glulisine"
 )
 
@@ -114,12 +115,15 @@ tibble(
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-**Key Takeaway:** Roughly half the population is on no diabetes medication at
+**Comments:** Roughly half the population is on no diabetes medication at
 baseline (newly diagnosed). Among those on therapy, GLP-1 RAs, metformin, and
 SGLT2 inhibitors are the most common classes. Classes overlap because patients
 may be on combination regimens, so percentages do not sum to 100.
 
-# 3. Race / Ethnicity
+
+
+
+## Race / Ethnicity
 
 ```{r race-dist}
 case %>%
@@ -132,12 +136,10 @@ case %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-**Key Takeaway:** Race/ethnicity is balanced by design across the four groups.
 
-# 4. GPT-5.4 Metformin Review (eGFR < 30)
 
-Pulling the verbatim GPT-5.4 plans for low-eGFR cases to check the apparent
-metformin guideline-adherence gap.
+# GPT-5.4 Metformin Review (eGFR < 30)
+Pulling the GPT-5.4 plans for low-eGFR cases to check the metformin guideline-adherence.
 
 ```{r metformin-review}
 raw <- read_csv(raw_path, show_col_types = FALSE)
@@ -154,7 +156,7 @@ raw %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-**Key Takeaway:** The "15% flagged metformin" figure is an artifact of the
+**Comments:** The "15% flagged metformin" figure is an artifact of the
 regex-derived `metformin_stop_or_caution` flag, whose denominator includes all
 eGFR <30 cases. Only the small number of patients actually on metformin at
 baseline represent real metformin decisions; in those, GPT-5.4 discontinued it
@@ -174,8 +176,10 @@ for (i in seq_len(nrow(txt))) {
 }
 ```
 
-# 5. Univariate Logistic Regression (eGFR >= 60 reference)
 
+
+
+## Univariate Logistic Regression (eGFR >= 60 reference)
 Re-running the medication-class associations as univariate models with eGFR as
 the sole predictor and eGFR >= 60 as the reference category, to address the
 complete separation seen in the multivariable models.
@@ -222,11 +226,10 @@ ind %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-**Key Takeaway:** The univariate models with eGFR >= 60 as reference are
+**Comments:** The univariate models with eGFR >= 60 as reference are
 well-behaved (sensible CIs), unlike the multivariable models. Metformin is
-sharply less likely as eGFR falls (OR ~0.24 at 45-59, ~0.04 at 30-44); SGLT2
-inhibitors peak in the moderate-CKD bands and drop below 30; insulin rises
+;ess likely as eGFR falls (OR ~0.24 at 45-59, ~0.04 at 30-44). SGLT2
+inhibitors peak in the moderate-CKD bands and drop below 30. Insulin rises
 steeply at low eGFR. The metformin eGFR <30 cell remains a complete-separation
-case (0 of 39 responses recommend metformin) and is reported as a simple
+case (0 of 39 responses recommend metformin). Reported as a simple
 proportion rather than an odds ratio.
-```

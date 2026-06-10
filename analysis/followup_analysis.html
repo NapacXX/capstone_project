@@ -580,10 +580,10 @@ display: none;
 <div id="disagreement-vs.-complexity" class="section level2">
 <h2>Disagreement vs. Complexity</h2>
 <p>Hypothesis that model disagreement rises with clinical complexity;
-operationalized as number of comorbidities and lower eGFR.</p>
+defined as number of comorbidities and lower eGFR.</p>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Spearman correlations (n = 98 cases)
+Spearman Correlations (n = 98 Cases)
 </caption>
 <thead>
 <tr>
@@ -601,7 +601,7 @@ p-value
 <tbody>
 <tr>
 <td style="text-align:left;">
-Disagreement vs. # comorbidities
+Disagreement vs. # Comorbidities
 </td>
 <td style="text-align:right;">
 0.130
@@ -625,7 +625,7 @@ Disagreement vs. eGFR
 </table>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Mean disagreement score by eGFR band
+Mean Disagreement Score by eGFR Band
 </caption>
 <thead>
 <tr>
@@ -687,21 +687,21 @@ N
 </tr>
 </tbody>
 </table>
-<p><strong>Comments:</strong> Both correlations run in the direction
-predicted. Disagreement increases with comorbidity count (rho ~ +0.18)
-and decreases with eGFR (rho ~ -0.19). Neither reaches significance at
-this sample size (both p ~ 0.07-0.08). Mean disagreement is highest in
-the CKD groups (~2.1 at eGFR &lt;30, ~1.9 at 30-44) and falls to ~1.5
-once eGFR exceeds 45. This is consistent with saying guidelines are
-clear for simple patients, ambiguous for complex ones and supports the
-case for expanding the sample if we want to confirm it
-sstatistically.</p>
+<p><strong>Comments:</strong> Both correlations run in the predicted
+direction, but neither is significant at this sample size. Disagreement
+vs. comorbidity count is weak (rho = 0.13, p = 0.20). Disagreement
+vs. eGFR is stronger and near-significant (rho = -0.19, p = 0.07). Mean
+disagreement is highest in the CKD groups (2.08 at eGFR &lt;30, 1.90 at
+30-44) and lower above 45 (1.32 at 45-59, 1.57 at &gt;=60). This is
+consistent with the idea that guidelines are clear for simple patients
+and ambiguous for complex ones. Supports expanding the sample if we want
+to confirm it statistically.</p>
 </div>
 <div id="baseline-diabetes-medications" class="section level2">
 <h2>Baseline Diabetes Medications</h2>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Baseline diabetes medications (n = 98 cases; classes overlap, patients
+Baseline Diabetes Medications (n = 98 Cases; classes overlap, patients
 may be on &gt;1)
 </caption>
 <thead>
@@ -818,7 +818,7 @@ regimens, so percentages do not sum to 100.</p>
 <h2>Race / Ethnicity</h2>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Race / ethnicity distribution (n = 98 cases)
+Race / Ethnicity Distribution (n = 98 Cases)
 </caption>
 <thead>
 <tr>
@@ -881,13 +881,13 @@ Asian
 </tbody>
 </table>
 </div>
-<div id="gpt-5.4-metformin-review-egfr-30" class="section level1">
-<h1>GPT-5.4 Metformin Review (eGFR &lt; 30)</h1>
+<div id="gpt-5.4-metformin-review-egfr-30" class="section level2">
+<h2>GPT-5.4 Metformin Review (eGFR &lt; 30)</h2>
 <p>Pulling the GPT-5.4 plans for low-eGFR cases to check the metformin
-guideline-adherence.</p>
+guideline-adherence finding.</p>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-GPT-5.4 cases with eGFR &lt; 30
+GPT-5.4 Cases with eGFR &lt; 30
 </caption>
 <thead>
 <tr>
@@ -1090,14 +1090,16 @@ Insulin glargine;Insulin lispro
 </tr>
 </tbody>
 </table>
-<p><strong>Comments:</strong> The “15% flagged metformin” figure is an
-artifact of the regex-derived <code>metformin_stop_or_caution</code>
-flag, whose denominator includes all eGFR &lt;30 cases. Only the small
-number of patients actually on metformin at baseline represent real
-metformin decisions; in those, GPT-5.4 discontinued it and cited the
-eGFR. No model recommends starting metformin below eGFR 30. The full
-verbatim <code>treatment_plan</code> text for these cases should be
-reviewed manually (printed below) before reporting.</p>
+<p><strong>Comments:</strong> The 15% figure is misleading. It comes
+from the metformin_stop_or_caution flag, which only goes when the text
+mentions stopping or cautioning metformin, divided by all 13 eGFR &lt;30
+cases. Only 2 of the 13 eGFR &lt;30 cases (DM072, DM077) were on
+metformin at baseline; these are the only real metformin decisions, and
+GPT-5.4 discontinued the drug and cited the eGFR in both. The remaining
+11 patients were never on metformin, so there was nothing to stop, and
+no model recommends starting metformin below eGFR 30. So GPT handled
+metformin correctly here; the low number is a counting issue, not a
+safety problem. The full <code>treatment_plan</code> text is below.</p>
 <p><strong>DM021</strong> (eGFR 24)</p>
 <blockquote>
 <table>
@@ -1390,6 +1392,7 @@ and 4 units subcutaneously before dinner.</td>
 </tbody>
 </table>
 </blockquote>
+</div>
 <div id="univariate-logistic-regression-egfr-60-reference" class="section level2">
 <h2>Univariate Logistic Regression (eGFR &gt;= 60 reference)</h2>
 <p>Re-running the medication-class associations as univariate models
@@ -1398,7 +1401,7 @@ category, to address the complete separation seen in the multivariable
 models.</p>
 <table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Univariate logistic regression: medication class by eGFR (ref = &gt;=60)
+Univariate Logistic Regression: Medication Class by eGFR (ref = &gt;=60)
 </caption>
 <thead>
 <tr>
@@ -1408,13 +1411,13 @@ Outcome
 <th style="text-align:left;">
 Level
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 OR
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 CI_low
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 CI_high
 </th>
 <th style="text-align:right;">
@@ -1433,14 +1436,14 @@ metformin_active
 <td style="text-align:left;">
 &lt;30 vs &gt;=60
 </td>
-<td style="text-align:right;">
-0.00
+<td style="text-align:left;">
+—
 </td>
-<td style="text-align:right;">
-0.00
+<td style="text-align:left;">
+—
 </td>
-<td style="text-align:right;">
-3.31072e+11
+<td style="text-align:left;">
+—
 </td>
 <td style="text-align:right;">
 0.9844
@@ -1456,14 +1459,14 @@ metformin_active
 <td style="text-align:left;">
 30-44 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.04
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.02
 </td>
-<td style="text-align:right;">
-9.00000e-02
+<td style="text-align:left;">
+0.09
 </td>
 <td style="text-align:right;">
 0.0000
@@ -1478,14 +1481,14 @@ metformin_active
 <td style="text-align:left;">
 45-59 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.24
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.12
 </td>
-<td style="text-align:right;">
-4.80000e-01
+<td style="text-align:left;">
+0.48
 </td>
 <td style="text-align:right;">
 0.0001
@@ -1500,14 +1503,14 @@ sglt2i_active
 <td style="text-align:left;">
 &lt;30 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.38
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.14
 </td>
-<td style="text-align:right;">
-8.70000e-01
+<td style="text-align:left;">
+0.87
 </td>
 <td style="text-align:right;">
 0.0301
@@ -1522,14 +1525,14 @@ sglt2i_active
 <td style="text-align:left;">
 30-44 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 15.45
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 6.68
 </td>
-<td style="text-align:right;">
-4.23300e+01
+<td style="text-align:left;">
+42.33
 </td>
 <td style="text-align:right;">
 0.0000
@@ -1544,14 +1547,14 @@ sglt2i_active
 <td style="text-align:left;">
 45-59 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 12.26
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 5.49
 </td>
-<td style="text-align:right;">
-3.14100e+01
+<td style="text-align:left;">
+31.41
 </td>
 <td style="text-align:right;">
 0.0000
@@ -1566,14 +1569,14 @@ glp1_active
 <td style="text-align:left;">
 &lt;30 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 1.55
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.76
 </td>
-<td style="text-align:right;">
-3.30000e+00
+<td style="text-align:left;">
+3.3
 </td>
 <td style="text-align:right;">
 0.2378
@@ -1588,14 +1591,14 @@ glp1_active
 <td style="text-align:left;">
 30-44 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 2.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 1.08
 </td>
-<td style="text-align:right;">
-3.93000e+00
+<td style="text-align:left;">
+3.93
 </td>
 <td style="text-align:right;">
 0.0306
@@ -1610,14 +1613,14 @@ glp1_active
 <td style="text-align:left;">
 45-59 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.51
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.27
 </td>
-<td style="text-align:right;">
-9.50000e-01
+<td style="text-align:left;">
+0.95
 </td>
 <td style="text-align:right;">
 0.0349
@@ -1632,14 +1635,14 @@ insulin_any_active
 <td style="text-align:left;">
 &lt;30 vs &gt;=60
 </td>
-<td style="text-align:right;">
-47.30
+<td style="text-align:left;">
+47.3
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 18.16
 </td>
-<td style="text-align:right;">
-1.43230e+02
+<td style="text-align:left;">
+143.23
 </td>
 <td style="text-align:right;">
 0.0000
@@ -1654,14 +1657,14 @@ insulin_any_active
 <td style="text-align:left;">
 30-44 vs &gt;=60
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 3.69
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 1.71
 </td>
-<td style="text-align:right;">
-8.05000e+00
+<td style="text-align:left;">
+8.05
 </td>
 <td style="text-align:right;">
 0.0009
@@ -1676,14 +1679,14 @@ insulin_any_active
 <td style="text-align:left;">
 45-59 vs &gt;=60
 </td>
-<td style="text-align:right;">
-1.20
+<td style="text-align:left;">
+1.2
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;">
 0.44
 </td>
-<td style="text-align:right;">
-3.04000e+00
+<td style="text-align:left;">
+3.04
 </td>
 <td style="text-align:right;">
 0.7031
@@ -1725,14 +1728,13 @@ N metformin active
 </tbody>
 </table>
 <p><strong>Comments:</strong> The univariate models with eGFR &gt;= 60
-as reference are well-behaved (sensible CIs), unlike the multivariable
-models. Metformin is ;ess likely as eGFR falls (OR ~0.24 at 45-59, ~0.04
-at 30-44). SGLT2 inhibitors peak in the moderate-CKD bands and drop
-below 30. Insulin rises steeply at low eGFR. The metformin eGFR &lt;30
-cell remains a complete-separation case (0 of 39 responses recommend
-metformin). Reported as a simple proportion rather than an odds
+as reference have sensible CIs) unlike the multivariable models.
+Metformin is less likely as eGFR falls (OR = 0.24 at 45-59, 0.04 at
+30-44). SGLT2 inhibitors peak in the moderate-CKD bands and drop below
+30. Insulin rises steeply at low eGFR. The metformin eGFR &lt;30 cell
+remains a complete-separation case (0 of 39 responses recommend
+metformin) and is reported as a simple proportion rather than an odds
 ratio.</p>
-</div>
 </div>
 
 

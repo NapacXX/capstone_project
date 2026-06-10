@@ -1,0 +1,235 @@
+---
+title: "Follow-Up Analyses"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(dplyr)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(broom)
+library(tidyr)
+library(stringr)
+
+ind_path <- "C:/Users/rosie/Documents/capstone_project/data/processed/changchangpan/capstone_llm_data_explore_r_outputs/processed_llm_treatment_indicators.csv"
+dis_path <- "C:/Users/rosie/Documents/capstone_project/data/processed/changchangpan/capstone_llm_data_explore_r_outputs/high_disagreement_cases.csv"
+raw_path <- "C:/Users/rosie/Documents/capstone_project/data/raw/final_results_gpt_claude_models.csv"
+
+ind <- read_csv(ind_path, show_col_types = FALSE)
+
+# Patient-level frame: one row per case for patient covariates
+case <- ind %>% distinct(case_id, .keep_all = TRUE)
+```
+
+
+
+## Disagreement vs. Complexity
+Hypothesis that model disagreement rises with clinical
+complexity; operationalized as number of comorbidities and lower eGFR.
+
+```{r disagreement-corr}
+dis <- read_csv(dis_path, show_col_types = FALSE)
+
+comorbid_cols <- c(
+  "heart_failure_present", "chronic_kidney_disease", "mi_history",
+  "stroke_tia_history", "coronary_artery_disease", "atrial_fibrillation",
+  "peripheral_neuropathy", "diabetic_retinopathy", "hypertension",
+  "hyperlipidemia", "hypothyroidism", "depression", "copd", "asthma",
+  "anemia", "osteoporosis", "rheumatoid_arthritis", "cancer_breast",
+  "cancer_colon", "cancer_lung", "cancer_prostate", "cancer_endometrial"
+)
+comorbid_cols <- intersect(comorbid_cols, names(case))
+
+case <- case %>%
+  mutate(n_comorbid = rowSums(across(all_of(comorbid_cols), ~ . == "Yes"),
+                              na.rm = TRUE)) %>%
+  left_join(dis %>% select(case_id, disagreement_score), by = "case_id") %>%
+  mutate(disagreement_score = replace_na(disagreement_score, 0))
+
+c1 <- cor.test(case$n_comorbid, case$disagreement_score, method = "spearman")
+c2 <- cor.test(case$egfr_ml_min_1_73m2, case$disagreement_score,
+               method = "spearman")
+
+tibble(
+  Comparison = c("Disagreement vs. # comorbidities",
+                 "Disagreement vs. eGFR"),
+  `Spearman rho` = round(c(c1$estimate, c2$estimate), 3),
+  `p-value` = round(c(c1$p.value, c2$p.value), 4)
+) %>%
+  kable(caption = paste0("Spearman correlations (n = ", nrow(case), " cases)")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+```{r disagreement-by-egfr}
+case %>%
+  mutate(egfr_band = cut(egfr_ml_min_1_73m2, c(0, 30, 45, 60, Inf),
+                         labels = c("<30", "30-44", "45-59", ">=60"),
+                         right = FALSE)) %>%
+  group_by(`eGFR band` = egfr_band) %>%
+  summarise(`Mean disagreement` = round(mean(disagreement_score), 2),
+            N = n(), .groups = "drop") %>%
+  kable(caption = "Mean disagreement score by eGFR band") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** Both correlations run in the direction predicted.
+Disagreement increases with comorbidity count (rho ~ +0.18) and decreases with
+eGFR (rho ~ -0.19). Neither reaches significance at this sample size
+(both p ~ 0.07-0.08). Mean disagreement is highest in the CKD groups (~2.1 at eGFR
+<30, ~1.9 at 30-44) and falls to ~1.5 once eGFR exceeds 45. This is consistent
+with saying guidelines are clear for simple patients, ambiguous for complex ones
+and supports the case for expanding the sample if we want to confirm it
+sstatistically.
+
+
+
+## Baseline Diabetes Medications
+```{r baseline-dm-drugs}
+drug_pat <- c(
+  "Metformin" = "metformin",
+  "SGLT2 inhibitor" = "gliflozin|empagliflozin|dapagliflozin|canagliflozin",
+  "GLP-1 RA" = "semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|lixisenatide",
+  "DPP-4 inhibitor" = "gliptin|sitagliptin|linagliptin|saxagliptin",
+  "Sulfonylurea" = "glipizide|glyburide|glimepiride|gliclazide",
+  "Basal insulin" = "glargine|detemir|degludec|NPH|isophane",
+  "Prandial insulin" = "aspart|lispro|glulisine"
+)
+
+drugs_lc <- tolower(coalesce(case$current_dm_drugs, ""))
+none_n <- sum(drugs_lc == "")
+
+tibble(
+  `Drug class` = names(drug_pat),
+  `n cases` = sapply(drug_pat, function(p) sum(str_detect(drugs_lc, p)))
+) %>%
+  bind_rows(tibble(`Drug class` = "No diabetes medication (newly dx)",
+                   `n cases` = none_n)) %>%
+  mutate(`%` = round(100 * `n cases` / nrow(case), 1)) %>%
+  arrange(desc(`n cases`)) %>%
+  kable(caption = paste0("Baseline diabetes medications (n = ", nrow(case),
+        " cases; classes overlap, patients may be on >1)")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** Roughly half the population is on no diabetes medication at
+baseline (newly diagnosed). Among those on therapy, GLP-1 RAs, metformin, and
+SGLT2 inhibitors are the most common classes. Classes overlap because patients
+may be on combination regimens, so percentages do not sum to 100.
+
+
+
+
+## Race / Ethnicity
+
+```{r race-dist}
+case %>%
+  mutate(race_ethnicity = coalesce(race_ethnicity, "Unknown")) %>%
+  count(`Race / Ethnicity` = race_ethnicity) %>%
+  mutate(`%` = round(100 * n / sum(n), 1)) %>%
+  arrange(desc(n)) %>%
+  kable(caption = paste0("Race / ethnicity distribution (n = ", nrow(case),
+                         " cases)")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+
+
+# GPT-5.4 Metformin Review (eGFR < 30)
+Pulling the GPT-5.4 plans for low-eGFR cases to check the metformin guideline-adherence.
+
+```{r metformin-review}
+raw <- read_csv(raw_path, show_col_types = FALSE)
+
+raw %>%
+  filter(model == "azure/gpt-5.4", egfr_ml_min_1_73m2 < 30) %>%
+  mutate(on_metformin = str_detect(tolower(coalesce(current_dm_drugs, "")),
+                                   "metformin")) %>%
+  arrange(case_id) %>%
+  select(`Case` = case_id, `eGFR` = egfr_ml_min_1_73m2,
+         `On metformin at baseline` = on_metformin,
+         `Baseline DM drugs` = current_dm_drugs) %>%
+  kable(caption = "GPT-5.4 cases with eGFR < 30") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** The "15% flagged metformin" figure is an artifact of the
+regex-derived `metformin_stop_or_caution` flag, whose denominator includes all
+eGFR <30 cases. Only the small number of patients actually on metformin at
+baseline represent real metformin decisions; in those, GPT-5.4 discontinued it
+and cited the eGFR. No model recommends starting metformin below eGFR 30. The
+full verbatim `treatment_plan` text for these cases should be reviewed manually
+(printed below) before reporting.
+
+```{r metformin-text, results='asis'}
+txt <- raw %>%
+  filter(model == "azure/gpt-5.4", egfr_ml_min_1_73m2 < 30) %>%
+  arrange(case_id)
+
+for (i in seq_len(nrow(txt))) {
+  cat("\n\n**", txt$case_id[i], "** (eGFR ", txt$egfr_ml_min_1_73m2[i], ")\n\n",
+      sep = "")
+  cat("> ", gsub("\n", "\n> ", txt$treatment_plan[i]), "\n", sep = "")
+}
+```
+
+
+
+
+## Univariate Logistic Regression (eGFR >= 60 reference)
+Re-running the medication-class associations as univariate models with eGFR as
+the sole predictor and eGFR >= 60 as the reference category, to address the
+complete separation seen in the multivariable models.
+
+```{r univariate-logit}
+ind <- ind %>%
+  mutate(egfr_cat = case_when(
+    egfr_ml_min_1_73m2 < 30 ~ "<30",
+    egfr_ml_min_1_73m2 < 45 ~ "30-44",
+    egfr_ml_min_1_73m2 < 60 ~ "45-59",
+    TRUE                    ~ ">=60"),
+    egfr_cat = relevel(factor(egfr_cat), ref = ">=60"))
+
+run_one <- function(outcome) {
+  f <- as.formula(paste(outcome, "~ egfr_cat"))
+  suppressWarnings(glm(f, data = ind, family = binomial)) %>%
+    tidy(exponentiate = TRUE, conf.int = TRUE) %>%
+    filter(term != "(Intercept)") %>%
+    mutate(Outcome = outcome,
+           Level = paste0(sub("egfr_cat", "", term), " vs >=60")) %>%
+    select(Outcome, Level, OR = estimate, CI_low = conf.low,
+           CI_high = conf.high, p = p.value)
+}
+
+outcomes <- c("metformin_active", "sglt2i_active",
+              "glp1_active", "insulin_any_active")
+
+bind_rows(lapply(outcomes, run_one)) %>%
+  mutate(across(c(OR, CI_low, CI_high), ~ round(., 2)),
+         p = round(p, 4),
+         note = ifelse(is.infinite(CI_high) | CI_high > 1e6,
+                       "separation - report as proportion", "")) %>%
+  kable(caption = "Univariate logistic regression: medication class by eGFR (ref = >=60)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r metformin-separation-proportion}
+ind %>%
+  filter(egfr_cat == "<30") %>%
+  summarise(N = n(),
+            `N metformin active` = sum(metformin_active, na.rm = TRUE),
+            `%` = round(100 * mean(metformin_active, na.rm = TRUE), 1)) %>%
+  kable(caption = "Metformin in eGFR < 30 (report as proportion, not OR)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Comments:** The univariate models with eGFR >= 60 as reference are
+well-behaved (sensible CIs), unlike the multivariable models. Metformin is
+;ess likely as eGFR falls (OR ~0.24 at 45-59, ~0.04 at 30-44). SGLT2
+inhibitors peak in the moderate-CKD bands and drop below 30. Insulin rises
+steeply at low eGFR. The metformin eGFR <30 cell remains a complete-separation
+case (0 of 39 responses recommend metformin). Reported as a simple
+proportion rather than an odds ratio.

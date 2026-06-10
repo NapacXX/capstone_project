@@ -294,6 +294,13 @@ case %>%
             N = n(), .groups = "drop") %>%
   kable(caption = "Mean Disagreement by Heart Failure Status") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+
+# Mann-Whitney
+hf_test <- suppressWarnings(
+  wilcox.test(disagreement_score ~ heart_failure_present, data = case)
+  )
+hf_p <- round(hf_test$p.value, 2)
+# hf_p
 ```
 
 

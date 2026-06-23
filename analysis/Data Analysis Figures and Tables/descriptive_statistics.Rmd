@@ -1,0 +1,686 @@
+---
+title: "Descriptive Statistics"
+date: "2026-06-18"
+output: html_document
+---
+
+# Set-Up
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(dplyr)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(tidyr)
+library(forcats)
+library(stringr)
+library(purrr)
+library(flextable)
+library(officer)
+
+theme_set(theme_minimal(base_size = 12))
+
+raw_path <- "../../data/raw/final_results_capstone_data_ver2.csv"
+export_dir <- "descriptive_statistics_exports"
+
+dir.create(export_dir, showWarnings = FALSE, recursive = TRUE)
+unlink(
+  list.files(export_dir, all.files = TRUE, no.. = TRUE, full.names = TRUE),
+  recursive = TRUE
+)
+
+responses <- read_csv(raw_path, show_col_types = FALSE) %>%
+  select(-starts_with("..."))
+
+cases <- responses %>%
+  arrange(case_id, model) %>%
+  distinct(case_id, .keep_all = TRUE)
+
+format_pct <- function(x, denom) {
+  round(100 * x / denom, 1)
+}
+
+normalize_yes <- function(x) {
+  str_to_lower(str_squish(as.character(x))) %in%
+    c("yes", "y", "true", "1", "present")
+}
+
+summarize_categorical <- function(data, variable, label) {
+  data %>%
+    mutate(value = coalesce(as.character(.data[[variable]]), "Missing")) %>%
+    count(value, name = "n") %>%
+    mutate(
+      Variable = label,
+      `%` = format_pct(n, sum(n))
+    ) %>%
+    rename(Category = value) %>%
+    select(Variable, Category, n, `%`) %>%
+    arrange(Variable, desc(n))
+}
+
+summarize_binary <- function(data, variables) {
+  map_dfr(names(variables), function(var) {
+    tibble(
+      Variable = variables[[var]],
+      n = sum(normalize_yes(data[[var]]), na.rm = TRUE),
+      `%` = format_pct(n, nrow(data))
+    )
+  }) %>%
+    arrange(desc(n))
+}
+
+fmt_n_pct <- function(n, denom) {
+  paste0(n, " (", format_pct(n, denom), "%)")
+}
+
+continuous_table1_row <- function(data, label, variable) {
+  x <- data[[variable]]
+  tibble(
+    Characteristic = label,
+    `Summary, n = 100 cases` = paste0(
+      round(mean(x, na.rm = TRUE), 1), " (",
+      round(sd(x, na.rm = TRUE), 1), "); ",
+      round(median(x, na.rm = TRUE), 1), " [",
+      round(quantile(x, 0.25, na.rm = TRUE), 1), ", ",
+      round(quantile(x, 0.75, na.rm = TRUE), 1), "]"
+    )
+  )
+}
+
+binary_table1_row <- function(data, label, variable) {
+  n_yes <- sum(normalize_yes(data[[variable]]), na.rm = TRUE)
+  tibble(
+    Characteristic = label,
+    `Summary, n = 100 cases` = fmt_n_pct(n_yes, nrow(data))
+  )
+}
+
+category_table1_rows <- function(data, variable, label) {
+  data %>%
+    mutate(value = coalesce(as.character(.data[[variable]]), "Missing")) %>%
+    count(value, name = "n") %>%
+    mutate(
+      Characteristic = paste0("&nbsp;&nbsp;", value),
+      `Summary, n = 100 cases` = fmt_n_pct(n, sum(n))
+    ) %>%
+    select(Characteristic, `Summary, n = 100 cases`) %>%
+    bind_rows(
+      tibble(Characteristic = paste0("<strong>", label, "</strong>"),
+             `Summary, n = 100 cases` = ""),
+      .
+    )
+}
+
+drug_patterns <- c(
+  "No diabetes medication" = "^$|^none$|newly diagnosed",
+  "Metformin" = "metformin",
+  "SGLT2 inhibitor" = "gliflozin|empagliflozin|dapagliflozin|canagliflozin",
+  "GLP-1 RA / GIP-GLP-1" =
+    "semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|lixisenatide",
+  "DPP-4 inhibitor" = "gliptin|sitagliptin|linagliptin|saxagliptin",
+  "Sulfonylurea" = "glipizide|glyburide|glimepiride|gliclazide",
+  "Basal insulin" = "glargine|detemir|degludec|nph|isophane",
+  "Prandial insulin" = "aspart|lispro|glulisine"
+)
+
+plot_fill <- "#2F6F73"
+plot_fill_light <- "#86B7B3"
+plot_accent <- "#B75D3A"
+```
+
+```{r derived-case-fields, include = FALSE}
+cancer_cols <- intersect(
+  c("cancer_breast", "cancer_endometrial", "cancer_colon",
+    "cancer_lung", "cancer_prostate"),
+  names(cases)
+)
+
+cases <- cases %>%
+  mutate(
+    any_cancer_history = if_any(all_of(cancer_cols), normalize_yes),
+    egfr_band = cut(
+      egfr_ml_min_1_73m2,
+      breaks = c(-Inf, 30, 45, 60, Inf),
+      labels = c("<30", "30-44", "45-59", ">=60"),
+      right = FALSE
+    ),
+    hba1c_band = cut(
+      hba1c_percent,
+      breaks = c(-Inf, 7, 8, 9, 10, Inf),
+      labels = c("<7", "7-7.9", "8-8.9", "9-9.9", ">=10"),
+      right = FALSE
+    ),
+    albuminuria_band = cut(
+      uacr_mg_g,
+      breaks = c(-Inf, 30, 300, Inf),
+      labels = c("<30", "30-299", ">=300"),
+      right = FALSE
+    ),
+    ckd_stage_report = coalesce(as.character(stage_ckd), as.character(egfr_band))
+  )
+
+cases <- cases %>%
+  mutate(
+    ckd_stage_report = if_else(
+      is.na(ckd_stage_report) | ckd_stage_report == "",
+      "Missing",
+      ckd_stage_report
+    )
+  )
+
+model_counts <- responses %>%
+  count(model, name = "Response rows") %>%
+  mutate(`%` = format_pct(`Response rows`, sum(`Response rows`))) %>%
+  arrange(desc(`Response rows`))
+
+case_model_completeness <- responses %>%
+  count(case_id, name = "n_model_responses") %>%
+  mutate(complete_3_models = n_model_responses == 3)
+
+duplicate_case_model <- responses %>%
+  count(case_id, model, name = "n_rows") %>%
+  filter(n_rows > 1)
+
+drugs_lc <- str_to_lower(str_squish(coalesce(cases$current_dm_drugs, "")))
+
+baseline_med_summary <- map_dfr(names(drug_patterns), function(label) {
+  tibble(
+    `Drug class` = label,
+    n = sum(str_detect(drugs_lc, drug_patterns[[label]]), na.rm = TRUE)
+  )
+}) %>%
+  mutate(`%` = format_pct(n, nrow(cases))) %>%
+  arrange(desc(n))
+```
+
+# Dataset Overview
+
+This report describes the current raw vignette dataset at the **case level**.
+The raw file has one row per model response, so patient characteristics are first
+deduplicated to one row per `case_id`.
+
+```{r dataset-overview}
+tibble(
+  Metric = c(
+    "Raw model-response rows",
+    "Unique cases",
+    "Unique models",
+    "Cases with exactly 3 model responses",
+    "Duplicate case-model combinations"
+  ),
+  Value = c(
+    nrow(responses),
+    nrow(cases),
+    n_distinct(responses$model),
+    sum(case_model_completeness$complete_3_models),
+    nrow(duplicate_case_model)
+  )
+) %>%
+  kable(caption = "Dataset Overview") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r model-counts}
+model_counts %>%
+  rename(Model = model) %>%
+  kable(caption = "Model Response Rows") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+**Key Takeaway:** The current raw file contains 300 responses from 100 unique
+cases and 3 models. Each case has the expected 3 model responses.
+
+
+# Table 1. Case Characteristics
+
+This table summarizes the variables most likely to be used in the manuscript
+description of the synthetic vignette population. Continuous variables are shown
+as mean (SD); median [Q1, Q3]. Categorical variables are shown as n (%).
+
+```{r table1}
+baseline_med_rows <- baseline_med_summary %>%
+  transmute(
+    Characteristic = paste0("&nbsp;&nbsp;", `Drug class`),
+    `Summary, n = 100 cases` = fmt_n_pct(n, nrow(cases))
+  ) %>%
+  bind_rows(
+    tibble(Characteristic = "<strong>Baseline diabetes medications</strong>",
+           `Summary, n = 100 cases` = ""),
+    .
+  )
+
+table1 <- bind_rows(
+  tibble(Characteristic = "<strong>Demographics</strong>",
+         `Summary, n = 100 cases` = ""),
+  continuous_table1_row(cases, "Age, years", "age"),
+  tibble(
+    Characteristic = "Female sex",
+    `Summary, n = 100 cases` = fmt_n_pct(
+      sum(str_to_lower(cases$sex) == "female", na.rm = TRUE),
+      nrow(cases)
+    )
+  ),
+  category_table1_rows(cases, "race_ethnicity", "Race / ethnicity"),
+  tibble(Characteristic = "<strong>Diabetes and metabolic profile</strong>",
+         `Summary, n = 100 cases` = ""),
+  continuous_table1_row(cases, "Diabetes duration, years",
+                        "duration_dm_years"),
+  continuous_table1_row(cases, "HbA1c, %", "hba1c_percent"),
+  continuous_table1_row(cases, "BMI, kg/m2", "bmi_kg_m2"),
+  continuous_table1_row(cases, "eGFR, mL/min/1.73m2",
+                        "egfr_ml_min_1_73m2"),
+  continuous_table1_row(cases, "UACR, mg/g", "uacr_mg_g"),
+  category_table1_rows(cases, "egfr_band", "eGFR band"),
+  category_table1_rows(cases, "albuminuria_band", "Albuminuria band"),
+  baseline_med_rows,
+  tibble(Characteristic = "<strong>Comorbidities and preferences</strong>",
+         `Summary, n = 100 cases` = ""),
+  binary_table1_row(cases, "Chronic kidney disease",
+                    "chronic_kidney_disease"),
+  binary_table1_row(cases, "Heart failure", "heart_failure_present"),
+  binary_table1_row(cases, "Hypertension", "hypertension"),
+  binary_table1_row(cases, "Hyperlipidemia", "hyperlipidemia"),
+  binary_table1_row(cases, "Coronary artery disease",
+                    "coronary_artery_disease"),
+  binary_table1_row(cases, "MI history", "mi_history"),
+  binary_table1_row(cases, "Stroke/TIA history", "stroke_tia_history"),
+  tibble(
+    Characteristic = "Any cancer history",
+    `Summary, n = 100 cases` = fmt_n_pct(
+      sum(cases$any_cancer_history, na.rm = TRUE),
+      nrow(cases)
+    )
+  ),
+  binary_table1_row(cases, "Financial limitations",
+                    "financial_limitations"),
+  binary_table1_row(cases, "Reluctant injections", "reluctant_injections")
+)
+
+section_rows <- str_detect(table1$Characteristic, "<strong>")
+
+table1_export <- table1 %>%
+  mutate(
+    Characteristic = str_replace_all(Characteristic, "&nbsp;", " "),
+    Characteristic = str_replace_all(Characteristic, "<[^>]+>", "")
+  )
+
+table1_ft <- flextable(table1_export) %>%
+  bold(i = section_rows, bold = TRUE, part = "body") %>%
+  bold(part = "header") %>%
+  width(j = 1, width = 3.6) %>%
+  width(j = 2, width = 2.2) %>%
+  align(j = 2, align = "right", part = "all") %>%
+  autofit()
+
+table1_doc <- read_docx() %>%
+  body_add_par("Table 1. Case Characteristics", style = "heading 1") %>%
+  body_add_flextable(table1_ft)
+
+print(
+  table1_doc,
+  target = file.path(export_dir, "table1_case_characteristics.docx")
+)
+
+table1 %>%
+  kable(
+    caption = "Table 1. Case Characteristics",
+    escape = FALSE,
+    align = c("l", "r")
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Manuscript Emphasis:** This table should support the background statement that
+the vignette set intentionally focuses on older adults with type 2 diabetes and
+substantial prescribing complexity, especially kidney disease, albuminuria,
+baseline medication use, cardiovascular comorbidity, cancer history, and patient
+preferences that can affect medication choice.
+
+
+# Continuous Case Characteristics
+
+```{r continuous-table}
+continuous_vars <- c(
+  "Age" = "age",
+  "Diabetes duration, years" = "duration_dm_years",
+  "HbA1c, %" = "hba1c_percent",
+  "eGFR, mL/min/1.73m2" = "egfr_ml_min_1_73m2",
+  "UACR, mg/g" = "uacr_mg_g",
+  "Creatinine, mg/dL" = "creatinine_mg_dl",
+  "BMI, kg/m2" = "bmi_kg_m2",
+  "SBP, mmHg" = "sbp",
+  "DBP, mmHg" = "dbp",
+  "LDL cholesterol, mg/dL" = "ldl_cholesterol_mg_dl",
+  "Triglycerides, mg/dL" = "triglycerides_mg_dl"
+)
+
+map_dfr(names(continuous_vars), function(label) {
+  x <- cases[[continuous_vars[[label]]]]
+  tibble(
+    Variable = label,
+    N = sum(!is.na(x)),
+    Mean = mean(x, na.rm = TRUE),
+    SD = sd(x, na.rm = TRUE),
+    Median = median(x, na.rm = TRUE),
+    Q1 = quantile(x, 0.25, na.rm = TRUE),
+    Q3 = quantile(x, 0.75, na.rm = TRUE),
+    Min = min(x, na.rm = TRUE),
+    Max = max(x, na.rm = TRUE)
+  )
+}) %>%
+  mutate(across(where(is.numeric), ~ round(., 1))) %>%
+  kable(caption = "Continuous Characteristics (n = 100 cases)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r continuous-histograms, fig.height=7, fig.width=10}
+hist_vars <- c(
+  "Age" = "age",
+  "HbA1c (%)" = "hba1c_percent",
+  "eGFR" = "egfr_ml_min_1_73m2",
+  "BMI" = "bmi_kg_m2",
+  "UACR" = "uacr_mg_g"
+)
+
+continuous_histogram_plot <- cases %>%
+  select(all_of(hist_vars)) %>%
+  pivot_longer(everything(), names_to = "Variable", values_to = "Value") %>%
+  mutate(Variable = recode(Variable, !!!setNames(names(hist_vars), hist_vars))) %>%
+  ggplot(aes(x = Value)) +
+  geom_histogram(fill = plot_fill, color = "white", bins = 15) +
+  facet_wrap(~ Variable, scales = "free", ncol = 2) +
+  labs(x = NULL, y = "Number of cases",
+       title = "Distribution of Key Continuous Characteristics") +
+  theme(panel.grid.minor = element_blank())
+
+ggsave(
+  file.path(export_dir, "figure2_continuous_characteristics_histograms.png"),
+  plot = continuous_histogram_plot,
+  width = 10,
+  height = 7,
+  dpi = 300
+)
+
+continuous_histogram_plot
+```
+
+
+# Demographic Characteristics
+
+```{r demographics-table}
+bind_rows(
+  summarize_categorical(cases, "sex", "Sex"),
+  summarize_categorical(cases, "race_ethnicity", "Race / ethnicity")
+) %>%
+  kable(caption = "Demographic Characteristics (n = 100 cases)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  collapse_rows(columns = 1, valign = "top")
+```
+
+```{r demographics-plots, fig.height=4.5, fig.width=10}
+demo_plot_data <- bind_rows(
+  summarize_categorical(cases, "sex", "Sex"),
+  summarize_categorical(cases, "race_ethnicity", "Race / ethnicity")
+)
+
+demographics_plot <- ggplot(
+  demo_plot_data,
+  aes(x = fct_reorder(Category, n), y = n)
+) +
+  geom_col(fill = plot_fill_light) +
+  geom_text(aes(label = paste0(n, " (", `%`, "%)")),
+            hjust = -0.05, size = 3.4) +
+  facet_wrap(~ Variable, scales = "free_y") +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(x = NULL, y = "Number of cases",
+       title = "Sex and Race/Ethnicity Distribution") +
+  theme(panel.grid.minor = element_blank())
+
+ggsave(
+  file.path(export_dir, "figure3_demographic_characteristics.png"),
+  plot = demographics_plot,
+  width = 10,
+  height = 4.5,
+  dpi = 300
+)
+
+demographics_plot
+```
+
+
+# Clinical Subgroup Distributions
+
+```{r clinical-subgroup-table}
+clinical_subgroups <- bind_rows(
+  summarize_categorical(cases, "hba1c_band", "HbA1c band"),
+  summarize_categorical(cases, "egfr_band", "eGFR band"),
+  summarize_categorical(cases, "albuminuria_band", "Albuminuria band"),
+  summarize_categorical(cases, "ckd_stage_report", "CKD stage")
+) %>%
+  mutate(
+    Variable = factor(
+      Variable,
+      levels = c("HbA1c band", "eGFR band", "Albuminuria band", "CKD stage")
+    )
+  )
+
+clinical_subgroups %>%
+  kable(caption = "Clinical Subgroup Distributions (n = 100 cases)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  collapse_rows(columns = 1, valign = "top")
+```
+
+```{r clinical-subgroup-plots, fig.height=5.5, fig.width=10}
+clinical_subgroup_plot_data <- clinical_subgroups %>%
+  filter(Variable %in% c("eGFR band", "HbA1c band", "Albuminuria band")) %>%
+  mutate(
+    Category = case_when(
+      Variable == "HbA1c band" ~ factor(
+        as.character(Category),
+        levels = c("<7", "7-7.9", "8-8.9", "9-9.9", ">=10")
+      ),
+      Variable == "eGFR band" ~ factor(
+        as.character(Category),
+        levels = c(">=60", "45-59", "30-44", "<30")
+      ),
+      Variable == "Albuminuria band" ~ factor(
+        as.character(Category),
+        levels = c("<30", "30-299", ">=300")
+      ),
+      TRUE ~ factor(as.character(Category))
+    )
+  )
+
+clinical_subgroup_plot <- clinical_subgroup_plot_data %>%
+  ggplot(aes(x = Category, y = n)) +
+  geom_col(fill = plot_fill) +
+  geom_text(aes(label = paste0(n, " (", `%`, "%)")),
+            vjust = -0.3, size = 3.4) +
+  facet_wrap(~ Variable, scales = "free_x") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
+  labs(x = NULL, y = "Number of cases",
+       title = "Distribution of HbA1c, eGFR, and Albuminuria Categories") +
+  theme(panel.grid.minor = element_blank())
+
+ggsave(
+  file.path(export_dir, "figure1_clinical_subgroup_distributions.png"),
+  plot = clinical_subgroup_plot,
+  width = 10,
+  height = 5.5,
+  dpi = 300
+)
+
+clinical_subgroup_plot
+```
+
+**Key Takeaway:** The vignette set includes many patients with clinically
+important kidney disease and albuminuria, which are central to diabetes
+medication selection.
+
+
+# Comorbidities and Preferences
+
+```{r comorbidity-table}
+binary_vars <- c(
+  chronic_kidney_disease = "Chronic kidney disease",
+  heart_failure_present = "Heart failure",
+  hypertension = "Hypertension",
+  hyperlipidemia = "Hyperlipidemia",
+  coronary_artery_disease = "Coronary artery disease",
+  mi_history = "MI history",
+  stroke_tia_history = "Stroke/TIA history",
+  peripheral_neuropathy = "Peripheral neuropathy",
+  diabetic_retinopathy = "Diabetic retinopathy",
+  masld_present = "MASLD",
+  mash_present = "MASH",
+  depression = "Depression",
+  copd = "COPD",
+  asthma = "Asthma",
+  anemia = "Anemia",
+  osteoporosis = "Osteoporosis",
+  gi_distress_history = "GI distress history",
+  gu_infection_history = "GU infection history",
+  financial_limitations = "Financial limitations",
+  preference_tighter_control = "Preference: tighter control",
+  preference_simple_regimen = "Preference: simple regimen",
+  reluctant_injections = "Reluctant injections"
+)
+
+binary_summary <- summarize_binary(cases, binary_vars) %>%
+  bind_rows(tibble(
+    Variable = "Any cancer history",
+    n = sum(cases$any_cancer_history, na.rm = TRUE),
+    `%` = format_pct(n, nrow(cases))
+  )) %>%
+  arrange(desc(n))
+
+binary_summary %>%
+  kable(caption = "Comorbidities and Preferences (n = 100 cases)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+```{r comorbidity-plot, fig.height=8, fig.width=10}
+comorbidity_plot <- binary_summary %>%
+  mutate(Variable = fct_reorder(Variable, n)) %>%
+  ggplot(aes(x = Variable, y = n)) +
+  geom_col(fill = plot_accent) +
+  geom_text(aes(label = paste0(n, " (", `%`, "%)")),
+            hjust = -0.05, size = 3.2) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(x = NULL, y = "Number of cases",
+       title = "Prevalence of Comorbidities and Patient Preference Features") +
+  theme(panel.grid.minor = element_blank())
+
+ggsave(
+  file.path(export_dir, "figure4_comorbidities_and_preferences.png"),
+  plot = comorbidity_plot,
+  width = 10,
+  height = 8,
+  dpi = 300
+)
+
+comorbidity_plot
+```
+
+
+# Baseline Diabetes Medications
+
+```{r baseline-medications}
+baseline_med_summary %>%
+  kable(caption = paste0(
+    "Baseline Diabetes Medications (n = ", nrow(cases),
+    " cases; classes overlap)"
+  )) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r baseline-medication-plot, fig.height=5, fig.width=9}
+baseline_medication_plot <- baseline_med_summary %>%
+  mutate(`Drug class` = fct_reorder(`Drug class`, n)) %>%
+  ggplot(aes(x = `Drug class`, y = n)) +
+  geom_col(fill = plot_fill) +
+  geom_text(aes(label = paste0(n, " (", `%`, "%)")),
+            hjust = -0.05, size = 3.4) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(x = NULL, y = "Number of cases",
+       title = "Baseline Diabetes Medication Classes") +
+  theme(panel.grid.minor = element_blank())
+
+ggsave(
+  file.path(export_dir, "figure5_baseline_diabetes_medications.png"),
+  plot = baseline_medication_plot,
+  width = 9,
+  height = 5,
+  dpi = 300
+)
+
+baseline_medication_plot
+```
+
+**Key Takeaway:** Baseline medication percentages can sum to more than 100%
+because patients may be on combination regimens. The no-medication group
+represents patients with `current_dm_drugs` recorded as `none` or blank.
+
+
+# Missingness and Data Quality
+
+```{r missingness}
+key_missing_vars <- c(
+  "case_id", "vignette_text", "age", "sex", "race_ethnicity",
+  "duration_dm_years", "current_dm_drugs", "hba1c_percent",
+  "egfr_ml_min_1_73m2", "uacr_mg_g", "bmi_kg_m2",
+  "heart_failure_present", "chronic_kidney_disease", "stage_ckd",
+  "financial_limitations", "reluctant_injections"
+)
+
+missingness <- map_dfr(key_missing_vars, function(var) {
+  x <- cases[[var]]
+  missing_n <- sum(is.na(x) | str_squish(as.character(x)) == "")
+  tibble(
+    Variable = var,
+    `Missing (n)` = missing_n,
+    `Missing (%)` = format_pct(missing_n, nrow(cases))
+  )
+}) %>%
+  arrange(desc(`Missing (%)`), Variable)
+
+missingness %>%
+  kable(caption = "Missingness in Key Case-Level Variables") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r case-completeness}
+case_model_completeness %>%
+  filter(!complete_3_models) %>%
+  rename(
+    `Case ID` = case_id,
+    `N model responses` = n_model_responses,
+    `Complete 3-model case` = complete_3_models
+  ) %>%
+  kable(caption = "Incomplete Cases (expected = 3 model responses)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r duplicates}
+duplicate_case_model %>%
+  rename(`Case ID` = case_id, Model = model, `N rows` = n_rows) %>%
+  kable(caption = "Duplicated Case-Model Combinations (expected = 1 row each)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
+
+```{r dm026-check}
+cases %>%
+  filter(str_detect(case_id, "^DM026")) %>%
+  select(`Case ID` = case_id, `Vignette text` = vignette_text) %>%
+  kable(caption = "DM026 Case Labels in Current Dataset") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+**Key Takeaway:** The previous DM026 labeling problem is resolved in this raw
+dataset because the three variants are represented as `DM026(1)`, `DM026(2)`,
+and `DM026(3)`. All 100 cases have the expected three model responses.

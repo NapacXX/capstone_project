@@ -1,0 +1,31 @@
+model_clean,action_indicator,n_case_drug_action_pairs,agreement_rate,n_pairs_ever_present
+Claude Opus 4.6,active_recommendation,1000,0.984,257
+Claude Opus 4.6,conditional,1000,0.968,40
+Claude Opus 4.6,continue,1000,0.996,29
+Claude Opus 4.6,increase_intensify,1000,0.98,56
+Claude Opus 4.6,manual_review_flag,1000,0.949,57
+Claude Opus 4.6,mentioned,1000,0.945,365
+Claude Opus 4.6,not_preferred,1000,0.979,21
+Claude Opus 4.6,reduce,1000,0.98,24
+Claude Opus 4.6,start_add,1000,0.942,251
+Claude Opus 4.6,stop_or_avoid,1000,0.973,58
+Claude Sonnet 4.6,active_recommendation,1000,0.984,240
+Claude Sonnet 4.6,conditional,1000,0.921,81
+Claude Sonnet 4.6,continue,1000,0.991,42
+Claude Sonnet 4.6,increase_intensify,1000,0.965,55
+Claude Sonnet 4.6,manual_review_flag,1000,0.899,102
+Claude Sonnet 4.6,mentioned,1000,0.883,451
+Claude Sonnet 4.6,not_preferred,1000,0.942,62
+Claude Sonnet 4.6,reduce,1000,0.952,50
+Claude Sonnet 4.6,start_add,1000,0.915,258
+Claude Sonnet 4.6,stop_or_avoid,1000,0.919,121
+GPT-5.4,active_recommendation,1000,0.937,238
+GPT-5.4,conditional,1000,0.943,57
+GPT-5.4,continue,1000,0.987,40
+GPT-5.4,increase_intensify,1000,0.938,89
+GPT-5.4,manual_review_flag,1000,0.878,122
+GPT-5.4,mentioned,1000,0.834,418
+GPT-5.4,not_preferred,1000,0.917,84
+GPT-5.4,reduce,1000,0.956,47
+GPT-5.4,start_add,1000,0.83,298
+GPT-5.4,stop_or_avoid,1000,0.878,132

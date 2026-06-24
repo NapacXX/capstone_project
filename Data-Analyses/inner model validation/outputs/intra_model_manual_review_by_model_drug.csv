@@ -1,0 +1,31 @@
+model_clean,drug_class,manual_review_flags
+Claude Opus 4.6,glp1,48
+Claude Opus 4.6,insulin_any,36
+Claude Opus 4.6,metformin,31
+Claude Opus 4.6,sglt2i,26
+Claude Opus 4.6,sulfonylurea,1
+Claude Opus 4.6,gip_glp1,0
+Claude Opus 4.6,dpp4i,0
+Claude Opus 4.6,basal_insulin,0
+Claude Opus 4.6,prandial_insulin,0
+Claude Opus 4.6,tzd,0
+Claude Sonnet 4.6,sglt2i,58
+Claude Sonnet 4.6,glp1,47
+Claude Sonnet 4.6,metformin,30
+Claude Sonnet 4.6,insulin_any,15
+Claude Sonnet 4.6,dpp4i,7
+Claude Sonnet 4.6,tzd,2
+Claude Sonnet 4.6,basal_insulin,1
+Claude Sonnet 4.6,gip_glp1,0
+Claude Sonnet 4.6,prandial_insulin,0
+Claude Sonnet 4.6,sulfonylurea,0
+GPT-5.4,insulin_any,102
+GPT-5.4,sglt2i,34
+GPT-5.4,metformin,33
+GPT-5.4,glp1,12
+GPT-5.4,sulfonylurea,8
+GPT-5.4,prandial_insulin,5
+GPT-5.4,tzd,5
+GPT-5.4,gip_glp1,0
+GPT-5.4,dpp4i,0
+GPT-5.4,basal_insulin,0

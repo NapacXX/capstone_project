@@ -1,0 +1,4 @@
+metric_definition,Claude Opus,Claude Sonnet,GPT-5.4
+Active only alpha,0.962,0.94,0.795
+Active + stop/avoid alpha,0.859,0.673,0.493
+Full signature alpha,0.575,0.22,0.142

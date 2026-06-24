@@ -1,0 +1,4 @@
+model,prompt_condition,n_rows,n_missing_treatment_plan,pct_missing_treatment_plan
+Claude Opus,baseline,100,0,0
+Claude Sonnet,baseline,100,0,0
+GPT-5.4,baseline,100,0,0

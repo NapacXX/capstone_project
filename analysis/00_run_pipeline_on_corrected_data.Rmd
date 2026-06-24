@@ -1,0 +1,33 @@
+---
+title: "Regenerate Indicators on Corrected 100-Case Data"
+date: "2026-06-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=TRUE)
+library(dplyr)
+library(readr)
+library(janitor)
+```
+
+```{r point-input}
+expected_raw <- "../Data/Raw/final_results_capstone_data_ver2.csv"
+stopifnot(file.exists(expected_raw))
+df <- read_csv(expected_raw)
+```
+
+```{r run-pipeline, results="hide"}
+source(here::here("data", "transform_data", "01_transform_abahy_data_to_standard_format.R"))
+source(here::here("data", "transform_data", "02_parse_treatment_plan_to_medication_actions.R"))
+source(here::here("data", "transform_data", "03_create_analysis_ready_dataset.R"))
+```
+
+```{r check}
+wide <- read_csv(here::here("data", "transform_data", "outputs", "analysis_ready_wide.csv"), show_col_types=FALSE)
+n_cases <- n_distinct(wide$case_id)
+dm026ids <- sort(unique(wide$case_id[grepl("026", wide$case_id)]))
+cat("rows:", nrow(wide), "\n")
+cat("unique case_id:", n_cases, "\n")
+cat("DM026-like IDs:", paste(dm026ids, collapse=", "), "\n")
+```

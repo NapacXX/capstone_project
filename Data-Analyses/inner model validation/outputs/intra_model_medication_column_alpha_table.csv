@@ -1,0 +1,4 @@
+metric_definition,Claude Opus,Claude Sonnet,GPT-5.4
+Medication-name alpha,0.952,0.935,0.798
+Medication-action alpha,0.95,0.934,0.782
+Medication-action-dose alpha,0.84,0.747,0.647

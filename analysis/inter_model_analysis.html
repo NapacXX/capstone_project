@@ -355,8 +355,8 @@ Data)</h1>
 </div>
 
 
-<div id="load-data" class="section level1">
-<h1>Load data</h1>
+<div id="load" class="section level1">
+<h1>Load</h1>
 <pre class="r"><code>wide &lt;-read_csv(
   here::here(&quot;data&quot;,&quot;transform_data&quot;,&quot;outputs&quot;,&quot;analysis_ready_wide.csv&quot;),
   show_col_types=FALSE
@@ -380,7 +380,7 @@ extra_features  &lt;-intersect(c(&quot;urgent_eval_mentioned&quot;,&quot;cost_me
 all_features    &lt;-c(active_features,extra_features)</code></pre>
 </div>
 <div id="recommendation-rates-by-model" class="section level1">
-<h1>1. Recommendation rates by model</h1>
+<h1>Recommendation rates by model</h1>
 <pre class="r"><code>rec_rates &lt;-wide %&gt;%
   group_by(model_short) %&gt;%
   summarise(
@@ -404,8 +404,8 @@ rec_rates</code></pre>
   pivot_longer(starts_with(&quot;pct_&quot;),names_to=&quot;feature&quot;,values_to=&quot;pct&quot;) %&gt;%
   mutate(feature=str_remove(feature,&quot;^pct_&quot;))</code></pre>
 </div>
-<div id="range-across-models-widest-spread" class="section level1">
-<h1>2. Range across models (widest spread)</h1>
+<div id="range-across-models" class="section level1">
+<h1>Range across models</h1>
 <pre class="r"><code>feature_ranges &lt;-rec_rates_long %&gt;%
   group_by(feature) %&gt;%
   summarise(min_pct=min(pct),max_pct=max(pct),
@@ -429,7 +429,7 @@ feature_ranges</code></pre>
 ## 12 urgent_eval_mentioned         0       0                0</code></pre>
 </div>
 <div id="inter-model-agreement-by-drug-class" class="section level1">
-<h1>3. Inter-model agreement by drug class</h1>
+<h1>Inter-model agreement by drug class</h1>
 <pre class="r"><code>agreement_summary &lt;-map_dfr(all_features,function(f){
   w &lt;-wide %&gt;%
     select(case_id,model_short,value=all_of(f)) %&gt;%
@@ -458,14 +458,18 @@ agreement_summary</code></pre>
 ## 12 urgent_eval_mentioned       100     100          0       100</code></pre>
 </div>
 <div id="high-disagreement-cases" class="section level1">
-<h1>4. High-disagreement cases</h1>
+<h1>High-disagreement cases</h1>
 <pre class="r"><code>disagree_by_case &lt;-map_dfr(active_features,function(f){
-  wide %&gt;%
+  w &lt;-wide %&gt;%
     select(case_id,model_short,value=all_of(f)) %&gt;%
     pivot_wider(names_from=model_short,values_from=value) %&gt;%
-    drop_na() %&gt;%
-    transmute(case_id,feature=f,
-              disagree=apply(across(-case_id),1,function(r) length(unique(r))&gt;1))
+    drop_na()
+  model_cols &lt;-setdiff(names(w),&quot;case_id&quot;)
+  w %&gt;% transmute(
+    case_id,
+    feature=f,
+    disagree=apply(w[,model_cols],1,function(r) length(unique(r))&gt;1)
+  )
 }) %&gt;%
   group_by(case_id) %&gt;%
   summarise(disagreement_score=sum(disagree),
@@ -475,25 +479,31 @@ agreement_summary</code></pre>
 
 high_disagreement &lt;-disagree_by_case %&gt;% filter(disagreement_score&gt;=3)
 high_disagreement</code></pre>
-<pre><code>## # A tibble: 100 × 3
+<pre><code>## # A tibble: 18 × 3
 ##    case_id  disagreement_score disagreed_features                               
 ##    &lt;chr&gt;                 &lt;int&gt; &lt;chr&gt;                                            
-##  1 DM020                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  2 DM021                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  3 DM022                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  4 DM023                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  5 DM024                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  6 DM025                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  7 DM026(1)                 10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  8 DM026(2)                 10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-##  9 DM026(3)                 10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-## 10 DM027                    10 basal_insulin_active; dpp4i_active; gip_glp1_act…
-## # ℹ 90 more rows</code></pre>
+##  1 DM063                     5 basal_insulin_active; dpp4i_active; glp1_active;…
+##  2 DM067                     5 basal_insulin_active; glp1_active; insulin_any_a…
+##  3 DM026(3)                  4 basal_insulin_active; glp1_active; insulin_any_a…
+##  4 DM033                     4 gip_glp1_active; glp1_active; sglt2i_active; tzd…
+##  5 DM049                     4 basal_insulin_active; dpp4i_active; insulin_any_…
+##  6 DM070                     4 basal_insulin_active; insulin_any_active; metfor…
+##  7 DM106                     4 basal_insulin_active; glp1_active; insulin_any_a…
+##  8 DM120                     4 glp1_active; metformin_active; prandial_insulin_…
+##  9 DM022                     3 glp1_active; sglt2i_active; tzd_active           
+## 10 DM074                     3 basal_insulin_active; glp1_active; insulin_any_a…
+## 11 DM077                     3 basal_insulin_active; insulin_any_active; sglt2i…
+## 12 DM091                     3 basal_insulin_active; insulin_any_active; metfor…
+## 13 DM095                     3 basal_insulin_active; insulin_any_active; sglt2i…
+## 14 DM096                     3 basal_insulin_active; insulin_any_active; sglt2i…
+## 15 DM098                     3 basal_insulin_active; insulin_any_active; metfor…
+## 16 DM102                     3 glp1_active; metformin_active; sglt2i_active     
+## 17 DM115                     3 dpp4i_active; glp1_active; sglt2i_active         
+## 18 DM117                     3 glp1_active; metformin_active; sglt2i_active</code></pre>
 </div>
-<div id="inter-model-krippendorffs-alpha-pairwise-cohens-kappa" class="section level1">
-<h1>5. Inter-model Krippendorff’s alpha + pairwise Cohen’s kappa</h1>
-<pre class="r"><code># per-feature nominal alpha (3 models as raters)
-kripp_by_feature &lt;-map_dfr(all_features,function(f){
+<div id="krippendorffs-alpha-and-pairwise-cohens-kappa" class="section level1">
+<h1>Krippendorff’s alpha and pairwise Cohen’s kappa</h1>
+<pre class="r"><code>kripp_by_feature &lt;-map_dfr(all_features,function(f){
   m &lt;-wide %&gt;%
     select(case_id,model_short,value=all_of(f)) %&gt;%
     pivot_wider(names_from=model_short,values_from=value) %&gt;%
@@ -517,8 +527,7 @@ kripp_by_feature</code></pre>
 ## 10 tzd_active                           0.188
 ## 11 urgent_eval_mentioned                1    
 ## 12 cost_mentioned                       0.343</code></pre>
-<pre class="r"><code># overall alpha across all active features stacked together
-big &lt;-map_dfr(active_features,function(f){
+<pre class="r"><code>big &lt;-map_dfr(active_features,function(f){
   wide %&gt;% select(case_id,model_short,value=all_of(f)) %&gt;% mutate(feature=f)
 }) %&gt;%
   unite(&quot;item&quot;,case_id,feature) %&gt;%
@@ -527,8 +536,7 @@ big &lt;-map_dfr(active_features,function(f){
 overall_alpha &lt;-round(kripp.alpha(big,method=&quot;nominal&quot;)$value,3)
 overall_alpha</code></pre>
 <pre><code>## [1] 0.725</code></pre>
-<pre class="r"><code># pairwise Cohen&#39;s kappa, averaged across active drug classes
-model_pairs &lt;-list(
+<pre class="r"><code>model_pairs &lt;-list(
   c(&quot;GPT-5.4&quot;,&quot;Claude Opus 4.6&quot;),
   c(&quot;GPT-5.4&quot;,&quot;Claude Sonnet 4.6&quot;),
   c(&quot;Claude Opus 4.6&quot;,&quot;Claude Sonnet 4.6&quot;)
@@ -551,17 +559,17 @@ pairwise_kappa</code></pre>
 ## 3 Claude Opus 4.6 vs Claude Sonnet 4.6      0.561</code></pre>
 </div>
 <div id="disagreement-vs-clinical-complexity" class="section level1">
-<h1>6. Disagreement vs clinical complexity</h1>
-<pre class="r"><code>case_clin &lt;-wide %&gt;%
+<h1>Disagreement vs clinical complexity</h1>
+<pre class="r"><code>yesno &lt;-function(x) as.integer(str_to_lower(as.character(x))==&quot;yes&quot;)
+
+case_clin &lt;-wide %&gt;%
   distinct(case_id,.keep_all=TRUE) %&gt;%
   mutate(
-    egfr_val=suppressWarnings(as.numeric(egfr_ml_min_1_73m2)),
-    across(c(heart_failure_present,chronic_kidney_disease,coronary_artery_disease,
-             mi_history,stroke_tia_history),
-           ~as.integer(.x %in% c(1,&quot;1&quot;,&quot;yes&quot;,&quot;Yes&quot;,&quot;TRUE&quot;,TRUE)),.names=&quot;cm_{.col}&quot;),
-    cm_cancer=as.integer(cancer_history %in% c(1,&quot;1&quot;,&quot;yes&quot;,&quot;Yes&quot;)),
-    comorbidity_count=cm_heart_failure_present+cm_chronic_kidney_disease+
-      cm_coronary_artery_disease+cm_mi_history+cm_stroke_tia_history+cm_cancer
+    egfr_val=as.numeric(egfr_ml_min_1_73m2),
+    comorbidity_count=
+      yesno(heart_failure_present)+yesno(chronic_kidney_disease)+
+      yesno(coronary_artery_disease)+yesno(mi_history)+
+      yesno(stroke_tia_history)+yesno(cancer_history)
   ) %&gt;%
   select(case_id,egfr_val,comorbidity_count) %&gt;%
   left_join(disagree_by_case %&gt;% select(case_id,disagreement_score),by=&quot;case_id&quot;)
@@ -573,65 +581,35 @@ cor_comorbid</code></pre>
 ##  Spearman&#39;s rank correlation rho
 ## 
 ## data:  case_clin$disagreement_score and case_clin$comorbidity_count
-## S = NA, p-value = NA
+## S = 135199, p-value = 0.06005
 ## alternative hypothesis: true rho is not equal to 0
 ## sample estimates:
-## rho 
-##  NA</code></pre>
+##       rho 
+## 0.1887255</code></pre>
 <pre class="r"><code>cor_egfr</code></pre>
 <pre><code>## 
 ##  Spearman&#39;s rank correlation rho
 ## 
 ## data:  case_clin$disagreement_score and case_clin$egfr_val
-## S = NA, p-value = NA
+## S = 206199, p-value = 0.01743
 ## alternative hypothesis: true rho is not equal to 0
 ## sample estimates:
-## rho 
-##  NA</code></pre>
+##        rho 
+## -0.2373206</code></pre>
+<pre class="r"><code>complexity_results &lt;-tibble(
+  predictor=c(&quot;comorbidity_count&quot;,&quot;egfr&quot;),
+  rho=c(round(cor_comorbid$estimate,3),round(cor_egfr$estimate,3)),
+  p_value=c(signif(cor_comorbid$p.value,3),signif(cor_egfr$p.value,3))
+)
+complexity_results</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   predictor            rho p_value
+##   &lt;chr&gt;              &lt;dbl&gt;   &lt;dbl&gt;
+## 1 comorbidity_count  0.189  0.06  
+## 2 egfr              -0.237  0.0174</code></pre>
 </div>
-<div id="manuscript-sentences-auto-filled" class="section level1">
-<h1>7. Manuscript sentences (auto-filled)</h1>
-<pre class="r"><code>top_spread &lt;-feature_ranges %&gt;% slice(1)
-low_agree  &lt;-agreement_summary %&gt;% slice_head(n=3)
-nice &lt;-function(f){
-  f %&gt;% str_remove(&quot;_active|_mentioned&quot;) %&gt;%
-    recode(sglt2i=&quot;SGLT2 inhibitors&quot;,glp1=&quot;GLP-1 RA&quot;,metformin=&quot;metformin&quot;,
-           insulin_any=&quot;insulin&quot;,basal_insulin=&quot;basal insulin&quot;,cost=&quot;cost mention&quot;,
-           gip_glp1=&quot;GIP/GLP-1&quot;,dpp4i=&quot;DPP-4 inhibitors&quot;,
-           prandial_insulin=&quot;prandial insulin&quot;,sulfonylurea=&quot;sulfonylurea&quot;,tzd=&quot;TZD&quot;,
-           .default=str_replace_all(f,&quot;_&quot;,&quot; &quot;))
-}
-
-cat(&quot;**Inter-Model Agreement.** Across the three models, overall Krippendorff&#39;s alpha was &quot;,
-    overall_alpha,&quot;. Pairwise Cohen&#39;s kappa (averaged across active drug classes) was &quot;,
-    pairwise_kappa$mean_kappa[1],&quot; (&quot;,pairwise_kappa$pair[1],&quot;), &quot;,
-    pairwise_kappa$mean_kappa[2],&quot; (&quot;,pairwise_kappa$pair[2],&quot;), and &quot;,
-    pairwise_kappa$mean_kappa[3],&quot; (&quot;,pairwise_kappa$pair[3],&quot;). &quot;,
-    &quot;Disagreement was concentrated in &quot;,
-    paste(nice(low_agree$feature),collapse=&quot;, &quot;),
-    &quot;, with the widest spread in &quot;,nice(top_spread$feature),&quot; (&quot;,
-    top_spread$range_pct_points,&quot; percentage points).\n\n&quot;,sep=&quot;&quot;)</code></pre>
-<p><strong>Inter-Model Agreement.</strong> Across the three models,
-overall Krippendorff’s alpha was 0.725. Pairwise Cohen’s kappa (averaged
-across active drug classes) was 0.503 (GPT-5.4 vs Claude Opus 4.6),
-0.514 (GPT-5.4 vs Claude Sonnet 4.6), and 0.561 (Claude Opus 4.6 vs
-Claude Sonnet 4.6). Disagreement was concentrated in SGLT2 inhibitors,
-cost mention, GLP-1 RA, with the widest spread in SGLT2 inhibitors (22
-percentage points).</p>
-<pre class="r"><code>trend &lt;-function(ct) if(is.na(ct$p.value)) &quot;could not be assessed&quot; else
-  if(ct$p.value&lt;0.05) &quot;was significantly associated&quot; else &quot;showed no clear trend&quot;
-egfr_phrase &lt;-if(is.na(cor_egfr$p.value)) &quot;with eGFR&quot; else
-  if(cor_egfr$p.value&lt;0.05) &quot;was associated with eGFR&quot; else &quot;was not associated with eGFR&quot;
-cat(&quot;**Disagreement and Clinical Complexity.** Disagreement &quot;,
-    trend(cor_comorbid),&quot; with comorbidity count (rho = &quot;,round(cor_comorbid$estimate,3),
-    &quot;, p = &quot;,signif(cor_comorbid$p.value,3),&quot;) and &quot;,egfr_phrase,
-    &quot; (rho = &quot;,round(cor_egfr$estimate,3),&quot;, p = &quot;,signif(cor_egfr$p.value,3),&quot;).&quot;,sep=&quot;&quot;)</code></pre>
-<p><strong>Disagreement and Clinical Complexity.</strong> Disagreement
-could not be assessed with comorbidity count (rho = NA, p = NA) and with
-eGFR (rho = NA, p = NA).</p>
-</div>
-<div id="save-outputs-for-comparison_of_models.rmd" class="section level1">
-<h1>Save outputs (for comparison_of_models.Rmd)</h1>
+<div id="save-outputs" class="section level1">
+<h1>Save outputs</h1>
 <pre class="r"><code>out &lt;-here::here(&quot;data&quot;,&quot;processed&quot;,&quot;my_inter_model_outputs&quot;)
 dir.create(out,showWarnings=FALSE,recursive=TRUE)
 write_csv(rec_rates,         file.path(out,&quot;recommendation_rates_by_model.csv&quot;))
@@ -640,7 +618,8 @@ write_csv(feature_ranges,    file.path(out,&quot;model_to_model_feature_ranges.c
 write_csv(agreement_summary, file.path(out,&quot;model_agreement_summary.csv&quot;))
 write_csv(disagree_by_case,  file.path(out,&quot;high_disagreement_cases.csv&quot;))
 write_csv(kripp_by_feature,  file.path(out,&quot;inter_model_krippendorff_by_feature.csv&quot;))
-write_csv(pairwise_kappa,    file.path(out,&quot;inter_model_pairwise_kappa.csv&quot;))</code></pre>
+write_csv(pairwise_kappa,    file.path(out,&quot;inter_model_pairwise_kappa.csv&quot;))
+write_csv(complexity_results,file.path(out,&quot;disagreement_complexity_correlations.csv&quot;))</code></pre>
 </div>
 
 

@@ -9,10 +9,10 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
 library(here)
 library(tidyverse)
 library(janitor)
-library(irr)  
+library(irr)
 ```
 
-# Load data
+# Load
 
 ```{r load}
 wide <-read_csv(
@@ -38,7 +38,7 @@ extra_features  <-intersect(c("urgent_eval_mentioned","cost_mentioned"),names(wi
 all_features    <-c(active_features,extra_features)
 ```
 
-# 1. Recommendation rates by model
+# Recommendation rates by model
 
 ```{r rec-rates}
 rec_rates <-wide %>%
@@ -55,7 +55,7 @@ rec_rates_long <-rec_rates %>%
   mutate(feature=str_remove(feature,"^pct_"))
 ```
 
-# 2. Range across models (widest spread)
+# Range across models
 
 ```{r ranges}
 feature_ranges <-rec_rates_long %>%
@@ -66,7 +66,7 @@ feature_ranges <-rec_rates_long %>%
 feature_ranges
 ```
 
-# 3. Inter-model agreement by drug class
+# Inter-model agreement by drug class
 
 ```{r agreement}
 agreement_summary <-map_dfr(all_features,function(f){
@@ -82,16 +82,20 @@ agreement_summary <-map_dfr(all_features,function(f){
 agreement_summary
 ```
 
-# 4. High-disagreement cases
+# High-disagreement cases
 
 ```{r disagreement}
 disagree_by_case <-map_dfr(active_features,function(f){
-  wide %>%
+  w <-wide %>%
     select(case_id,model_short,value=all_of(f)) %>%
     pivot_wider(names_from=model_short,values_from=value) %>%
-    drop_na() %>%
-    transmute(case_id,feature=f,
-              disagree=apply(across(-case_id),1,function(r) length(unique(r))>1))
+    drop_na()
+  model_cols <-setdiff(names(w),"case_id")
+  w %>% transmute(
+    case_id,
+    feature=f,
+    disagree=apply(w[,model_cols],1,function(r) length(unique(r))>1)
+  )
 }) %>%
   group_by(case_id) %>%
   summarise(disagreement_score=sum(disagree),
@@ -103,10 +107,9 @@ high_disagreement <-disagree_by_case %>% filter(disagreement_score>=3)
 high_disagreement
 ```
 
-# 5. Inter-model Krippendorff's alpha + pairwise Cohen's kappa
+# Krippendorff's alpha and pairwise Cohen's kappa
 
 ```{r kripp}
-# per-feature nominal alpha (3 models as raters)
 kripp_by_feature <-map_dfr(all_features,function(f){
   m <-wide %>%
     select(case_id,model_short,value=all_of(f)) %>%
@@ -117,7 +120,6 @@ kripp_by_feature <-map_dfr(all_features,function(f){
 })
 kripp_by_feature
 
-# overall alpha across all active features stacked together
 big <-map_dfr(active_features,function(f){
   wide %>% select(case_id,model_short,value=all_of(f)) %>% mutate(feature=f)
 }) %>%
@@ -127,7 +129,6 @@ big <-map_dfr(active_features,function(f){
 overall_alpha <-round(kripp.alpha(big,method="nominal")$value,3)
 overall_alpha
 
-# pairwise Cohen's kappa, averaged across active drug classes
 model_pairs <-list(
   c("GPT-5.4","Claude Opus 4.6"),
   c("GPT-5.4","Claude Sonnet 4.6"),
@@ -145,19 +146,19 @@ pairwise_kappa <-map_dfr(model_pairs,function(p){
 pairwise_kappa
 ```
 
-# 6. Disagreement vs clinical complexity
+# Disagreement vs clinical complexity
 
 ```{r complexity}
+yesno <-function(x) as.integer(str_to_lower(as.character(x))=="yes")
+
 case_clin <-wide %>%
   distinct(case_id,.keep_all=TRUE) %>%
   mutate(
-    egfr_val=suppressWarnings(as.numeric(egfr_ml_min_1_73m2)),
-    across(c(heart_failure_present,chronic_kidney_disease,coronary_artery_disease,
-             mi_history,stroke_tia_history),
-           ~as.integer(.x %in% c(1,"1","yes","Yes","TRUE",TRUE)),.names="cm_{.col}"),
-    cm_cancer=as.integer(cancer_history %in% c(1,"1","yes","Yes")),
-    comorbidity_count=cm_heart_failure_present+cm_chronic_kidney_disease+
-      cm_coronary_artery_disease+cm_mi_history+cm_stroke_tia_history+cm_cancer
+    egfr_val=as.numeric(egfr_ml_min_1_73m2),
+    comorbidity_count=
+      yesno(heart_failure_present)+yesno(chronic_kidney_disease)+
+      yesno(coronary_artery_disease)+yesno(mi_history)+
+      yesno(stroke_tia_history)+yesno(cancer_history)
   ) %>%
   select(case_id,egfr_val,comorbidity_count) %>%
   left_join(disagree_by_case %>% select(case_id,disagreement_score),by="case_id")
@@ -166,45 +167,18 @@ cor_comorbid <-cor.test(case_clin$disagreement_score,case_clin$comorbidity_count
 cor_egfr     <-cor.test(case_clin$disagreement_score,case_clin$egfr_val,method="spearman")
 cor_comorbid
 cor_egfr
+
+complexity_results <-tibble(
+  predictor=c("comorbidity_count","egfr"),
+  rho=c(round(cor_comorbid$estimate,3),round(cor_egfr$estimate,3)),
+  p_value=c(signif(cor_comorbid$p.value,3),signif(cor_egfr$p.value,3))
+)
+complexity_results
 ```
 
-# 7. Manuscript sentences (auto-filled)
+# Save outputs
 
-```{r writeup, results='asis'}
-top_spread <-feature_ranges %>% slice(1)
-low_agree  <-agreement_summary %>% slice_head(n=3)
-nice <-function(f){
-  f %>% str_remove("_active|_mentioned") %>%
-    recode(sglt2i="SGLT2 inhibitors",glp1="GLP-1 RA",metformin="metformin",
-           insulin_any="insulin",basal_insulin="basal insulin",cost="cost mention",
-           gip_glp1="GIP/GLP-1",dpp4i="DPP-4 inhibitors",
-           prandial_insulin="prandial insulin",sulfonylurea="sulfonylurea",tzd="TZD",
-           .default=str_replace_all(f,"_"," "))
-}
-
-cat("**Inter-Model Agreement.** Across the three models, overall Krippendorff's alpha was ",
-    overall_alpha,". Pairwise Cohen's kappa (averaged across active drug classes) was ",
-    pairwise_kappa$mean_kappa[1]," (",pairwise_kappa$pair[1],"), ",
-    pairwise_kappa$mean_kappa[2]," (",pairwise_kappa$pair[2],"), and ",
-    pairwise_kappa$mean_kappa[3]," (",pairwise_kappa$pair[3],"). ",
-    "Disagreement was concentrated in ",
-    paste(nice(low_agree$feature),collapse=", "),
-    ", with the widest spread in ",nice(top_spread$feature)," (",
-    top_spread$range_pct_points," percentage points).\n\n",sep="")
-
-trend <-function(ct) if(is.na(ct$p.value)) "could not be assessed" else
-  if(ct$p.value<0.05) "was significantly associated" else "showed no clear trend"
-egfr_phrase <-if(is.na(cor_egfr$p.value)) "with eGFR" else
-  if(cor_egfr$p.value<0.05) "was associated with eGFR" else "was not associated with eGFR"
-cat("**Disagreement and Clinical Complexity.** Disagreement ",
-    trend(cor_comorbid)," with comorbidity count (rho = ",round(cor_comorbid$estimate,3),
-    ", p = ",signif(cor_comorbid$p.value,3),") and ",egfr_phrase,
-    " (rho = ",round(cor_egfr$estimate,3),", p = ",signif(cor_egfr$p.value,3),").",sep="")
-```
-
-# Save outputs (for comparison_of_models.Rmd)
-
-```{r save, eval=FALSE}
+```{r save}
 out <-here::here("data","processed","my_inter_model_outputs")
 dir.create(out,showWarnings=FALSE,recursive=TRUE)
 write_csv(rec_rates,         file.path(out,"recommendation_rates_by_model.csv"))
@@ -214,4 +188,5 @@ write_csv(agreement_summary, file.path(out,"model_agreement_summary.csv"))
 write_csv(disagree_by_case,  file.path(out,"high_disagreement_cases.csv"))
 write_csv(kripp_by_feature,  file.path(out,"inter_model_krippendorff_by_feature.csv"))
 write_csv(pairwise_kappa,    file.path(out,"inter_model_pairwise_kappa.csv"))
+write_csv(complexity_results,file.path(out,"disagreement_complexity_correlations.csv"))
 ```

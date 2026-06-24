@@ -1,0 +1,4 @@
+model_short,n,pct_metformin_active,pct_sglt2i_active,pct_glp1_active,pct_gip_glp1_active,pct_dpp4_active,pct_insulin_any_active,pct_basal_insulin_active,pct_prandial_insulin_active,pct_sulfonylurea_active,pct_tzd_active,pct_urgent_eval_mentioned,pct_cost_mentioned
+Claude Opus 4.6,100,56,62,66,7,4,25,16,3,1,2,100,8
+Claude Sonnet 4.6,100,50,50,56,8,10,26,20,3,2,0,100,4
+GPT-5.4,100,64,52,43,7,9,22,22,2,1,0,100,0

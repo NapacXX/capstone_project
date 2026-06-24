@@ -1,0 +1,7 @@
+model_clean,is_max_unstable_case,n_responses,responses_with_manual_review,manual_review_response_rate
+Claude Opus 4.6,TRUE,40,12,0.3
+Claude Opus 4.6,FALSE,460,103,0.22391304347826088
+Claude Sonnet 4.6,TRUE,135,41,0.3037037037037037
+Claude Sonnet 4.6,FALSE,365,86,0.2356164383561644
+GPT-5.4,TRUE,210,72,0.34285714285714286
+GPT-5.4,FALSE,290,75,0.25862068965517243

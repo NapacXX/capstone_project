@@ -1,0 +1,411 @@
+---
+title: "Claude Intra-Model Response Generation"
+author: "Group 30"
+output:
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+required_packages <- c(
+  "httr2", "jsonlite", "readr", "dplyr", "purrr",
+  "tibble", "stringr", "knitr"
+)
+missing_packages <- required_packages[
+  !vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
+]
+
+if (length(missing_packages) > 0) {
+  stop("Missing required packages: ", paste(missing_packages, collapse = ", "))
+}
+
+library(httr2)
+library(jsonlite)
+library(readr)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(stringr)
+library(knitr)
+
+find_project_root <- function(start_dir = getwd()) {
+  candidates <- normalizePath(
+    file.path(start_dir, c(".", "..", "../..", "../../..")),
+    mustWork = FALSE
+  )
+
+  matched <- candidates[
+    file.exists(file.path(candidates, "data/raw/final_results_gpt_claude_models.csv"))
+  ]
+
+  if (length(matched) == 0) {
+    stop("Could not find project root containing data/raw/final_results_gpt_claude_models.csv.")
+  }
+
+  matched[[1]]
+}
+
+project_root <- find_project_root()
+knitr::opts_knit$set(root.dir = project_root)
+dir.create(file.path(project_root, "data/inner model validation"), showWarnings = FALSE, recursive = TRUE)
+```
+
+# Purpose
+
+This workflow is generation-only. It reads the prebuilt prompt request dataset for intra-model validation, sends each `prompt_text` row to Claude through the Anthropic Messages API, and writes one `treatment_plan` response per request row.
+
+It does not rebuild prompts, reshape the raw vignette dataset, or perform scoring.
+
+# Configuration
+
+```{r configuration}
+run_generation <- TRUE
+
+prompt_request_input_path <- "data/inner model validation/intra_model_validation_prompt_requests.csv"
+response_output_path <- "data/inner model validation/claude_intra_model_responses.csv"
+
+# API keys are read from the local environment only.
+# Do not paste secrets into this file.
+api_key <- Sys.getenv("ANTHROPIC_API_KEY")
+base_url <- "https://api.anthropic.com/v1/messages"
+anthropic_version <- "2023-06-01"
+model_id <- "claude-sonnet-4-6"
+
+temperature <- 0
+max_output_tokens <- 2500
+request_pause_seconds <- 1
+overwrite_existing <- TRUE
+max_requests <- 100
+retry_attempts <- 2
+```
+
+# Input Preparation
+
+```{r input-preparation}
+prompt_requests_raw <- read_csv(prompt_request_input_path, show_col_types = FALSE)
+
+blank_names <- names(prompt_requests_raw) == ""
+if (any(blank_names)) {
+  names(prompt_requests_raw)[blank_names] <- paste0("blank_column_", seq_len(sum(blank_names)))
+}
+
+required_input_columns <- c(
+  "case_id",
+  "original_case_id",
+  "case_variant_id",
+  "vignette_text",
+  "prompt_text",
+  "model_type",
+  "prompt_type",
+  "repeat_id"
+)
+
+missing_input_columns <- setdiff(required_input_columns, names(prompt_requests_raw))
+if (length(missing_input_columns) > 0) {
+  stop("Missing required input columns: ", paste(missing_input_columns, collapse = ", "))
+}
+
+prompt_requests <- prompt_requests_raw %>%
+  mutate(
+    case_id = as.character(case_id),
+    original_case_id = as.character(original_case_id),
+    case_variant_id = as.integer(case_variant_id),
+    vignette_text = as.character(vignette_text),
+    prompt_text = as.character(prompt_text),
+    model_type = as.character(model_type),
+    prompt_type = as.character(prompt_type),
+    repeat_id = suppressWarnings(as.integer(repeat_id))
+  )
+
+if (any(is.na(prompt_requests$repeat_id))) {
+  stop("repeat_id contains missing or non-integer values.")
+}
+
+if (any(!nzchar(str_squish(prompt_requests$prompt_text)))) {
+  stop("prompt_text contains blank rows. Clean the prompt request dataset before generation.")
+}
+
+duplicate_request_keys <- prompt_requests %>%
+  count(case_id, model_type, repeat_id, name = "n") %>%
+  filter(n > 1)
+
+if (nrow(duplicate_request_keys) > 0) {
+  stop("Duplicate case_id + model_type + repeat_id rows found in the prompt request dataset.")
+}
+
+prompt_requests <- prompt_requests %>%
+  mutate(model_type = model_id) %>%
+  arrange(case_id, repeat_id)
+
+if (!is.null(max_requests)) {
+  prompt_requests <- prompt_requests %>%
+    slice_head(n = max_requests)
+}
+
+input_validation <- tibble(
+  metric = c(
+    "Input rows",
+    "Distinct case IDs",
+    "Distinct original case IDs",
+    "Duplicate request keys",
+    "Configured model ID",
+    "Configured max_requests"
+  ),
+  value = c(
+    nrow(prompt_requests),
+    n_distinct(prompt_requests$case_id),
+    n_distinct(prompt_requests$original_case_id),
+    nrow(duplicate_request_keys),
+    model_id,
+    ifelse(is.null(max_requests), "NULL", as.character(max_requests))
+  )
+)
+
+input_validation %>% kable()
+```
+
+```{r input-preview}
+prompt_requests %>%
+  mutate(prompt_text = str_trunc(prompt_text, 200)) %>%
+  select(case_id, original_case_id, case_variant_id, model_type, prompt_type, repeat_id, prompt_text) %>%
+  slice_head(n = min(10, nrow(prompt_requests))) %>%
+  kable(caption = "Prompt request input preview")
+```
+
+# Anthropic API Helpers
+
+```{r api-helpers}
+validate_generation_configuration <- function(api_key, base_url, model_id, retry_attempts) {
+  if (!is.character(api_key) || !nzchar(api_key)) {
+    stop("ANTHROPIC_API_KEY is not set. Add it to your local environment before running generation.")
+  }
+  if (!is.character(base_url) || !nzchar(base_url)) {
+    stop("base_url is blank.")
+  }
+  if (!str_detect(str_to_lower(base_url), "anthropic\\.com")) {
+    stop("base_url must be an Anthropic endpoint for this workflow.")
+  }
+  if (!is.character(model_id) || !nzchar(model_id)) {
+    stop("model_id is blank.")
+  }
+  if (!str_detect(model_id, "^claude-")) {
+    stop("This workflow is restricted to Claude model IDs (must start with 'claude-').")
+  }
+  if (!is.numeric(retry_attempts) || length(retry_attempts) != 1 || retry_attempts < 0) {
+    stop("retry_attempts must be a non-negative number.")
+  }
+}
+
+extract_anthropic_response_text <- function(body) {
+  if (!is.null(body$content) && length(body$content) > 0) {
+    text_parts <- unlist(
+      map(body$content, function(item) {
+        if (!is.null(item$text)) item$text else ""
+      })
+    )
+
+    text_parts <- text_parts[nzchar(text_parts)]
+    if (length(text_parts) > 0) {
+      return(paste(text_parts, collapse = "\n"))
+    }
+  }
+
+  ""
+}
+
+call_anthropic_response <- function(prompt_text, model_id, api_key, base_url, anthropic_version, temperature, max_output_tokens) {
+  body <- list(
+    model = model_id,
+    max_tokens = max_output_tokens,
+    temperature = temperature,
+    messages = list(
+      list(role = "user", content = prompt_text)
+    )
+  )
+
+  response <- request(base_url) %>%
+    req_headers(
+      `x-api-key` = api_key,
+      `anthropic-version` = anthropic_version,
+      `Content-Type` = "application/json"
+    ) %>%
+    req_body_json(body, auto_unbox = TRUE) %>%
+    req_perform()
+
+  parsed <- resp_body_json(response, simplifyVector = FALSE)
+  extract_anthropic_response_text(parsed)
+}
+
+call_anthropic_response_with_retry <- function(prompt_text, model_id, api_key, base_url, anthropic_version, temperature, max_output_tokens, retry_attempts) {
+  max_attempts <- retry_attempts + 1L
+  last_error <- NULL
+
+  for (attempt in seq_len(max_attempts)) {
+    result <- tryCatch(
+      call_anthropic_response(
+        prompt_text = prompt_text,
+        model_id = model_id,
+        api_key = api_key,
+        base_url = base_url,
+        anthropic_version = anthropic_version,
+        temperature = temperature,
+        max_output_tokens = max_output_tokens
+      ),
+      error = function(e) {
+        last_error <<- e
+        NULL
+      }
+    )
+
+    if (!is.null(result)) {
+      return(result)
+    }
+
+    if (attempt < max_attempts) {
+      Sys.sleep(2 ^ (attempt - 1))
+    }
+  }
+
+  stop(conditionMessage(last_error))
+}
+```
+
+# Claude Response Generation
+
+```{r generation}
+claude_responses <- tibble()
+
+if (run_generation) {
+  validate_generation_configuration(
+    api_key = api_key,
+    base_url = base_url,
+    model_id = model_id,
+    retry_attempts = retry_attempts
+  )
+
+  if (file.exists(response_output_path) && !overwrite_existing) {
+    stop("Response output file already exists and overwrite_existing is FALSE: ", response_output_path)
+  }
+
+  claude_responses <- pmap_dfr(
+    prompt_requests,
+    function(case_id, original_case_id, case_variant_id, vignette_text, prompt_text, model_type, prompt_type, repeat_id) {
+      result <- tryCatch(
+        {
+          response_text <- call_anthropic_response_with_retry(
+            prompt_text = prompt_text,
+            model_id = model_id,
+            api_key = api_key,
+            base_url = base_url,
+            anthropic_version = anthropic_version,
+            temperature = temperature,
+            max_output_tokens = max_output_tokens,
+            retry_attempts = retry_attempts
+          )
+
+          tibble(
+            case_id = case_id,
+            original_case_id = original_case_id,
+            case_variant_id = case_variant_id,
+            model_type = model_id,
+            prompt_type = prompt_type,
+            repeat_id = repeat_id,
+            temperature = temperature,
+            prompt_text = prompt_text,
+            treatment_plan = response_text,
+            error_message = ""
+          )
+        },
+        error = function(e) {
+          tibble(
+            case_id = case_id,
+            original_case_id = original_case_id,
+            case_variant_id = case_variant_id,
+            model_type = model_id,
+            prompt_type = prompt_type,
+            repeat_id = repeat_id,
+            temperature = temperature,
+            prompt_text = prompt_text,
+            treatment_plan = "",
+            error_message = conditionMessage(e)
+          )
+        }
+      )
+
+      Sys.sleep(request_pause_seconds)
+      result
+    }
+  )
+}
+```
+
+# Validation and Export
+
+```{r validation-export}
+processed_rows <- if (run_generation) nrow(claude_responses) else 0L
+non_empty_responses <- if (run_generation) sum(nzchar(claude_responses$treatment_plan)) else 0L
+failed_rows <- if (run_generation) sum(nzchar(claude_responses$error_message)) else 0L
+
+duplicate_response_keys <- if (run_generation) {
+  claude_responses %>%
+    count(case_id, model_type, repeat_id, name = "n") %>%
+    filter(n > 1)
+} else {
+  tibble(case_id = character(), model_type = character(), repeat_id = integer(), n = integer())
+}
+
+validation_summary <- tibble(
+  metric = c(
+    "Input rows",
+    "Processed rows",
+    "Non-empty responses",
+    "Failed rows",
+    "Duplicate response keys"
+  ),
+  value = c(
+    nrow(prompt_requests),
+    processed_rows,
+    non_empty_responses,
+    failed_rows,
+    nrow(duplicate_response_keys)
+  )
+)
+
+validation_summary %>% kable()
+
+if (run_generation) {
+  if (processed_rows != nrow(prompt_requests)) {
+    stop("Processed row count does not match input request row count.")
+  }
+  if (nrow(duplicate_response_keys) > 0) {
+    stop("Duplicate case_id + model_type + repeat_id rows detected in generated responses.")
+  }
+  if (non_empty_responses == 0) {
+    stop("All generated treatment_plan values are blank. Check the API key, endpoint, and model access.")
+  }
+
+  write_csv(claude_responses, response_output_path)
+}
+```
+
+```{r response-preview}
+if (run_generation) {
+  claude_responses %>%
+    mutate(
+      prompt_text = str_trunc(prompt_text, 120),
+      treatment_plan = str_trunc(treatment_plan, 200)
+    ) %>%
+    select(case_id, repeat_id, model_type, prompt_type, treatment_plan, error_message) %>%
+    slice_head(n = min(10, nrow(claude_responses))) %>%
+    kable(caption = "Generated response preview")
+}
+```
+
+# Run Notes
+
+Render once with `run_generation <- FALSE` to verify the input file and validation tables. For a first live test, set `run_generation <- TRUE`, make sure `ANTHROPIC_API_KEY` is available in your local environment, and set `max_requests <- 10` before running all 100 prompt requests.

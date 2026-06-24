@@ -1,0 +1,13 @@
+feature,min_pct,max_pct,range_pct_points
+glp1_active,43,66,23
+metformin_active,50,64,14
+sglt2i_active,50,62,12
+cost_mentioned,0,8,8
+basal_insulin_active,16,22,6
+dpp4_active,4,10,6
+insulin_any_active,22,26,4
+tzd_active,0,2,2
+gip_glp1_active,7,8,1
+prandial_insulin_active,2,3,1
+sulfonylurea_active,1,2,1
+urgent_eval_mentioned,100,100,0

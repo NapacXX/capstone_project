@@ -1,0 +1,249 @@
+---
+title: "Inter-Model Analysis (Corrected 100-Case Data)"
+date: "6-23-2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+library(here)
+library(tidyverse)
+library(janitor)
+library(irr)
+```
+
+# Load
+
+```{r load}
+wide <-read_csv(
+  here::here("data","transform_data","outputs","analysis_ready_wide.csv"),
+  show_col_types=FALSE
+) %>% clean_names()
+
+wide <-wide %>%
+  mutate(model_short=case_when(
+    str_detect(str_to_lower(model),"opus")   ~"Claude Opus 4.6",
+    str_detect(str_to_lower(model),"sonnet") ~"Claude Sonnet 4.6",
+    str_detect(str_to_lower(model),"gpt")    ~"GPT-5.4",
+    TRUE ~model
+  ))
+
+active_features <-c(
+  "metformin_active","sglt2i_active","glp1_active","gip_glp1_active",
+  "dpp4i_active","insulin_any_active","basal_insulin_active",
+  "prandial_insulin_active","sulfonylurea_active","tzd_active"
+)
+active_features <-active_features[active_features %in% names(wide)]
+extra_features  <-intersect(c("urgent_eval_mentioned","cost_mentioned"),names(wide))
+all_features    <-c(active_features,extra_features)
+```
+
+# Recommendation rates by model
+
+```{r rec-rates}
+rec_rates <-wide %>%
+  group_by(model_short) %>%
+  summarise(
+    n=n(),
+    across(all_of(all_features), ~round(100*mean(.x,na.rm=TRUE)),.names="pct_{.col}"),
+    .groups="drop"
+  )
+rec_rates
+
+rec_rates_long <-rec_rates %>%
+  pivot_longer(starts_with("pct_"),names_to="feature",values_to="pct") %>%
+  mutate(feature=str_remove(feature,"^pct_"))
+```
+
+# Range across models
+
+```{r ranges}
+feature_ranges <-rec_rates_long %>%
+  group_by(feature) %>%
+  summarise(min_pct=min(pct),max_pct=max(pct),
+            range_pct_points=max(pct)-min(pct),.groups="drop") %>%
+  arrange(desc(range_pct_points))
+feature_ranges
+```
+
+# Inter-model agreement by drug class
+
+```{r agreement}
+agreement_summary <-map_dfr(all_features,function(f){
+  w <-wide %>%
+    select(case_id,model_short,value=all_of(f)) %>%
+    pivot_wider(names_from=model_short,values_from=value) %>%
+    drop_na()
+  n_cases <-nrow(w)
+  agree <-apply(w[,-1],1,function(r) length(unique(r))==1)
+  tibble(feature=f,n_cases=n_cases,n_agree=sum(agree),
+         n_disagree=n_cases-sum(agree),pct_agree=round(100*sum(agree)/n_cases,1))
+}) %>% arrange(pct_agree)
+agreement_summary
+```
+
+# High-disagreement cases
+
+```{r disagreement}
+disagree_by_case <-map_dfr(active_features,function(f){
+  w <-wide %>%
+    select(case_id,model_short,value=all_of(f)) %>%
+    pivot_wider(names_from=model_short,values_from=value) %>%
+    drop_na()
+  model_cols <-setdiff(names(w),"case_id")
+  w %>% transmute(
+    case_id,
+    feature=f,
+    disagree=apply(w[,model_cols],1,function(r) length(unique(r))>1)
+  )
+}) %>%
+  group_by(case_id) %>%
+  summarise(disagreement_score=sum(disagree),
+            disagreed_features=paste(sort(feature[disagree]),collapse="; "),
+            .groups="drop") %>%
+  arrange(desc(disagreement_score))
+
+high_disagreement <-disagree_by_case %>% filter(disagreement_score>=3)
+high_disagreement
+```
+
+# Krippendorff's alpha and pairwise Cohen's kappa
+
+```{r kripp}
+kripp_by_feature <-map_dfr(all_features,function(f){
+  m <-wide %>%
+    select(case_id,model_short,value=all_of(f)) %>%
+    pivot_wider(names_from=model_short,values_from=value) %>%
+    drop_na() %>% select(-case_id) %>% as.matrix() %>% t()
+  a <-tryCatch(kripp.alpha(m,method="nominal")$value,error=function(e) NA_real_)
+  tibble(feature=f,krippendorff_alpha=round(a,3))
+})
+kripp_by_feature
+
+big <-map_dfr(active_features,function(f){
+  wide %>% select(case_id,model_short,value=all_of(f)) %>% mutate(feature=f)
+}) %>%
+  unite("item",case_id,feature) %>%
+  pivot_wider(names_from=model_short,values_from=value) %>%
+  drop_na() %>% select(-item) %>% as.matrix() %>% t()
+overall_alpha <-round(kripp.alpha(big,method="nominal")$value,3)
+overall_alpha
+
+model_pairs <-list(
+  c("GPT-5.4","Claude Opus 4.6"),
+  c("GPT-5.4","Claude Sonnet 4.6"),
+  c("Claude Opus 4.6","Claude Sonnet 4.6")
+)
+pairwise_kappa <-map_dfr(model_pairs,function(p){
+  ks <-map_dbl(active_features,function(f){
+    w <-wide %>% filter(model_short %in% p) %>%
+      select(case_id,model_short,value=all_of(f)) %>%
+      pivot_wider(names_from=model_short,values_from=value) %>% drop_na()
+    tryCatch(kappa2(w[,p])$value,error=function(e) NA_real_)
+  })
+  tibble(pair=paste(p,collapse=" vs "),mean_kappa=round(mean(ks,na.rm=TRUE),3))
+})
+pairwise_kappa
+```
+
+# Disagreement vs clinical complexity
+
+```{r complexity}
+yesno <-function(x) as.integer(str_to_lower(as.character(x))=="yes")
+
+case_clin <-wide %>%
+  distinct(case_id,.keep_all=TRUE) %>%
+  mutate(
+    egfr_val=as.numeric(egfr_ml_min_1_73m2),
+    comorbidity_count=
+      yesno(heart_failure_present)+yesno(chronic_kidney_disease)+
+      yesno(coronary_artery_disease)+yesno(mi_history)+
+      yesno(stroke_tia_history)+yesno(cancer_history)
+  ) %>%
+  select(case_id,egfr_val,comorbidity_count) %>%
+  left_join(disagree_by_case %>% select(case_id,disagreement_score),by="case_id")
+
+cor_comorbid <-cor.test(case_clin$disagreement_score,case_clin$comorbidity_count,method="spearman")
+cor_egfr     <-cor.test(case_clin$disagreement_score,case_clin$egfr_val,method="spearman")
+cor_comorbid
+cor_egfr
+
+complexity_results <-tibble(
+  predictor=c("comorbidity_count","egfr"),
+  rho=c(round(cor_comorbid$estimate,3),round(cor_egfr$estimate,3)),
+  p_value=c(signif(cor_comorbid$p.value,3),signif(cor_egfr$p.value,3))
+)
+complexity_results
+```
+
+# Save outputs
+
+```{r save}
+out <-here::here("data","processed","my_inter_model_outputs")
+dir.create(out,showWarnings=FALSE,recursive=TRUE)
+write_csv(rec_rates,         file.path(out,"recommendation_rates_by_model.csv"))
+write_csv(rec_rates_long,    file.path(out,"recommendation_rates_by_model_long.csv"))
+write_csv(feature_ranges,    file.path(out,"model_to_model_feature_ranges.csv"))
+write_csv(agreement_summary, file.path(out,"model_agreement_summary.csv"))
+write_csv(disagree_by_case,  file.path(out,"high_disagreement_cases.csv"))
+write_csv(kripp_by_feature,  file.path(out,"inter_model_krippendorff_by_feature.csv"))
+write_csv(pairwise_kappa,    file.path(out,"inter_model_pairwise_kappa.csv"))
+write_csv(complexity_results,file.path(out,"disagreement_complexity_correlations.csv"))
+```
+
+
+```{r}
+library(tidyverse)
+library(knitr)
+
+rec_rates <-read_csv(here::here("data","processed","my_inter_model_outputs",
+                                "recommendation_rates_by_model.csv"),show_col_types=FALSE)
+agreement_summary <-read_csv(here::here("data","processed","my_inter_model_outputs",
+                                "model_agreement_summary.csv"),show_col_types=FALSE)
+pairwise_kappa <-read_csv(here::here("data","processed","my_inter_model_outputs",
+                                "inter_model_pairwise_kappa.csv"),show_col_types=FALSE)
+
+label_map <-c(
+  metformin_active="Metformin", sglt2i_active="SGLT2 inhibitor",
+  glp1_active="GLP-1 RA", gip_glp1_active="GIP/GLP-1",
+  dpp4i_active="DPP-4 inhibitor", insulin_any_active="Insulin (any)",
+  basal_insulin_active="Basal insulin", prandial_insulin_active="Prandial insulin",
+  sulfonylurea_active="Sulfonylurea", tzd_active="TZD",
+  cost_mentioned="Cost mentioned", urgent_eval_mentioned="Urgent eval"
+)
+
+heat <-rec_rates %>%
+  select(model_short,starts_with("pct_")) %>%
+  pivot_longer(-model_short,names_to="feature",values_to="pct") %>%
+  mutate(feature=str_remove(feature,"^pct_"),
+         label=recode(feature,!!!label_map),
+         model_short=factor(model_short,
+           levels=c("Claude Opus 4.6","Claude Sonnet 4.6","GPT-5.4")))
+
+fig6 <-ggplot(heat,aes(x=reorder(label,-pct),y=model_short,fill=pct))+
+  geom_tile(color="white",linewidth=0.6)+
+  geom_text(aes(label=paste0(pct,"%")),size=3)+
+  scale_fill_gradient(low="#e8a33d",high="#1f7a4d",name="Rate")+
+  labs(x="Medication class",y=NULL,
+       title="Active-Recommendation Rate by Model and Medication Class")+
+  theme_minimal(base_size=11)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),
+        panel.grid=element_blank(),plot.title=element_text(face="bold",size=11))
+fig6
+
+table6 <-agreement_summary %>%
+  mutate(`Medication class`=recode(feature,!!!label_map)) %>%
+  transmute(`Medication class`,
+            `Cases in agreement`=n_agree,
+            `Cases in disagreement`=n_disagree,
+            `Agreement (%)`=pct_agree) %>%
+  arrange(`Agreement (%)`)
+kable(table6,caption="Table 6. Inter-model agreement by medication class (n = 100 cases).")
+
+
+table7 <-pairwise_kappa %>%
+  rename(`Model pair`=pair,`Cohen's kappa`=mean_kappa) %>%
+  bind_rows(tibble(`Model pair`="Overall (Krippendorff's alpha)",`Cohen's kappa`=0.725))
+kable(table7,caption="Table 7. Pairwise Cohen's kappa across active drug classes and overall Krippendorff's alpha.")
+```
+

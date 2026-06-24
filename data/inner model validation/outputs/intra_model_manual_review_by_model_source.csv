@@ -1,0 +1,7 @@
+model_clean,source_used,manual_review_flags
+Claude Opus 4.6,free_text_rationale,142
+Claude Opus 4.6,table,0
+Claude Sonnet 4.6,free_text_rationale,160
+Claude Sonnet 4.6,table,0
+GPT-5.4,free_text_rationale,199
+GPT-5.4,table,0

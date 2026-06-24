@@ -1,0 +1,10 @@
+model_clean,alpha,metric_definition
+Claude Opus 4.6,0.9620263930668959,Active only alpha
+Claude Sonnet 4.6,0.9396273592514922,Active only alpha
+GPT-5.4,0.7954551563479975,Active only alpha
+Claude Opus 4.6,0.8592463048629132,Active + stop/avoid alpha
+Claude Sonnet 4.6,0.6725553817084328,Active + stop/avoid alpha
+GPT-5.4,0.49252441613588116,Active + stop/avoid alpha
+Claude Opus 4.6,0.5753928090437905,Full signature alpha
+Claude Sonnet 4.6,0.22035022498911339,Full signature alpha
+GPT-5.4,0.14154524601815655,Full signature alpha

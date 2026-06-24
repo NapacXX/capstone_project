@@ -1,0 +1,4 @@
+model_clean,n_responses,responses_with_manual_review,response_manual_review_rate,total_manual_review_classes
+GPT-5.4,500,147,0.294,199
+Claude Sonnet 4.6,500,127,0.254,160
+Claude Opus 4.6,500,115,0.23,142

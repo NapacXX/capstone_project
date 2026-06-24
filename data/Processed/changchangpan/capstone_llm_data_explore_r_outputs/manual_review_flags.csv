@@ -1,0 +1,787 @@
+case_id,vignette_uid,model_short,egfr_ml_min_1_73m2,hba1c_percent,financial_limitations,metformin_active,metformin_stop_or_caution,sglt2i_active,sglt2i_stop_or_caution,glp1_active,glp1_stop_or_caution,insulin_any_active,cost_mentioned,possible_low_egfr_metformin_issue,metformin_parser_conflict,sglt2i_parser_conflict,glp1_parser_conflict,severe_hyperglycemia_no_insulin,financial_no_cost_mention,treatment_plan
+DM020,1,Claude Sonnet 4.6,48,8.9,Yes,0,1,1,1,0,0,1,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the recommended antihyperglycemic medication plan:
+
+| Medication Plan |
+|---|
+| Metformin 1000 mg twice daily — STOP. Discontinue given eGFR of 48 mL/min/1.73m², which is below the threshold for safe continued use at full dose in a 72-year-old, in the context of heart failure with recent hospitalization and risk of volume shifts affecting renal perfusion. |
+| Sitagliptin 100 mg daily — STOP. Discontinue; being replaced by a more effective agent with cardiorenal and hepatic benefits. |
+| Empagliflozin 10 mg once daily in the morning — START. Provides heart failure benefit (HFpEF indication), reduces albuminuria and slows CKD progression, supports weight loss, and has evidence in MASH. Note: eGFR 48 is acceptable for heart failure and CKD indications with empagliflozin even though glycemic efficacy is reduced at this eGFR level. Monitor for genital mycotic infections and volume status given concurrent diuretic use. Given cost concerns, patient assistance programs (e.g., Jardiance Savings Card or manufacturer PAP) should be explored. |
+| Insulin glargine 26 units subcutaneously every night — CONTINUE at current dose for now, with planned upward titration over the coming weeks. Titrate by 2 units every 3 days targeting fasting glucose 80–130 mg/dL. Patient prefers minimal injections, so basal-only insulin strategy is maintained. |"
+DM020,1,GPT-5.4,48,8.9,Yes,1,0,1,0,0,0,1,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"| Medication recommendation |
+|---|
+| Continue metformin 1000 mg by mouth twice daily. |
+| Stop sitagliptin. |
+| Continue insulin glargine 26 units subcutaneously nightly; titrate up over the next few months. |
+| Add empagliflozin 10 mg by mouth once daily. |"
+DM020,1,Claude Opus 4.6,48,8.9,Yes,1,1,1,0,1,1,1,0,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,"Here is my recommended diabetes medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Metformin: REDUCE DOSE to 500 mg twice daily (dose reduction due to eGFR 48 mL/min/1.73m²; continue at this lower dose with monitoring of renal function) |
+| Sitagliptin: STOP (being replaced by a GLP-1 receptor agonist which provides superior cardiovascular, renal, and weight benefits; cannot combine DPP-4 inhibitor with GLP-1 RA) |
+| Insulin glargine: CONTINUE at 26 units nightly (reassess need and consider dose reduction after GLP-1 RA is titrated up, but for now maintain current dose) |
+| Semaglutide (Ozempic): START at 0.25 mg subcutaneous injection once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up to 1 mg once weekly after 4 additional weeks if tolerated and needed for glycemic control (addresses glycemic control, obesity, heart failure with preserved EF, MASLD/MASH, albuminuria, and cardiovascular risk; once-weekly injection aligns with patient preference for simplicity) |
+| Empagliflozin: START at 10 mg once daily (provides cardiovascular benefit in HFpEF, renal protection given albuminuria of 240 mg/g, glycemic benefit, and weight reduction; safe at eGFR 48 and indicated for heart failure and CKD with albuminuria) |"
+DM021,2,Claude Opus 4.6,24,7.9,No,0,0,0,0,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Insulin glargine – CONTINUE with dose INCREASE from 34 units to 36 units nightly. Titrate up by 2 units every 3-5 days targeting fasting glucose 100-150 mg/dL. |
+| Insulin aspart – STOP. Discontinue all mealtime injections to simplify regimen, reduce hypoglycemia risk, and accommodate visual impairment and hand tremor. |
+| Dulaglutide (Trulicity) 0.75 mg – NEW. Inject subcutaneously once weekly. This provides prandial glucose coverage without multiple daily injections, has cardiovascular benefit, is renally safe at eGFR 24, and the pre-filled single-dose pen accommodates impaired vision/dexterity. Titrate up to 1.5 mg weekly after 4 weeks if tolerated and if additional glycemic control is needed. |
+
+**Rationale summary:** This plan simplifies the regimen from 4 injections daily to 1 injection daily plus 1 injection weekly. The GLP-1 receptor agonist (dulaglutide) replaces mealtime insulin coverage, reduces hypoglycemia risk, provides cardiovascular benefit (proven in REWIND trial, relevant given his CAD/prior MI), and is approved for use in CKD stage 4. The modest basal insulin uptitration compensates for loss of bolus insulin. The relaxed A1c target of ~7.5-8.0% is appropriate given his age, CKD stage 4, hypoglycemia risk, and cardiovascular disease burden."
+DM022,3,Claude Opus 4.6,78,8.1,No,1,1,1,1,1,1,0,0,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"Based on this patient's profile — type 2 diabetes with HbA1c 8.1%, obesity (BMI 33), metabolic dysfunction-associated steatotic liver disease (MASLD), mildly elevated urine albumin-creatinine ratio (38 mg/g), eGFR 78, and strong preference for non-injectable oral therapy — I recommend the following plan:
+
+**Rationale summary:** Metformin is first-line and addresses insulin resistance. A GLP-1 receptor agonist would be ideal given her obesity, MASLD, and cardiometabolic profile, but she strongly prefers avoiding injections. Oral semaglutide provides GLP-1 RA benefits without injection. An SGLT2 inhibitor is additionally indicated given her early albuminuria (UACR 38 mg/g, above normal), MASLD, obesity, and cardiorenal protective benefits. Starting both metformin and an SGLT2 inhibitor now, with addition of oral semaglutide after metformin is titrated, provides a simple stepwise approach. However, given her HbA1c of 8.1% and desire for tighter control, initiating all three oral agents (with appropriate titration) is reasonable.
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg by mouth once daily with dinner, to be titrated up to 1000 mg twice daily over the next 4-8 weeks as tolerated |
+| Empagliflozin 10 mg by mouth once daily in the morning, to be titrated up to 25 mg once daily in 4 weeks if tolerated |
+| Oral semaglutide (Rybelsus) 3 mg by mouth once daily on an empty stomach with no more than 4 oz of plain water, at least 30 minutes before first food/drink/other medications; to be titrated to 7 mg daily after 30 days, then to 14 mg daily after another 30 days as tolerated |"
+DM024,5,Claude Opus 4.6,72,7.9,No,1,1,0,0,1,1,0,1,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,"Based on this patient's profile — type 2 diabetes with HbA1c 7.9%, BMI 39, MASLD, obesity, eGFR 72, strong desire for weight loss, reluctance toward injectables, and concern about cost — here is my recommended antihyperglycemic medication plan:
+
+**Rationale summary:** I am starting metformin as first-line therapy (cost-effective, well-tolerated with slow titration, weight-neutral/modest loss) combined with a GLP-1 receptor agonist in oral form (semaglutide) to address glycemic control, weight loss, and MASLD benefits while respecting her preference to avoid injections. The oral semaglutide will be titrated up over the coming months.
+
+| Medication |
+|---|
+| Metformin 500 mg by mouth once daily with dinner for 1 week, then increase to 500 mg twice daily with meals. Titrate up to 1000 mg twice daily over 4–6 weeks as tolerated. Final target dose: metformin 1000 mg twice daily (extended-release formulation preferred if GI side effects occur). |
+| Oral semaglutide (Rybelsus) 3 mg by mouth once daily on an empty stomach with no more than 4 oz of plain water, at least 30 minutes before any food, drink, or other medications. Start at 3 mg daily for 30 days, then increase to 7 mg daily. Plan to titrate to 14 mg daily after an additional 30 days if glycemic goal not met and medication is tolerated. |"
+DM025,6,Claude Opus 4.6,52,7.6,No,1,1,1,1,0,0,0,0,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's diabetes medication plan:
+
+| Medication Recommendation |
+|---|
+| Empagliflozin 10 mg oral once daily (new medication) |
+| Metformin 500 mg oral once daily (new medication; titrate up to 1000 mg twice daily over the next 1-2 months as tolerated) |
+
+**Rationale (for reference, not part of the table):**
+
+- **Empagliflozin (SGLT2 inhibitor):** This is the priority first-line agent given his heart failure with reduced ejection fraction, CKD stage 3a with albuminuria, and established atherosclerotic cardiovascular disease. It provides proven cardiovascular and renal benefits independent of glycemic control. eGFR of 52 mL/min/1.73m² is well above the initiation threshold. The 10 mg dose is appropriate and does not require titration.
+
+- **Metformin:** Added as a foundational diabetes therapy for additional glycemic control. Starting at 500 mg once daily given his CKD (eGFR 52, above the 30 mL/min threshold) with planned gradual titration to minimize GI side effects. This will help achieve his HbA1c goal."
+DM026,9,Claude Sonnet 4.6,82,10.2,No,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,"| Medication |
+|---|
+| Metformin 500 mg twice daily with meals; titrate up over 4 weeks to target dose of 1000 mg twice daily |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up further toward 1 mg once weekly as tolerated over the following months |"
+DM029,12,Claude Sonnet 4.6,72,7.2,Yes,1,0,0,0,0,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"| Medication Recommendation |
+|---|
+| **Metformin 500 mg once daily with dinner** — New medication. Start at low dose given age and preference to minimize GI side effects; will titrate up over coming months as tolerated (target 1000 mg twice daily with meals). eGFR 72 is acceptable for initiation. |"
+DM029,12,GPT-5.4,72,7.2,Yes,1,0,0,0,0,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"| Medication recommendation |
+|---|
+| Start metformin extended-release 500 mg by mouth once daily with the evening meal; titrate up. |"
+DM029,12,Claude Opus 4.6,72,7.2,Yes,1,1,1,0,1,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,"Based on this patient's profile — a 73-year-old with newly diagnosed type 2 diabetes, HbA1c 7.2%, eGFR 72, no albuminuria, no established cardiovascular disease, BMI 26, and a preference for a simple oral regimen with minimal side effects — I recommend the following:
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg oral tablet, take 500 mg once daily with dinner for 2 weeks, then increase to 500 mg twice daily with meals. Will titrate up to 1000 mg twice daily over the next 2-3 months as tolerated. |
+
+**Rationale (for documentation, not part of the table):**
+- Metformin is first-line therapy for newly diagnosed type 2 diabetes.
+- Starting at a low dose and titrating slowly minimizes GI side effects, which aligns with her concern about side effects.
+- eGFR 72 is well above the threshold for safe metformin use.
+- Her HbA1c of 7.2% is modestly elevated and likely achievable with metformin monotherapy plus lifestyle modifications.
+- No compelling indication for SGLT2 inhibitor (no heart failure, no albuminuria, no established ASCVD) or GLP-1 RA at this time, and she prefers simplicity."
+DM030,13,Claude Sonnet 4.6,88,8.4,No,1,1,1,1,1,0,0,0,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,"| Medication |
+|---|
+| Metformin 500 mg once daily with dinner — new medication being started; will be titrated up (goal 1000 mg twice daily as tolerated) |
+| Empagliflozin 10 mg once daily in the morning — new medication being started |
+
+**Brief rationale notes (not for CSV):**
+- HbA1c of 8.4% warrants combination therapy at initiation
+- Patient preference for oral once-daily therapy is accommodated by empagliflozin (once daily); metformin is started once daily and titrated to reduce GI side effects
+- Empagliflozin provides CV/renal protection, modest weight benefit, and aligns with once-daily oral preference; eGFR 88 supports its use
+- SGLT2 inhibitor may also help with the nocturia from BPH (osmotic diuresis caveat should be discussed, though net effect is generally modest)
+- No GLP-1 agonist given patient's preference for oral-only therapy"
+DM031,14,Claude Opus 4.6,68,8.8,No,1,1,0,1,1,1,0,1,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg by mouth twice daily with meals. Titrate up to 1000 mg twice daily over the next 1-2 months as tolerated. |
+| Semaglutide (oral, Rybelsus) 3 mg by mouth once daily on an empty stomach with no more than 4 oz of water, at least 30 minutes before first food/drink/other medications. Titrate up to 7 mg daily after 30 days, then to 14 mg daily after another 30 days as tolerated. |
+
+Rationale (not part of the table): This patient is newly diagnosed with an A1c of 8.8%, which warrants dual therapy. Metformin is first-line and cost-effective. Given her moderately elevated albuminuria (UACR 44 mg/g) and eGFR of 68, a GLP-1 receptor agonist provides cardiovascular and renal benefit. Oral semaglutide is chosen over injectable options given her preference to avoid injections. SGLT2 inhibitors were avoided due to her history of recurrent urinary tract infections, as they increase genitourinary infection risk."
+DM033,16,GPT-5.4,78,10.4,No,1,0,1,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,"| Medication Plan |
+|---|
+| Metformin ER: start 500 mg by mouth once daily with the evening meal and titrate up; final target dose 1000 mg by mouth twice daily as tolerated. |
+| Empagliflozin: start 10 mg by mouth once daily. |
+| Semaglutide (oral): start 3 mg by mouth once daily for 30 days, then increase to 7 mg once daily; medication will be titrated up. |"
+DM033,16,Claude Opus 4.6,78,10.4,No,1,1,1,1,1,1,0,0,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,"Based on this patient's presentation — newly diagnosed T2DM with HbA1c 10.4%, BMI 37, eGFR 78, moderately elevated UACR (42 mg/g), and strong preference to avoid injections — I recommend initiating combination oral/non-injection therapy. Given the very high HbA1c, dual or triple therapy is warranted upfront. A GLP-1 receptor agonist would be ideal given her obesity, cardiovascular risk, and albuminuria, but she strongly prefers to avoid injections; therefore, oral semaglutide is an excellent option. Metformin provides foundational therapy, and an SGLT2 inhibitor adds cardiorenal benefit given her albuminuria and cardiovascular risk profile.
+
+| Medication |
+|---|
+| Metformin 500 mg by mouth twice daily for 1-2 weeks, then titrate up to 1000 mg twice daily over the next 4-8 weeks as tolerated |
+| Empagliflozin 10 mg by mouth once daily, to be titrated to 25 mg once daily after 4 weeks if tolerated |
+| Oral semaglutide 3 mg by mouth once daily on an empty stomach with no more than 4 oz of plain water, at least 30 minutes before any food or other medications; titrate to 7 mg once daily after 30 days, then to 14 mg once daily after another 30 days as tolerated |
+
+Rationale summary: The HbA1c of 10.4% warrants aggressive upfront combination therapy. Metformin is foundational. Empagliflozin provides SGLT2i-mediated cardiorenal protection (relevant given albuminuria and CV risk). Oral semaglutide provides potent glucose lowering and significant weight loss benefit while honoring the patient's preference to avoid injections. Reassess HbA1c in 3 months after full titration; if not at goal, reconsider injectable GLP-1 RA or insulin at that time."
+DM037,20,Claude Sonnet 4.6,56,8,TRUE,1,1,0,1,0,1,0,1,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"| Medication Recommendation |
+|---|
+| **Metformin 500 mg twice daily with meals — new medication being started. Will titrate up over the coming months as tolerated to a target of 1000 mg twice daily.** |
+
+---
+
+**Rationale (not for CSV):** Metformin is the appropriate first-line agent here. Her eGFR of 56 mL/min/1.73m² (CKD 3a) is above the threshold for initiation (eGFR ≥45), so metformin is safe to start. Her HbA1c of 8.0% is modestly elevated and does not mandate combination therapy at initiation, particularly given her preference for simplicity and cost-consciousness. Starting with metformin monotherapy at a low dose with gradual titration minimizes GI side effects. Metformin is also low-cost and widely available generically. Her UACR of 88 mg/g (microalbuminuria) and CKD would make an SGLT-2 inhibitor or GLP-1 RA an attractive add-on in the future if targets are not met, but starting one medication at a time aligns with her preferences. No insulin is indicated at this stage."
+DM042,25,Claude Opus 4.6,70,9.3,FALSE,1,0,0,0,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic regimen:
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg by mouth twice daily with meals. Titrate up to 1000 mg twice daily over the next 4-8 weeks as tolerated. |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly for 4 weeks, then increase to 0.5 mg once weekly. Titrate up to 1 mg once weekly after 4 weeks at 0.5 mg if tolerated and further glycemic control is needed. |
+
+**Rationale (for reference, not part of the table):**
+
+- **Metformin**: First-line agent; appropriate given eGFR 70; addresses insulin resistance.
+- **Semaglutide (GLP-1 receptor agonist)**: Given HbA1c 9.3% (well above goal), dual therapy is warranted at diagnosis. A GLP-1 RA provides excellent A1c reduction (1.5-1.8%), promotes significant weight loss (beneficial given BMI 36), has cardiovascular benefit, and her borderline albuminuria (UACR 30) and eGFR suggest she would benefit from cardiorenal protective agents. This combination avoids hypoglycemia risk, which is important in a 72-year-old."
+DM043,26,Claude Opus 4.6,92,6.9,No,1,1,0,1,0,1,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's diabetes medication plan:
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg by mouth twice daily with meals; titrate up to 1000 mg twice daily over the next 1-2 months as tolerated |
+
+**Rationale:** This is a newly diagnosed type 2 diabetes patient with an HbA1c of 6.9% (just at the diagnostic threshold), preserved renal function (eGFR 92), and no contraindications to metformin. Metformin is the appropriate first-line agent. Starting at 500 mg twice daily and titrating up minimizes gastrointestinal side effects. Given his cardiovascular risk factors (smoking, hypertension, hyperlipidemia), an SGLT2 inhibitor or GLP-1 receptor agonist could be considered in the future, but with an HbA1c of 6.9%, monotherapy with metformin is a reasonable initial approach with reassessment in 3 months."
+DM044,27,Claude Opus 4.6,68,8.1,No,1,1,0,1,0,1,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication |
+|---|
+| Metformin 500 mg by mouth once daily with dinner for 1-2 weeks, then increase to 500 mg twice daily with meals; will be titrated up to 1000 mg twice daily as tolerated over the next 2-3 months |
+
+**Rationale (for reference, not part of the table):** This is a newly diagnosed type 2 diabetes patient with an HbA1c of 8.1%. Metformin is appropriate first-line therapy. Her eGFR of 68 mL/min/1.73m² is well above the threshold for metformin use. Given her age (76) and the fact that she is preparing for knee replacement surgery, a conservative start-low, go-slow approach with metformin monotherapy is reasonable. Her A1c of 8.1% is not so elevated as to require initial combination therapy or insulin. A GLP-1 receptor agonist or SGLT2 inhibitor could be considered at follow-up if glycemic targets are not met, but starting with metformin alone and titrating is the most appropriate initial step for this treatment-naïve patient."
+DM048,31,Claude Sonnet 4.6,84,10.1,No,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,"| Medication Recommendation |
+|---|
+| Metformin 500 mg twice daily with meals; will titrate up over the next few months |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly; will titrate up over the next few months |"
+DM048,31,GPT-5.4,84,10.1,No,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,"| Medication recommendation |
+|---|
+| Start metformin 500 mg by mouth twice daily with meals; titrate up. |
+| Start semaglutide 0.25 mg subcutaneously once weekly; titrate up. |"
+DM049,32,Claude Sonnet 4.6,22,7.8,FALSE,0,1,1,1,1,1,1,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is the medication recommendation table:
+
+| Medication Recommendation |
+|---|
+| Start linagliptin 5 mg orally once daily (no renal dose adjustment required; metformin avoided given eGFR 22, SGLT2 inhibitors avoided given eGFR 22 and limited glycemic efficacy, GLP-1 agonists are an alternative but given age 72 and modest HbA1c of 7.8% a DPP-4 inhibitor is preferred to minimize hypoglycemia and GI side effects; dose is fixed and no titration needed) |
+
+---
+
+**Brief clinical rationale (not for CSV):**
+- **Metformin**: Contraindicated with eGFR <30.
+- **SGLT2 inhibitors**: eGFR 22 precludes meaningful glycemic benefit (and most are not indicated below eGFR 20–25); also hyperkalemia risk with K 5.0 and CKD4.
+- **GLP-1 RA**: Reasonable alternative but GI tolerability concerns in a 72-year-old with modest hyperglycemia (A1c 7.8%) make DPP-4i a pragmatic first choice.
+- **Linagliptin**: Uniquely among DPP-4 inhibitors, it is hepatically eliminated and requires **no renal dose adjustment**, making it well-suited for CKD stage 4. It has a neutral renal safety profile and low hypoglycemia risk.
+- **Insulin**: Not yet indicated given A1c 7.8% and no symptoms of severe hyperglycemia; can be added if targets not met."
+DM049,32,Claude Opus 4.6,22,7.8,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+**Clinical Reasoning Summary:**
+This is a 72-year-old male with newly diagnosed T2DM (A1c 7.8%), CKD stage 4 (eGFR 22), and significant albuminuria (UACR 420 mg/g). Key considerations:
+- Metformin is contraindicated with eGFR <20 and generally avoided/not initiated at eGFR <30
+- SGLT2 inhibitors: Evidence supports initiation for cardiorenal protection even at low eGFR; however, most SGLT2 inhibitors should not be *initiated* for glycemic control at eGFR <20-25 (varies by agent). Dapagliflozin can be initiated at eGFR ≥20 for CKD/heart failure benefit, though glycemic efficacy is reduced. Given his albuminuria and CKD, the cardiorenal benefit is compelling.
+- GLP-1 receptor agonists have no renal dose adjustment and would provide glycemic efficacy and cardiovascular benefit.
+- Potassium is 5.0, so agents that raise potassium should be used cautiously.
+- A1c target of ~7.5% is reasonable given age, CKD, and hypoglycemia risk.
+
+| Medication Recommendation |
+|---|
+| Dapagliflozin 10 mg oral once daily (new; initiated primarily for cardiorenal protection in CKD with albuminuria; modest glycemic benefit expected at this eGFR) |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly (new; start at 0.25 mg weekly for 4 weeks, then increase to 0.5 mg weekly; will titrate up to 1 mg weekly if needed based on A1c at follow-up) |"
+DM050,33,Claude Sonnet 4.6,34,8.9,FALSE,1,1,1,0,1,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is the recommended antihyperglycemic medication plan:
+
+| Medication Plan |
+|---|
+| **Metformin** – Start 500 mg twice daily with meals; will titrate up over coming weeks as tolerated toward a target of 1000 mg twice daily |
+| **Semaglutide (Ozempic)** – Start 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up further over coming months toward 1 mg once weekly (or higher if needed and tolerated) based on glycemic response and tolerability |
+
+---
+
+**Brief clinical rationale (not for CSV):**
+
+- **Metformin** is appropriate here; eGFR of 34 mL/min/1.73m² (CKD 3b) warrants a reduced dose and monitoring but is not a contraindication (FDA allows use down to eGFR ≥30).
+- **Semaglutide (GLP-1 RA)** is strongly preferred given CKD with albuminuria (UACR 310 mg/g), obesity (BMI 34), and cardiovascular risk factors — it has proven cardiorenal benefits, requires no renal dose adjustment, and supports weight loss. An SGLT2 inhibitor (e.g., empagliflozin) would also have strong guideline support for CKD/albuminuria, but with eGFR of 34, glycemic efficacy is limited; the GLP-1 RA is prioritized here for glucose lowering plus cardiorenal protection."
+DM050,33,Claude Opus 4.6,34,8.9,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Based on this patient's profile — newly diagnosed T2DM with HbA1c 8.9%, BMI 34, CKD stage 3b (eGFR 34), and significant albuminuria (UACR 310 mg/g) — I recommend the following plan:
+
+**Rationale summary:** This patient has compelling indications for an SGLT2 inhibitor (CKD with albuminuria, heart/kidney protection) and needs additional glycemic control given HbA1c 8.9%. Metformin is contraindicated or not recommended at eGFR 34 (below the 30-initiation threshold and at best a reduced dose with close monitoring — given she is newly starting, I will avoid it). A GLP-1 receptor agonist provides excellent glycemic efficacy, weight loss, and cardiovascular/renal benefit. An SGLT2 inhibitor can be initiated at this eGFR for cardiorenal protection (per current guidelines, can be initiated if eGFR ≥20).
+
+| Medication |
+|---|
+| Empagliflozin 10 mg oral once daily (new; initiate for cardiorenal protection and glycemic benefit; monitor eGFR and potassium in 2-4 weeks) |
+| Semaglutide 0.25 mg subcutaneous injection once weekly (new; initiate at 0.25 mg weekly for 4 weeks, then titrate up to 0.5 mg weekly, then to 1 mg weekly as tolerated over the following months for glycemic control and weight management) |"
+DM053,36,Claude Sonnet 4.6,38,8.2,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the medication recommendation table:
+
+| Medication Recommendation |
+|---|
+| SGLT2 inhibitor: Start empagliflozin 10 mg orally once daily in the morning. Note: eGFR is 38 mL/min/1.73m2, which is above the threshold for heart failure benefit (eGFR ≥20); the glucose-lowering efficacy will be modest at this eGFR but the cardioprotective and renoprotective benefits justify use. |
+| GLP-1 receptor agonist: Start semaglutide 0.25 mg subcutaneously once weekly for 4 weeks, then titrate up per standard protocol. Titration to higher doses will be pursued over the coming months to support glycemic control and weight loss. |
+
+**Clinical rationale summary (not for CSV):**
+- **Metformin** is relatively contraindicated given eGFR of 38 (CKD 3b) due to lactic acidosis risk and is not recommended below eGFR 45.
+- **Empagliflozin** is prioritized given her heart failure with prior hospitalization and CKD with albuminuria — strong guideline-based indications beyond glucose lowering.
+- **Semaglutide** addresses her HbA1c of 8.2%, obesity (BMI 35), and CKD with albuminuria (renoprotective data), and is safe in heart failure with preserved EF.
+- **Thiazolidinediones** are contraindicated given heart failure.
+- **Sulfonylureas** are avoided given age (hypoglycemia risk) and CKD."
+DM056,39,Claude Sonnet 4.6,42,7.5,FALSE,1,1,1,0,0,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"| Medication Recommendation |
+|---|
+| **Empagliflozin 10 mg orally once daily in the morning** — New medication being started. Given eGFR of 42 mL/min/1.73m², empagliflozin is appropriate for cardiorenal protection (CKD with albuminuria 260 mg/g) and glucose lowering. Dose will be titrated up to 25 mg once daily as tolerated and as eGFR allows. |
+| **Metformin 500 mg orally twice daily with meals** — New medication being started. eGFR of 42 permits use at a reduced dose. Dose will be titrated up gradually toward 1000 mg twice daily as tolerated, with ongoing monitoring of eGFR. |"
+DM056,39,Claude Opus 4.6,42,7.5,FALSE,1,1,1,1,0,0,0,0,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication |
+|---|
+| Empagliflozin 10 mg oral once daily (new medication; provides both glycemic control and cardiorenal protection given CKD stage 3b with albuminuria; appropriate to use at eGFR 42 mL/min/1.73m2) |
+| Metformin 500 mg oral once daily (new medication; initiate at low dose given eGFR 42 mL/min/1.73m2; titrate up to 1000 mg daily over the next 1-2 months as tolerated, with monitoring of renal function) |
+
+Rationale summary: This patient has newly diagnosed T2DM with HbA1c 7.5% and established CKD stage 3b with significant albuminuria (UACR 260 mg/g). Per current guidelines (ADA/KDIGO), an SGLT2 inhibitor is first-line regardless of glycemic need given proven cardiorenal benefits. Empagliflozin is appropriate at this eGFR. Metformin is added at a reduced dose (given eGFR 42, it can be used but at reduced dosing with monitoring) to achieve the glycemic target of HbA1c <7%. This two-drug regimen should be sufficient to bring HbA1c to goal."
+DM057,40,Claude Opus 4.6,20,9.4,FALSE,0,1,1,0,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+**Clinical Reasoning Summary:**
+This is a newly diagnosed T2DM patient with HbA1c 9.4%, CKD stage 4 (eGFR 20), BMI 32, and albuminuria (UACR 480 mg/g). Key considerations:
+- Metformin is contraindicated (eGFR <20-25, and generally avoided below 30)
+- SGLT2 inhibitors: Limited glycemic efficacy at eGFR 20, but may still be initiated for cardiorenal protection (per KDIGO/ADA guidelines, can initiate if eGFR ≥20); however, glycemic benefit will be minimal at this eGFR
+- GLP-1 receptor agonists: Excellent choice for glycemic control, weight management, and cardiovascular benefit; no renal dose adjustment needed (though caution with very low GFR regarding GI side effects)
+- Given HbA1c 9.4%, she likely needs insulin (basal) in addition to a GLP-1 RA to achieve adequate control, as a single non-insulin agent is unlikely to bring her to goal from 9.4%
+- Potassium is 5.2, so finerenone (which could help with albuminuria) should be avoided for now
+
+| Medication |
+|---|
+| Basal insulin glargine (Lantus) – NEW – Start 10 units subcutaneously once daily at bedtime. Titrate up by 2 units every 3 days targeting fasting blood glucose 80–130 mg/dL. |
+| Semaglutide (Ozempic) – NEW – Start 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly. Will titrate up to 1 mg once weekly as tolerated over the following months. |"
+DM059,42,Claude Opus 4.6,54,7.4,FALSE,0,1,1,1,0,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's diabetes medication plan:
+
+**Clinical Reasoning:**
+This is an 82-year-old frail elderly woman with newly diagnosed T2DM (A1c 7.4%), CKD stage 3a (eGFR 54), and albuminuria (UACR 42 mg/g). Given her age, a relaxed A1c target of 7.5–8.0% is appropriate to avoid hypoglycemia. Her current A1c of 7.4% is nearly at a reasonable goal for her age/comorbidities. However, she has CKD with albuminuria, which provides a compelling indication for an SGLT2 inhibitor for cardiorenal protection. Metformin is acceptable at eGFR 54 but given her age (82), mild CKD, and the fact that her A1c is already close to a relaxed target, an SGLT2 inhibitor alone may suffice as first-line therapy here — offering both modest glucose lowering and significant renal/cardiovascular benefit. Metformin carries more GI side effects and lactic acidosis risk in this elderly patient with CKD.
+
+| Medication |
+|---|
+| Empagliflozin 10 mg orally once daily (new medication; start and continue at this dose — provides glycemic control plus cardiorenal benefit given her CKD with albuminuria) |"
+DM060,43,Claude Sonnet 4.6,38,8.2,FALSE,1,1,1,1,1,1,0,0,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"I'll analyze this patient's case:
+
+- 84-year-old male, newly diagnosed T2DM
+- HbA1c 8.2% — needs improvement, but given age (84), moderate targets are appropriate (ADA suggests ~8.0–8.5% acceptable for complex older adults)
+- eGFR 38 mL/min/1.73m² (CKD stage 3b) — limits metformin (generally avoid eGFR <30, use with caution 30–45); SGLT2 inhibitors have reduced glycemic efficacy at this eGFR but finerenone/SGLT2 still have cardiorenal benefit considerations
+- UACR 260 mg/g — significant albuminuria
+- Established CVD (CAD with prior stent)
+- Age 84 — hypoglycemia risk is a major concern; simplicity and safety are priorities
+
+**Reasoning:**
+- Metformin: eGFR 38 is a caution zone; can start at low dose with monitoring, but given age 84 and CKD 3b, risk-benefit is borderline. I will start at low dose.
+- GLP-1 RA: Compelling given CVD; however, at age 84 with new diagnosis, GI side effects and weight loss risk are concerns. Nonetheless, cardiorenal benefit is meaningful.
+- SGLT2 inhibitor: eGFR 38 — canagliflozin/dapagliflozin have renal/CV outcome data; glycemic efficacy is reduced but cardiorenal protection remains. Dapagliflozin is approved for CKD with eGFR ≥25.
+- Given age and complexity, I'll keep the regimen simple: low-dose metformin + dapagliflozin (cardiorenal protection). GLP-1 RA avoided given age 84, frailty risk, and weight concerns.
+
+```
+""Metformin 500 mg orally once daily with evening meal. Given eGFR of 38 mL/min/1.73m², use with caution; recheck renal function in 3 months before any dose increase. Hold if eGFR falls below 30.""
+""Dapagliflozin 10 mg orally once daily in the morning. Started for cardiorenal protection given established coronary artery disease and albuminuria (UACR 260 mg/g) with CKD stage 3b. Glycemic benefit is secondary at this eGFR level.""
+```
+
+| Medication Plan |
+|---|
+| Metformin 500 mg orally once daily with evening meal. Given eGFR of 38 mL/min/1.73m², use with caution; recheck renal function in 3 months before any dose increase. Hold if eGFR falls below 30. |
+| Dapagliflozin 10 mg orally once daily in the morning. Started for cardiorenal protection given established coronary artery disease and albuminuria (UACR 260 mg/g) with CKD stage 3b. Glycemic efficacy is reduced at this eGFR but cardiorenal benefit remains. |"
+DM060,43,Claude Opus 4.6,38,8.2,FALSE,0,1,1,1,0,1,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Empagliflozin 10 mg oral once daily (new medication - indicated given established ASCVD, CKD stage 3b with albuminuria; eGFR 38 supports initiation; provides cardiorenal benefit) |
+| Metformin 500 mg oral once daily (new medication - starting at low dose given eGFR 38; this is at the threshold where metformin can be initiated at reduced dose; will titrate up to 500 mg twice daily as tolerated if eGFR remains stable) |
+
+**Rationale summary:** This 84-year-old has a new diagnosis with HbA1c 8.2%. Given his age, a relaxed A1c target of <8% is reasonable (avoiding hypoglycemia). Empagliflozin is prioritized for its proven cardiovascular and renal benefits (established ASCVD + CKD with albuminuria, UACR 260 mg/g). Metformin is added at a reduced dose appropriate for eGFR 35–45 mL/min/1.73m². Together these agents should bring his A1c near goal without hypoglycemia risk. Sulfonylureas and insulin are avoided given his age and hypoglycemia concerns. GLP-1 receptor agonists could be considered at follow-up if targets are not met, but this two-drug regimen is an appropriate and safe starting point."
+DM061,44,Claude Opus 4.6,24,9,FALSE,0,1,0,1,1,1,0,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+**Clinical Reasoning:** This is an 80-year-old with newly diagnosed T2DM, HbA1c 9.0%, CKD stage 4 (eGFR 24), and obesity. Key considerations:
+- Metformin is contraindicated (eGFR <30)
+- SGLT2 inhibitors are not recommended for glycemic lowering at eGFR <20, but at eGFR 24 they may have limited glycemic efficacy and should be used cautiously; however, given recurrent UTIs and urinary symptoms, I will avoid SGLT2 inhibitors
+- GLP-1 receptor agonists are appropriate and provide cardiovascular/renal benefit; they can be used in CKD stage 4
+- Given HbA1c 9.0%, a GLP-1 RA alone may not achieve target; however, in an 80-year-old, a relaxed A1c target of <8% is appropriate, and a GLP-1 RA with titration is a reasonable initial approach
+- Basal insulin is an alternative addition if needed, but starting with a GLP-1 RA is preferred given obesity and to avoid hypoglycemia risk in an elderly patient
+- A relaxed A1c goal of <8.0% is appropriate given age and comorbidities
+
+| Medication |
+|---|
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly for 4 weeks, then titrate up to 0.5 mg once weekly, with further titration to 1 mg once weekly as tolerated based on glycemic response |"
+DM062,45,Claude Sonnet 4.6,58,7.1,No,1,1,0,0,0,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is my recommendation for this 85-year-old with newly identified type 2 diabetes, HbA1c 7.1%, CKD 3a (eGFR 58), and low hypoglycemia risk tolerance given his age:
+
+**Clinical reasoning summary:** Given his age (85), the primary goal is to avoid hypoglycemia and symptomatic hyperglycemia rather than aggressive glucose lowering. An HbA1c target of ~7.5–8.0% is appropriate. Metformin is reasonable at this eGFR (58) but should be used at a conservative dose. A DPP-4 inhibitor is a very safe add-on in the elderly — low hypoglycemia risk, renally dosed, well tolerated.
+
+---
+
+```
+""Metformin 500 mg once daily with dinner. Will titrate up slowly over coming months as tolerated.""
+""Sitagliptin 50 mg once daily (renally dose-reduced for eGFR 45–59 mL/min/1.73m2).""
+```
+
+---
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg once daily with dinner. Will titrate up slowly over coming months as tolerated. |
+| Sitagliptin 50 mg once daily (renally dose-reduced for eGFR 45–59 mL/min/1.73m2). |"
+DM062,45,Claude Opus 4.6,58,7.1,No,1,1,0,1,0,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Based on this clinical scenario, I need to consider:
+
+- **Age 85**: Relaxed HbA1c target is appropriate (7.5–8.0% per ADA guidelines for older adults with limited life expectancy or comorbidities, though this patient seems relatively healthy)
+- **HbA1c 7.1%**: This is already within or near a relaxed target for an 85-year-old. The risk of hypoglycemia and overtreatment is a major concern in this population.
+- **CKD stage 3a (eGFR 58)**: Metformin is still appropriate at this eGFR level.
+- **UACR 30 mg/g**: Borderline albuminuria; an SGLT2 inhibitor could offer renal/cardiovascular benefit, but given the HbA1c is already near goal and the patient is 85, the priority is avoiding overtreatment.
+
+**Clinical reasoning**: For an 85-year-old with a new diagnosis and HbA1c of 7.1%, a reasonable individualized target would be <8.0% (ADA recommends less stringent goals in older adults to avoid hypoglycemia). His HbA1c is already below this. However, initiating conservative lifestyle measures alone may not be sufficient long-term, and a low dose of metformin is reasonable as first-line therapy given it carries minimal hypoglycemia risk, is appropriate at his eGFR, and may provide modest cardiovascular benefit. Starting at a low dose is prudent given his age and kidney function.
+
+| Medication |
+|---|
+| Metformin 500 mg by mouth once daily with dinner (start low dose given age 85 and eGFR 58; will titrate up only if HbA1c rises above 7.5–8.0% at follow-up in 3 months) |"
+DM063,46,Claude Opus 4.6,36,8.4,FALSE,1,1,1,0,0,1,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Based on this patient's profile — an 81-year-old with newly diagnosed T2DM, HbA1c 8.4%, CKD stage 3b (eGFR 36), albuminuria (UACR 180 mg/g), BMI 24, and no prior diabetes medications — here are my considerations:
+
+- **HbA1c target:** A relaxed target of ~7.5–8.0% is reasonable given her age, though her current 8.4% warrants treatment.
+- **CKD with albuminuria:** An SGLT2 inhibitor provides cardiorenal benefit and is indicated with UACR 180 mg/g; empagliflozin and dapagliflozin can be initiated at eGFR ≥20.
+- **Metformin:** Can be used at reduced dose at eGFR 36 (range 30–45 allows reduced dosing), but given her age (81), weight loss, and borderline eGFR, the risk-benefit is less favorable. I will start at a low dose cautiously.
+- **GLP-1 RA:** Could be considered but given her low BMI (24), weight loss complaint, and age 81, GLP-1 RAs carry risk of further weight loss and GI side effects — I will avoid these.
+
+I will start two agents to address her HbA1c of 8.4% with a goal of ~7.5–8.0%:
+
+| Medication |
+|---|
+| Metformin 500 mg by mouth once daily (reduced dose due to eGFR 36; will monitor renal function and titrate up to 500 mg twice daily if tolerated and eGFR remains stable) |
+| Empagliflozin 10 mg by mouth once daily (for glycemic control and cardiorenal protection given CKD stage 3b with albuminuria) |"
+DM064,47,Claude Opus 4.6,50,7.7,No,1,1,1,0,1,0,0,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Based on this patient's profile — an 83-year-old male with newly diagnosed type 2 diabetes (HbA1c 7.7%), established atherosclerotic cardiovascular disease (prior MI), CKD stage 3a (eGFR 50) with albuminuria (UACR 220 mg/g), and a need for a conservative glycemic target (A1c <8% given age and comorbidities) — here are my recommendations:
+
+**Rationale summary:**
+- An SGLT2 inhibitor is strongly indicated given his established ASCVD, CKD with albuminuria, and heart disease (cardiorenal benefits independent of glycemic control). Empagliflozin is appropriate at eGFR 50.
+- Metformin can be used cautiously at a reduced dose given eGFR 50, providing additional glycemic lowering.
+- A GLP-1 receptor agonist could be considered for ASCVD benefit, but given his age (83), BMI only 28, and A1c only 7.7% (close to a relaxed target of <8%), starting two agents plus metformin would be excessive. The SGLT2i + metformin should be sufficient.
+
+| Medication |
+|---|
+| Empagliflozin 10 mg orally once daily - NEW - start immediately for cardiovascular and renal benefit in addition to glycemic control |
+| Metformin 500 mg orally once daily - NEW - start at low dose given age and eGFR 50; may titrate up to 500 mg twice daily in 2-4 weeks if tolerated (maximum 1000 mg/day given renal function) |"
+DM065,48,Claude Sonnet 4.6,21,8.8,FALSE,0,1,0,1,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"I'll analyze this case carefully:
+
+**Key considerations:**
+- 86-year-old, frail-ish (cane, fatigue, decreased appetite), newly diagnosed T2DM
+- HbA1c 8.8% — needs treatment, but goals should be conservative (~8-8.5% acceptable given age/frailty)
+- eGFR 21 (CKD stage 4): **metformin contraindicated**, SGLT2 inhibitors largely ineffective and mostly contraindicated at this eGFR, GLP-1 RAs usable with caution
+- Decreased appetite — weight loss risk; GLP-1 RA could worsen this
+- Hyperkalemia risk (K 5.2) — caution with some agents
+- Anemia (Hgb 10.4) — note DPP-4 inhibitors are renally dosed but safe
+- Hypoglycemia risk is HIGH given age, frailty, anemia
+- Avoid sulfonylureas, avoid aggressive insulin if possible
+- DPP-4 inhibitor (e.g., linagliptin — no renal dose adjustment needed) is a strong choice
+- Low-dose basal insulin could be considered if needed, but start conservatively
+
+**Plan: Start linagliptin (no renal adjustment needed). Given HbA1c 8.8% and symptomatic hyperglycemia, add low-dose basal insulin with plan to titrate carefully.**
+
+---
+
+```
+""Medication Plan""
+""Linagliptin (Tradjenta) — NEW medication. Start 5 mg orally once daily with or without food. No renal dose adjustment required. Preferred agent given CKD stage 4, low hypoglycemia risk, and no renal dosing concerns.""
+""Insulin glargine (Basaglar/Lantus) — NEW medication. Start 6 units subcutaneously once daily at bedtime. Titrate up slowly by 1-2 units every 3-7 days targeting fasting glucose 100-140 mg/dL. Given age, frailty, and decreased appetite, use conservative titration and avoid fasting glucose targets below 100 mg/dL to minimize hypoglycemia risk.""
+```"
+DM065,48,Claude Opus 4.6,21,8.8,FALSE,0,1,1,0,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+**Clinical Reasoning:**
+This is an 86-year-old frail elderly woman with newly diagnosed T2DM, HbA1c 8.8%, CKD stage 4 (eGFR 21), and hyperkalemia (K 5.2). Given her age, a less stringent A1c target of ~7.5-8.0% is appropriate. Key considerations:
+- Metformin is contraindicated (eGFR <25-30)
+- SGLT2 inhibitors: limited glycemic efficacy at eGFR <20-25, but could consider for kidney/CV benefits; however, with eGFR 21, most are not indicated for glycemic lowering initiation
+- GLP-1 receptor agonists: require caution in CKD stage 4 due to GI side effects and risk of dehydration/AKI in an elderly patient with decreased appetite
+- DPP-4 inhibitors: safe in CKD with dose adjustment, well-tolerated, modest A1c reduction
+- Insulin: given HbA1c 8.8% and symptoms (fatigue), basal insulin is appropriate and safe in CKD
+
+Given her symptomatic hyperglycemia, advanced CKD, age, and the need for a safe but effective regimen, I recommend a DPP-4 inhibitor plus low-dose basal insulin:
+
+| Medication |
+|---|
+| Linagliptin 5 mg oral once daily (new medication; no dose adjustment needed for CKD) |
+| Insulin glargine 10 units subcutaneous once daily at bedtime (new medication; will be titrated up by 2 units every 3-7 days targeting fasting glucose 130-180 mg/dL, with close monitoring given CKD and age) |"
+DM066,49,Claude Opus 4.6,60,8.1,FALSE,1,1,0,0,1,0,1,1,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg by mouth twice daily – NEW medication; titrate up to 1000 mg twice daily over the next 1-2 months as tolerated |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly – NEW medication; titrate up over the next several months (0.25 mg x 4 weeks, then 0.5 mg x 4 weeks, then 1.0 mg ongoing, with further titration to 2.0 mg if needed and tolerated) |
+
+**Rationale (for documentation, not part of the table):** This 80-year-old man with newly diagnosed T2DM (A1c 8.1%), obesity (BMI 32), MASLD, CKD stage 3a (eGFR 60), and albuminuria (UACR 60 mg/g) benefits from:
+
+- **Metformin**: First-line therapy, safe at eGFR 60, helps with insulin resistance, has hepatic benefits, and is cost-effective. Starting at a lower dose with gradual titration minimizes GI side effects in an elderly patient.
+- **GLP-1 receptor agonist (semaglutide)**: Provides cardiovascular benefit, significant weight reduction (beneficial for obesity and MASLD), renal protective effects, and liver enzyme improvement. It addresses multiple comorbidities simultaneously. No dose adjustment needed for CKD 3a. The combination should bring his A1c to goal (<7.5-8.0% is reasonable for this 80-year-old) while providing cardiorenal and metabolic benefits."
+DM067,50,Claude Sonnet 4.6,32,9.6,No,1,1,1,1,0,1,1,0,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,"Here is the medication recommendation table:
+
+| Medication Recommendation |
+|---|
+| **Insulin glargine (Basaglar/Lantus/Toujeo) 10 units subcutaneously at bedtime** — New medication. Starting dose given significantly elevated HbA1c (9.6%) and fasting glucose (260 mg/dL). Dose will be titrated up based on fasting glucose readings. Note: Metformin avoided given eGFR 32 mL/min/1.73m2 (contraindicated below eGFR 30, and near that threshold in an elderly patient). SGLT2 inhibitors avoided given eGFR 32 (insufficient glycemic efficacy and safety concerns at this level). GLP-1 agonists are an option but given the degree of hyperglycemia and age, basal insulin is prioritized for more reliable glucose lowering. |
+
+---
+
+**Clinical rationale summary (not for CSV):**
+- HbA1c of 9.6% with fasting glucose of 260 warrants insulin initiation
+- CKD 3b (eGFR 32) limits use of metformin and SGLT2i
+- Age 84 warrants avoidance of complex regimens and hypoglycemia risk; basal insulin alone is appropriate to start
+- Titration planned over coming weeks targeting fasting glucose 100–140 mg/dL given her age and hypoglycemia risk"
+DM067,50,Claude Opus 4.6,32,9.6,No,0,1,1,1,1,0,1,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+**Clinical Reasoning:**
+This is an 84-year-old with newly diagnosed type 2 diabetes, HbA1c 9.6%, eGFR 32, UACR 300 mg/g, and CKD stage 3b. Key considerations:
+- Age 84 → less aggressive A1c target (7.5–8.0% reasonable), avoid hypoglycemia
+- eGFR 32 → metformin is contraindicated (eGFR <30 is absolute cutoff, but generally avoided or used at reduced dose below 45; at 32, most guidelines recommend against initiation)
+- SGLT2 inhibitors: can be initiated for cardiorenal protection down to eGFR 20 (per current guidelines), though glycemic efficacy is reduced at this eGFR. Empagliflozin or dapagliflozin appropriate given albuminuria and CKD.
+- HbA1c 9.6% with fasting glucose 260: significant hyperglycemia. Given her age, a basal insulin is appropriate to bring glucose down safely, combined with an SGLT2 inhibitor for renal/CV protection.
+- GLP-1 receptor agonists are an alternative but given her age (84), injection burden, GI side effects, and the need for relatively prompt glucose control, basal insulin + SGLT2i is a practical approach.
+
+| Medication Recommendation |
+|---|
+| Empagliflozin 10 mg oral once daily - NEW (initiated primarily for cardiorenal protection given CKD stage 3b and albuminuria; modest glycemic benefit expected at this eGFR) |
+| Insulin glargine (basal insulin) 10 units subcutaneous once daily at bedtime - NEW; titrate up by 2 units every 3-5 days targeting fasting blood glucose 130-180 mg/dL (relaxed target given age 84) |"
+DM068,51,Claude Sonnet 4.6,40,7.9,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the recommended diabetes medication plan:
+
+| Medication Recommendation |
+|---------------------------|
+| **Empagliflozin 10 mg** – Start new medication. Take 10 mg orally once daily in the morning. This agent is chosen for its established cardiovascular and heart failure mortality benefit (EMPEROR-Reduced trial) and renal protective effects. It is safe to initiate at eGFR 40 mL/min/1.73m2, though glucose-lowering efficacy is reduced at this level. |
+| **Metformin** – Do NOT start. Contraindicated given eGFR of 40 mL/min/1.73m2 (below the threshold of 45 mL/min/1.73m2 for initiation). |
+| **Semaglutide (oral or subcutaneous)** – Start subcutaneous semaglutide 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly. Dose will be titrated up over subsequent months as tolerated toward 1 mg once weekly. Chosen for additional HbA1c lowering (current HbA1c 7.9%), cardiovascular benefit, and modest weight benefit; no dose adjustment required for eGFR 40 mL/min/1.73m2. |"
+DM068,51,Claude Opus 4.6,40,7.9,FALSE,1,1,1,1,1,1,0,0,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Empagliflozin 10 mg oral once daily (new medication) - given proven cardiovascular and heart failure benefits, renal protective effects, and can be initiated at eGFR 20+; monitor renal function and volume status given concurrent diuretic use |
+| Metformin 500 mg oral once daily (new medication) - starting at low dose given eGFR 40 mL/min/1.73m2; will titrate up to 500 mg twice daily if tolerated and renal function remains stable; do not exceed 1000 mg/day at this eGFR |
+
+**Rationale:** This 82-year-old man with newly diagnosed T2DM, HFrEF, CKD stage 3b with albuminuria, and established ASCVD benefits most from an SGLT2 inhibitor as first-line therapy given its triple cardiorenal-metabolic benefits (reduces HF hospitalizations, slows CKD progression, and lowers glucose). Empagliflozin is chosen given strong evidence in heart failure (EMPEROR-Reduced) and CKD populations. Low-dose metformin is added as a complementary agent for additional glycemic control, used cautiously at reduced dose appropriate for his eGFR. The HbA1c target for this elderly patient with multiple comorbidities is relaxed (< 8.0–8.5%), so this regimen should be sufficient without overtreatment risk. GLP-1 receptor agonists were considered but deferred given his age, heart failure symptoms, and the need to monitor volume status with SGLT2i initiation alongside existing diuretics."
+DM070,53,GPT-5.4,34,8.7,FALSE,1,1,1,0,0,0,1,0,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"| Medication recommendation |
+|---|
+| Metformin: continue but reduce dose to 500 mg by mouth once daily. |
+| Empagliflozin: start 10 mg by mouth once daily. |
+| Insulin glargine: start 10 units subcutaneously once nightly; this medication will be titrated up. |"
+DM070,53,Claude Opus 4.6,34,8.7,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+**Clinical Rationale Summary:**
+This patient has an HbA1c of 8.7% on metformin 500 mg BID, with CKD stage 3b (eGFR 34), albuminuria (UACR 280 mg/g), obesity, and cardiovascular risk factors. Metformin should be dose-reduced or discontinued given eGFR 34 (below the threshold of 30 requires discontinuation, but at 34 dose reduction is warranted). An SGLT2 inhibitor is strongly indicated for cardiorenal protection given her albuminuric CKD (can be initiated at eGFR ≥20). A GLP-1 receptor agonist is added for glycemic control, weight management, and cardiovascular benefit.
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg once daily (reduced from twice daily due to eGFR 34 mL/min/1.73m2; monitor renal function and discontinue if eGFR falls below 30) |
+| Empagliflozin 10 mg once daily — NEW (added for cardiorenal protection given albuminuric CKD and for glycemic benefit) |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly — NEW (starting dose; will be titrated up to 0.5 mg weekly after 4 weeks, then to 1 mg weekly after an additional 4 weeks as tolerated, for glycemic control and weight management) |"
+DM072,55,Claude Opus 4.6,24,7.9,FALSE,0,1,0,1,1,1,0,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended diabetes medication plan for this patient:
+
+**Clinical Reasoning:**
+- **Metformin** must be **stopped** — it is contraindicated with eGFR 24 mL/min/1.73m² (below the 30 threshold for discontinuation).
+- **HbA1c target** should be relaxed to ~7.5–8.0% given her age (81), CKD stage 4, limited life expectancy, and risk of hypoglycemia. Her current A1c of 7.9% is near a reasonable goal, but fasting glucose of 176 suggests she would benefit from a modest intervention.
+- **SGLT2 inhibitors** are not appropriate to initiate at eGFR 24 (below initiation threshold of 20-25 depending on agent, and limited glycemic efficacy at this level).
+- **GLP-1 receptor agonists** require caution in CKD stage 4 and may worsen her decreased appetite and fatigue; given her age and frailty (walker-dependent), these are less ideal.
+- **DPP-4 inhibitor (linagliptin)** is an excellent choice: no renal dose adjustment needed, weight-neutral, low hypoglycemia risk, well-tolerated in elderly patients with CKD.
+- A relaxed A1c target of ~7.5–8.0% is appropriate; linagliptin should modestly lower A1c by ~0.5–0.7% which is sufficient.
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg daily — STOP (contraindicated with eGFR 24 mL/min/1.73m²) |
+| Linagliptin 5 mg once daily — NEW (no renal dose adjustment required) |"
+DM074,57,Claude Opus 4.6,94,10.3,No,1,0,1,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Metformin 1000 mg twice daily - CONTINUE without change |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly - NEW. Start at 0.25 mg weekly for 4 weeks, then titrate up (to 0.5 mg weekly, then 1 mg weekly, then 2 mg weekly as tolerated) targeting improved glycemic control. Will be titrated up over the next few months. |
+| Empagliflozin 10 mg once daily - NEW. Start at 10 mg daily, may titrate to 25 mg daily if needed. |
+
+**Rationale summary (not part of the prescription table):** With an HbA1c of 10.3%, this patient needs significant intensification beyond metformin alone. A GLP-1 receptor agonist (semaglutide) is prioritized given her obesity (BMI 39), as it provides substantial A1c reduction and significant weight loss. An SGLT2 inhibitor (empagliflozin) is added given her borderline albuminuria (UACR 30 mg/g), cardiovascular risk factors, and complementary mechanism of action. Together with metformin, this triple therapy addresses her glycemic needs, weight, and cardiorenal risk profile without hypoglycemia risk."
+DM075,58,Claude Sonnet 4.6,40,8.2,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the medication recommendation table:
+
+| **Medication Plan** |
+|---|
+| Metformin 500 mg twice daily — STOP. Discontinue due to CKD stage 3b with eGFR of 40 mL/min/1.73m2, which is below the threshold for safe continued use. |
+| Empagliflozin 10 mg once daily in the morning — START. An SGLT2 inhibitor is strongly indicated given his type 2 diabetes with heart failure with preserved ejection fraction and CKD with albuminuria (UACR 260 mg/g). Will provide cardiovascular and cardiorenal benefit. eGFR of 40 is adequate to initiate for heart failure and cardiorenal indications per current guidelines, though glucose-lowering efficacy will be reduced at this eGFR. |
+| Semaglutide (oral) 3 mg once daily in the morning — START, to be titrated up. A GLP-1 receptor agonist is indicated given HbA1c of 8.2%, BMI of 32, and cardiovascular risk profile. Start at 3 mg once daily for 30 days, then titrate to 7 mg once daily, then to 14 mg once daily as tolerated to optimize glycemic and weight benefit. |"
+DM076,59,Claude Sonnet 4.6,76,8.8,FALSE,1,0,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"I'll analyze this case:
+
+- HbA1c 8.8% — above goal, needs intensification
+- BMI 35 — obesity favors weight-losing agents
+- eGFR 76 — GLP-1 RA and SGLT2 inhibitor both acceptable
+- Recurrent UTIs — **avoid SGLT2 inhibitor** (increased UTI/genital infection risk)
+- Microalbuminuria (UACR 44 mg/g) — GLP-1 RA has renal benefit; already on ACE/ARB
+- No ASCVD mentioned — but cardiometabolic risk factors present
+- Metformin already at max dose
+
+**Plan:** Continue metformin, add a GLP-1 RA (semaglutide) for additional HbA1c lowering, weight loss benefit, and renal protection, with titration protocol.
+
+---
+
+```
+""Medication Plan""
+""Metformin 1000 mg twice daily — continue without change""
+""Semaglutide (Ozempic) injection — start 0.25 mg subcutaneously once weekly for 4 weeks, then increase to 0.5 mg once weekly for 4 weeks, then increase to 1 mg once weekly; will titrate further toward 2 mg once weekly based on tolerability and glycemic response at follow-up visits""
+```"
+DM076,59,Claude Opus 4.6,76,8.8,FALSE,1,1,0,1,1,1,0,0,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended diabetes medication plan for this patient:
+
+**Clinical Rationale:** This patient has an HbA1c of 8.8% on metformin monotherapy, with obesity (BMI 35), moderately increased albuminuria (UACR 44 mg/g), and established cardiovascular risk factors. A GLP-1 receptor agonist is preferred given the obesity, cardiovascular benefit, and the fact that SGLT2 inhibitors are relatively contraindicated given her history of recurrent UTIs. The GLP-1 RA will address glycemic control and promote weight loss. Given the significantly elevated HbA1c, a second add-on agent is warranted; a low-dose sulfonylurea or other agent could be considered, but given her profile, maximizing the GLP-1 RA with planned titration should be attempted first, with reassessment in 3 months.
+
+| Medication |
+|---|
+| Metformin 1000 mg twice daily – CONTINUE without change |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly – NEW. Start at 0.25 mg weekly for 4 weeks, then increase to 0.5 mg weekly. Will be titrated up to 1 mg weekly (and potentially 2 mg weekly) over the next 2-3 months as tolerated to achieve glycemic goal. |"
+DM077,60,Claude Opus 4.6,28,8.5,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommended diabetes medication plan for this patient:
+
+**Clinical Reasoning Summary:**
+- eGFR 28 mL/min/1.73m² (CKD stage 4): Metformin is contraindicated when eGFR <30 and should be discontinued.
+- He has established ASCVD (stroke, peripheral vascular disease) and diabetic nephropathy with significant albuminuria (UACR 520 mg/g): An SGLT2 inhibitor with proven cardiorenal benefit is indicated. Empagliflozin can be initiated down to eGFR 20 mL/min/1.73m² per current guidelines for cardiorenal protection, though glycemic efficacy is reduced.
+- A GLP-1 receptor agonist is indicated given ASCVD history, need for additional glycemic control, and modest weight reduction benefit. Semaglutide (injectable) has strong cardiovascular evidence and does not require renal dose adjustment.
+- HbA1c 8.5% with fasting glucose 210: The combination of SGLT2i + GLP-1 RA should provide meaningful A1c reduction. The GLP-1 RA will be titrated up over the coming months.
+
+| Medication Recommendation |
+|---|
+| Metformin 500 mg twice daily – STOP (contraindicated with eGFR <30 mL/min/1.73m²) |
+| Empagliflozin 10 mg once daily – NEW (for cardiorenal protection and modest glycemic benefit; initiate at 10 mg daily) |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly – NEW (start at 0.25 mg weekly for 4 weeks, then increase to 0.5 mg weekly; will be titrated up to 1 mg weekly as tolerated over the next 2-3 months for glycemic control and cardiovascular benefit) |"
+DM078,61,Claude Opus 4.6,68,9.4,FALSE,1,1,1,1,1,1,0,0,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Metformin 1000 mg twice daily - CONTINUE without change |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly - NEW. Start at 0.25 mg weekly for 4 weeks, then titrate up to 0.5 mg weekly, with plan to titrate up further to 1 mg weekly and then 2 mg weekly as tolerated over the next few months. |
+| Empagliflozin 10 mg once daily - NEW. Start at 10 mg daily with plan to titrate up to 25 mg daily in 4-8 weeks if tolerated. |
+
+**Rationale summary:** This patient has an HbA1c of 9.4% on metformin alone, with obesity (BMI 36), metabolic dysfunction-associated steatotic liver disease (elevated ALT), and mildly reduced eGFR. She would benefit significantly from a GLP-1 receptor agonist (semaglutide) for glycemic control, weight loss, cardiovascular benefit, and potential liver benefit, combined with an SGLT2 inhibitor (empagliflozin) for additional glycemic control, weight loss, cardiorenal protection, and complementary mechanism of action. Both agents are appropriate given her eGFR of 68 and her comorbidity profile."
+DM080,63,Claude Opus 4.6,54,8.1,FALSE,0,0,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+**Clinical Rationale:** This patient has T2DM with HbA1c 8.1% on dulaglutide 1.5 mg weekly (already at max dose), with established ASCVD (prior coronary stent), CKD stage 3a (eGFR 54), and albuminuria (UACR 240 mg/g). He needs additional glycemic control and has compelling indications for an SGLT2 inhibitor (cardiovascular benefit, renal protection, and additional glucose lowering). Adding empagliflozin is appropriate given his eGFR of 54 (above initiation threshold) and will address cardiorenal protection plus help with glycemic control.
+
+| Medication |
+|---|
+| Dulaglutide 1.5 mg subcutaneous injection once weekly – continued without change |
+| Empagliflozin 10 mg oral once daily – NEW; will titrate up to 25 mg daily in 4-8 weeks if tolerated |"
+DM081,64,Claude Opus 4.6,76,9.2,No,1,1,1,1,1,1,0,1,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Liraglutide: Increase dose from 1.2 mg daily to 1.8 mg daily (subcutaneous injection). Will monitor GI tolerance. |
+| Empagliflozin: Add new medication at 10 mg orally once daily (SGLT2 inhibitor chosen given obesity, moderately increased albuminuria, and need for additional A1c lowering; may titrate up to 25 mg daily in 4-8 weeks if tolerated). |
+| Metformin: Add new medication at 500 mg orally once daily with evening meal; titrate up to 1000 mg twice daily over the next 2-3 months as GI tolerance allows. |
+
+**Rationale summary:** This patient has an A1c of 9.2% on submaximal liraglutide, with obesity (BMI 38), early diabetic kidney disease (UACR 36 mg/g), and cardiovascular risk factors. Maximizing liraglutide to 1.8 mg provides additional glycemic and weight benefit. Adding empagliflozin provides cardiorenal protection and complements the GLP-1 RA mechanism. Adding metformin provides foundational, cost-effective glucose lowering. This triple combination avoids hypoglycemia and supports weight management while targeting her significantly elevated A1c. Recheck A1c in 3 months."
+DM091,70,Claude Sonnet 4.6,38,8.4,FALSE,0,1,1,1,1,0,1,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the medication recommendation table:
+
+| Medication Plan |
+|---|
+| Semaglutide 1 mg subcutaneous injection once weekly — continue at current dose and frequency |
+| Empagliflozin 10 mg oral once daily — add this new medication; indicated given HFpEF hospitalization, CKD with albuminuria (UACR 310 mg/g), and suboptimal glycemic control; eGFR 38 is acceptable for cardiorenal benefit even though glycemic efficacy is reduced at this eGFR level |
+| Insulin glargine 10 units subcutaneous injection once daily at bedtime — add this new medication to address persistent hyperglycemia and HbA1c of 8.4%; dose will be titrated up over coming weeks targeting fasting glucose 80–130 mg/dL |
+
+**Key notes embedded in rationale (not for CSV):**
+- Metformin avoided given eGFR 38
+- SGLT2 inhibitor chosen for cardiorenal protection (HFpEF, CKD, albuminuria) per ADA/ACC guidelines regardless of modest glycemic contribution at this eGFR
+- Basal insulin added for symptomatic hyperglycemia; starting conservatively at 10 units given age 82 and fall/hypoglycemia risk
+- Pioglitazone avoided given HF history
+- DPP-4 inhibitor not added given patient already on GLP-1 RA"
+DM091,70,Claude Opus 4.6,38,8.4,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Semaglutide 1 mg subcutaneous injection once weekly – continue without change |
+| Empagliflozin 10 mg oral once daily – NEW addition (initiate now; provides cardiovascular benefit in heart failure with preserved ejection fraction, renal protection given albuminuria, and glycemic lowering; appropriate to use at eGFR 38 mL/min/1.73m2; monitor renal function and volume status given concurrent furosemide) |
+
+**Rationale summary:** This patient has HFpEF, CKD stage 3b with significant albuminuria, and suboptimal glycemic control (HbA1c 8.4%) on semaglutide alone. An SGLT2 inhibitor (empagliflozin) has strong evidence for reducing heart failure hospitalizations and slowing CKD progression, and is indicated at her current eGFR. The combination of semaglutide + empagliflozin addresses glycemic control while providing cardiorenal protection. A relaxed HbA1c target of ~7.5–8.0% is reasonable given her age and comorbidities, and this regimen should help achieve that without hypoglycemia risk. Metformin is avoided given eGFR 38 and heart failure history. Sulfonylureas are avoided given hypoglycemia risk in an elderly patient with CKD."
+DM093,72,Claude Sonnet 4.6,24,8.9,FALSE,0,1,0,1,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my analysis and recommendation:
+
+**Key considerations:**
+- HbA1c 8.9% — poorly controlled, needs intensification
+- eGFR 24 (CKD stage 4) — metformin contraindicated; SGLT2 inhibitors not effective for glucose lowering at this eGFR (and most contraindicated); GLP-1 RA already on board
+- Semaglutide 0.5 mg — likely not at max dose; can titrate to 1 mg (or 2 mg)
+- Insulin will be needed given degree of hyperglycemia and limited options in advanced CKD
+- Sulfonylureas: high hypoglycemia risk in elderly + CKD — avoid
+- TZDs: fluid retention risk in CKD/heart concern — avoid
+- Basal insulin appropriate addition; use carefully given age, with conservative starting dose
+- Dose-reduce insulin for eGFR <30 (renally cleared — especially true for insulin); start low
+- Given age 77, individualize targets — avoid hypoglycemia
+
+---
+
+```
+""Medication Plan""
+""Semaglutide — increase dose from 0.5 mg to 1 mg subcutaneously once weekly""
+""Insulin glargine — newly added; start at 10 units subcutaneously once nightly at bedtime; titrate up by 2 units every 3 days as needed targeting fasting glucose 100–140 mg/dL; titration will be ongoing over next several weeks""
+```"
+DM093,72,Claude Opus 4.6,24,8.9,FALSE,0,1,0,1,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Semaglutide: Increase dose from 0.5 mg weekly to 1 mg weekly. Will titrate up to 2 mg weekly if tolerated and if further glycemic control is needed. |
+| Insulin glargine (basal insulin): Start at 10 units subcutaneously once daily at bedtime. Titrate up by 2 units every 3 days until fasting blood glucose is consistently 80–130 mg/dL. |
+
+**Rationale:** This patient has an HbA1c of 8.9% with significantly elevated fasting glucose, CKD stage 4 (eGFR 24), and obesity. Semaglutide is safe in CKD and should be uptitrated for additional glycemic and weight benefit. However, given the degree of hyperglycemia (fasting glucose 222), semaglutide alone — even at a higher dose — is unlikely to achieve goal. Basal insulin is appropriate as add-on therapy. SGLT2 inhibitors are generally not initiated at eGFR <20, and while this patient's eGFR is 24, the limited glycemic efficacy at this level of kidney function and the elevated potassium (5.1) make basal insulin a more reliable choice for glucose lowering. Metformin is contraindicated at this eGFR. Sulfonylureas carry hypoglycemia risk and are best avoided in advanced CKD in an elderly patient."
+DM098,77,Claude Opus 4.6,72,9.1,FALSE,1,1,0,1,0,0,0,1,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,"Here is my recommended diabetes medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Tirzepatide: Increase dose from 7.5 mg weekly to 10 mg weekly (subcutaneous injection). Will plan to titrate up to 12.5 mg and then 15 mg weekly in subsequent months if needed and tolerated. |
+| Metformin: Add metformin 500 mg by mouth twice daily. Will titrate up to 1000 mg twice daily over the next 4–8 weeks as tolerated (eGFR supports use). |
+
+Rationale summary (not part of the table): Her A1c is 9.1% with significant fasting hyperglycemia despite tirzepatide 7.5 mg weekly. She has room to uptitrate tirzepatide (max 15 mg weekly). Adding metformin provides a complementary mechanism of action (hepatic glucose output reduction) with cardiovascular and cost benefits. An SGLT2 inhibitor was considered given her albuminuria and cardiorenal benefits; however, her history of recurrent UTIs is a relative contraindication, so it is avoided here."
+DM101,80,Claude Sonnet 4.6,38,8,FALSE,0,0,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is the recommended diabetes medication plan:
+
+| Medication Recommendation |
+|---------------------------|
+| Empagliflozin 25 mg daily — continue at current dose and frequency. Provides cardiovascular and renal protection in the setting of established CAD, prior MI, and CKD with albuminuria. Note: at eGFR 38, glycemic efficacy is reduced but cardiorenal benefits persist; continue unless eGFR drops below 20. |
+| Semaglutide (GLP-1 receptor agonist) — add new medication. Start semaglutide subcutaneous injection 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly. Dose will be titrated up over subsequent months toward a target of 1 mg once weekly as tolerated, to improve glycemic control and provide additional cardiovascular benefit given established ASCVD. |"
+DM101,80,Claude Opus 4.6,38,8,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Empagliflozin 25 mg daily - CONTINUE at current dose and frequency (provides cardiovascular and renal benefits; note eGFR 38 allows continuation but glycemic efficacy is reduced at this level) |
+| Semaglutide 0.25 mg subcutaneous injection once weekly - NEW; start at 0.25 mg weekly for 4 weeks, then titrate up to 0.5 mg weekly, with further titration to 1.0 mg weekly as tolerated to reach glycemic goal (provides additional cardiovascular benefit, weight reduction, and A1c lowering) |
+
+**Rationale summary:** This patient has established ASCVD, CKD stage 3b with albuminuria, and an A1c of 8.0% on empagliflozin alone. Adding a GLP-1 receptor agonist with proven cardiovascular benefit (semaglutide) is guideline-concordant. Metformin is not recommended given eGFR 38 (relative contraindication at <30, but limited efficacy and increased risk at this level with declining trajectory). The GLP-1 RA will provide meaningful A1c reduction, cardiovascular risk reduction, and modest weight loss without hypoglycemia risk."
+DM102,81,Claude Sonnet 4.6,72,8.3,FALSE,0,0,1,0,1,1,0,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is the recommended diabetes medication plan:
+
+| Diabetes Medication Plan |
+|--------------------------|
+| Canagliflozin 100 mg daily — continue at current dose and frequency |
+| Semaglutide (oral) 3 mg daily — new medication; start at 3 mg daily for 30 days, then titrate up |
+
+**Brief rationale notes (not for CSV):**
+- Her HbA1c of 8.3% with fasting glucoses consistently above 180 mg/dL indicates the need for an additional agent beyond canagliflozin.
+- A GLP-1 receptor agonist (semaglutide) is an excellent choice given her Asian ethnicity (where GLP-1 RAs perform particularly well), BMI of 26 (weight-neutral to modest weight loss benefit), preserved renal function (eGFR 72), and no contraindications. Oral semaglutide is offered here for convenience, though injectable semaglutide (0.25 mg weekly, titrating to 0.5–1 mg) is an equally valid alternative if preferred.
+- Canagliflozin is continued given eGFR 72, no genitourinary infection history, and ongoing cardiorenal benefits."
+DM103,82,Claude Sonnet 4.6,36,8.4,FALSE,0,1,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"I'll analyze this case:
+
+**Key considerations:**
+- HbA1c 8.4% — needs better glycemic control
+- eGFR 36 (CKD 3b) — limits some options; metformin relatively contraindicated; dapagliflozin has reduced glycemic efficacy at this eGFR but retains cardiorenal benefit
+- HFpEF with recent hospitalization 9 months ago — SGLT2i beneficial (already on it)
+- UACR 300 mg/g — significant albuminuria; GLP-1 RA has renal benefit
+- Age 82, fatigue — avoid hypoglycemia risk; sulfonylureas and insulin carry higher risk in elderly
+- BMI 30 — GLP-1 RA reasonable
+- BNP elevated — heart failure not fully compensated; GLP-1 RA is neutral/beneficial in HFpEF
+- Apixaban on board — no major interaction concerns with additions
+
+**Plan:** Continue dapagliflozin (cardiorenal benefit persists at eGFR 36). Add a GLP-1 RA (semaglutide) for additional HbA1c lowering, weight benefit, and renal protection, with careful titration given age and GI risk.
+
+---
+
+```
+""Medication Plan""
+""Dapagliflozin 10 mg once daily — continue unchanged. Retains cardiorenal and renoprotective benefit despite reduced glycemic efficacy at eGFR 36.""
+""Semaglutide (oral or subcutaneous) — new addition. Start semaglutide subcutaneous 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly. Will titrate up toward 1 mg once weekly over the following months based on tolerability and glycemic response.""
+```"
+DM103,82,Claude Opus 4.6,36,8.4,FALSE,0,0,1,1,0,0,1,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication |
+|---|
+| Dapagliflozin 10 mg daily – CONTINUE without change (provides cardiovascular and renal benefits; note eGFR 36 allows continuation but glycemic efficacy is reduced at this level) |
+| Insulin glargine – ADD, start at 10 units subcutaneously once daily at bedtime; will be titrated up (increase by 2 units every 3 days targeting fasting glucose 130–180 mg/dL, given age 82 and comorbidities, aiming for a relaxed A1c goal of ~7.5–8.0%) |"
+DM105,84,Claude Opus 4.6,68,8.6,FALSE,1,0,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Here is my reasoning and recommendation:
+
+**Clinical Assessment:**
+- HbA1c 8.6% is well above goal, indicating need for therapy intensification
+- Dapagliflozin is contributing to recurrent UTIs (2 in 4 months), which is a known side effect of SGLT2 inhibitors, particularly in women
+- However, she has moderately increased albuminuria (UACR 40 mg/g) and eGFR 68, suggesting early diabetic kidney disease where SGLT2 inhibitors have proven cardiorenal benefit
+- Given the recurrent UTIs are a significant quality-of-life and safety concern, the risk-benefit balance favors discontinuing dapagliflozin
+- She needs additional agents for glycemic control; a GLP-1 receptor agonist is ideal given obesity (BMI 34), cardiovascular risk factors, and glycemic gap
+- Metformin is also appropriate as foundational therapy with eGFR 68
+
+**Plan:**
+
+| Medication Recommendation |
+|---|
+| Dapagliflozin 5 mg daily – STOP (due to recurrent urinary tract infections) |
+| Metformin 500 mg twice daily – NEW; titrate up to 1000 mg twice daily over the next 1-2 months as tolerated |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly – NEW; titrate up to 0.5 mg weekly after 4 weeks, then to 1 mg weekly after another 4 weeks as tolerated |"
+DM107,86,Claude Opus 4.6,24,8.8,FALSE,0,1,1,1,1,1,1,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommended diabetes medication plan for this patient:
+
+**Clinical Reasoning:**
+- eGFR is 24 mL/min/1.73m² (CKD stage 4). Canagliflozin should be continued if already on it for cardiorenal benefit (per current guidelines, SGLT2 inhibitors can be continued until dialysis or transplant once initiated, though glycemic efficacy is reduced at this eGFR). However, canagliflozin's labeling recommends against initiation below eGFR 30 and some guidelines suggest discontinuation below eGFR 20-25. Given eGFR of 24 and significant albuminuria (UACR 420), the cardiorenal benefits support continuation for now.
+- HbA1c is 8.8% with fasting glucoses >190. She needs additional glycemic control. A reasonable HbA1c target for this 79-year-old with CKD4 and comorbidities is ~7.5-8.0%.
+- Metformin is contraindicated (eGFR <30).
+- GLP-1 receptor agonists (e.g., semaglutide) do not require renal dose adjustment and would help with glycemic control and weight.
+- Potassium is 5.1, so need to be cautious (avoid agents that raise potassium).
+- Insulin is an alternative but given her BMI of 31, a GLP-1 RA is preferred as next step before insulin.
+
+| Medication Recommendation |
+|---|
+| Canagliflozin 100 mg daily – CONTINUE at current dose for cardiorenal protection; monitor eGFR closely and discontinue if eGFR falls below 20 or if not tolerated |
+| Semaglutide (Ozempic) subcutaneous injection – NEW – Start at 0.25 mg once weekly for 4 weeks, then increase to 0.5 mg once weekly; will titrate up to 1 mg once weekly if tolerated and glycemic target not met |"
+DM111,90,Claude Sonnet 4.6,38,8.5,FALSE,0,0,1,1,1,0,0,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"I'll analyze this case:
+
+**Key considerations:**
+- HbA1c 8.5% — needs better glycemic control
+- eGFR 38 (CKD stage 3b) — limits some options
+- HFpEF with recent hospitalization + elevated BNP — SGLT2i has strong indication (cardiorenal benefit)
+- Semaglutide 0.5 mg — still at low/starting dose, can titrate
+- High albuminuria (300 mg/g) — further supports SGLT2i
+- Age 82, fatigue — avoid hypoglycemia risk; careful with complex regimens
+- eGFR 38: empagliflozin/dapagliflozin can be used for HF benefit down to lower eGFR thresholds (dapagliflozin approved for HF regardless of eGFR; glycemic benefit diminishes below eGFR 45 but CV/renal benefit persists)
+
+**Plan:**
+- Titrate semaglutide toward 1 mg
+- Add dapagliflozin for HF, CKD, and glycemic benefit
+
+---
+
+```
+""Semaglutide — increase dose from 0.5 mg to 1 mg subcutaneously once weekly""
+""Dapagliflozin — new medication; start 10 mg orally once daily""
+```
+
+---
+
+| Medication Recommendation |
+|---|
+| Semaglutide — increase dose from 0.5 mg to 1 mg subcutaneously once weekly |
+| Dapagliflozin — new medication; start dapagliflozin 10 mg orally once daily |"
+DM113,92,Claude Opus 4.6,24,8.7,FALSE,0,1,0,1,1,1,1,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+**Clinical Reasoning:** This 77-year-old woman with T2DM has an HbA1c of 8.7% on basal insulin alone, with fasting glucoses frequently >180 mg/dL. She has CKD stage 4 (eGFR 24), which significantly limits medication options (metformin contraindicated, SGLT2 inhibitors unlikely to provide glycemic benefit at this eGFR though may have renal protective effects, GLP-1 RAs require caution). Her elevated fasting glucose suggests inadequate basal insulin dosing. Given her age, CKD stage 4, and potassium of 5.1, the safest approach is to uptitrate basal insulin and add a short-acting insulin for additional coverage if needed. A GLP-1 receptor agonist (e.g., semaglutide) could be considered but given her advanced CKD and anemia/fatigue, I will focus on insulin optimization as the primary strategy, with addition of a low-dose GLP-1 RA for weight and glycemic benefit (semaglutide is not renally cleared and can be used in CKD).
+
+| Medication Recommendation |
+|---|
+| Insulin glargine – increase from 28 units to 32 units nightly, with continued titration up by 2-4 units every 3-5 days targeting fasting glucose 130-150 mg/dL. Will be titrated up over the next few months. |
+| Semaglutide (Ozempic) – NEW – start 0.25 mg subcutaneous injection once weekly for 4 weeks, then increase to 0.5 mg once weekly. Will be titrated up as tolerated over the next few months. |"
+DM114,93,Claude Opus 4.6,40,8.3,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"Here is my recommendation for this patient's antihyperglycemic medication plan:
+
+| Medication Recommendation |
+|---|
+| Dapagliflozin 10 mg once daily – CONTINUE without change (provides cardiovascular and renal benefits in setting of HFrEF and CKD) |
+| Semaglutide 0.25 mg subcutaneous injection once weekly – NEW; start at 0.25 mg weekly for 4 weeks, then titrate up (to 0.5 mg weekly, then 1 mg weekly as tolerated) to achieve glycemic goal |
+
+**Rationale summary:** This patient has ASCVD, HFrEF, and CKD with albuminuria. Dapagliflozin is continued for its proven cardiorenal benefits. A GLP-1 receptor agonist (semaglutide) is added as second-line therapy given persistent hyperglycemia (A1c 8.3%), established ASCVD, obesity (BMI 30), and the need for additional glycemic control without hypoglycemia risk. Metformin is not initiated given eGFR 40 (at the lower threshold where it could be considered at reduced dose, but given his heart failure history with recent hospitalization and risk of lactic acidosis, it is avoided). Sulfonylureas are avoided due to hypoglycemia risk. The GLP-1 RA will be titrated up over the coming months to target dose as tolerated."
+DM115,94,Claude Sonnet 4.6,42,8,FALSE,0,1,1,1,1,1,0,0,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,"I'll analyze this case:
+
+- 86-year-old with T2DM, HbA1c 8.0%, eGFR 42, UACR 160 mg/g (moderately increased albuminuria)
+- Currently on sitagliptin 50 mg daily (appropriate dose-reduced for CKD stage 3b)
+- HbA1c 8.0% — at her age (86), a reasonable target is 8.0–8.5%, so she is at the upper acceptable limit; modest intensification is reasonable but hypoglycemia risk must be minimized
+- CKD 3b with albuminuria: an SGLT2 inhibitor (e.g., empagliflozin) would offer cardiorenal protection, but eGFR 42 is borderline — empagliflozin is approved for cardiorenal protection down to eGFR 20, though glucose-lowering efficacy diminishes below ~45. At eGFR 42, it can still be used for organ protection at a low dose.
+- GLP-1 RA could be considered but injectable therapy in an 86-year-old with fatigue warrants caution; semaglutide oral is an option but GI side effects and age give pause. I'll add low-dose empagliflozin for cardiorenal benefit and modest glucose lowering.
+- Avoid sulfonylureas (hypoglycemia risk in elderly), avoid metformin (eGFR 42 is borderline but generally held at <45 in elderly with caution — will avoid), avoid TZDs (osteoporosis, age).
+
+```
+""Medication Plan""
+""Sitagliptin 50 mg daily — CONTINUE at current dose and frequency (dose-reduced appropriately for CKD stage 3b with eGFR 42)""
+""Empagliflozin 10 mg daily — NEW MEDICATION: start empagliflozin 10 mg orally once daily in the morning; prescribed primarily for cardiorenal protection given CKD stage 3b with albuminuria (UACR 160 mg/g), with additional modest benefit toward glycemic control""
+```"
+DM115,94,Claude Opus 4.6,42,8,FALSE,0,0,1,1,0,0,1,0,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,"Based on this patient's profile — 86 years old, HbA1c 8.0%, CKD stage 3b (eGFR 42), albuminuria (UACR 160 mg/g), and current therapy with sitagliptin 50 mg daily — here are my recommendations:
+
+**Key considerations:**
+- Age 86: A reasonable HbA1c target is <8.0%, but she is currently at 8.0% with fasting glucoses 170-190, so modest intensification is warranted while avoiding hypoglycemia.
+- CKD stage 3b with albuminuria: Strong indication for an SGLT2 inhibitor (cardiorenal benefit). Empagliflozin and dapagliflozin can be initiated at eGFR ≥20. Once an SGLT2 inhibitor is added, sitagliptin (a DPP-4 inhibitor) should be discontinued as the combination adds minimal glycemic benefit and is not typically recommended.
+
+| Medication Recommendation |
+|---|
+| Sitagliptin 50 mg daily — STOP |
+| Empagliflozin 10 mg once daily — NEW. Start for cardiorenal protection and glycemic benefit. Continue at this dose (no need to titrate to 25 mg given age and modest glycemic goal). |
+| Insulin glargine 10 units subcutaneously once daily at bedtime — NEW. Start for fasting hyperglycemia. Titrate up by 2 units every 3–5 days targeting fasting glucose 130–150 mg/dL. |"
+DM116,95,Claude Sonnet 4.6,72,8.4,FALSE,1,0,0,0,1,1,0,0,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,"Here is the recommended diabetes medication plan:
+
+| Medication Plan |
+|---|
+| Metformin 1000 mg twice daily — continue without change |
+| Glipizide ER 10 mg daily — STOP (discontinue due to hypoglycemia risk, evidenced by pre-dinner shakiness, and lack of cardiovascular or renal benefit; replaced by GLP-1 agonist below) |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly — START; dose will be titrated up over coming months |"
+DM119,98,Claude Sonnet 4.6,86,8.8,Yes,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"| Medication Recommendation |
+|---|
+| Metformin ER 500 mg daily — continue at current dose and frequency due to prior GI intolerance at higher doses |
+| Semaglutide (Ozempic) subcutaneous injection — start at 0.25 mg once weekly for 4 weeks, then titrate up (targets HbA1c reduction, weight loss, and cardiovascular risk reduction given obesity and cardiometabolic profile) |"
+DM119,98,GPT-5.4,86,8.8,Yes,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"| Medication recommendation |
+|---|
+| Continue metformin ER 500 mg by mouth once daily without change. |
+| Add semaglutide 0.25 mg subcutaneously once weekly; this medication will be titrated up. |"
+DM119,98,Claude Opus 4.6,86,8.8,Yes,1,0,0,0,1,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,"Here is my recommended antihyperglycemic medication plan for this patient:
+
+| Medication Recommendation |
+|---|
+| Metformin ER 500 mg once daily – continued without change (higher doses not tolerated due to diarrhea) |
+| Semaglutide (Ozempic) 0.25 mg subcutaneous injection once weekly – new medication; start at 0.25 mg weekly for 4 weeks, then increase to 0.5 mg weekly, with plan to titrate up to 1 mg weekly as tolerated over the next few months |
+
+**Rationale:** This patient has an A1c of 8.8% on low-dose metformin alone, with obesity (BMI 36) and elevated triglycerides. A GLP-1 receptor agonist is the ideal second agent given its A1c-lowering efficacy, weight loss benefits, cardiovascular risk reduction, and favorable triglyceride effects. Semaglutide will be titrated up gradually to minimize GI side effects."

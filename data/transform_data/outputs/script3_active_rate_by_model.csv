@@ -1,4 +1,0 @@
-model,prompt_condition,n_responses,metformin_active_n,metformin_active_rate,sglt2i_active_n,sglt2i_active_rate,glp1_active_n,glp1_active_rate,gip_glp1_active_n,gip_glp1_active_rate,dpp4i_active_n,dpp4i_active_rate,insulin_any_active_n,insulin_any_active_rate,basal_insulin_active_n,basal_insulin_active_rate,prandial_insulin_active_n,prandial_insulin_active_rate,sulfonylurea_active_n,sulfonylurea_active_rate,tzd_active_n,tzd_active_rate,cost_mentioned_n,cost_mentioned_rate,urgent_eval_mentioned_n,urgent_eval_mentioned_rate,manual_review_any_n,manual_review_table_n,manual_review_rationale_n,component_mixed_action_any_n
-Claude Opus,baseline,100,66,0.66,58,0.58,58,0.58,7,0.07,4,0.04,24,0.24,24,0.24,2,0.02,0,0,4,0.04,25,0.25,0,0,21,0,21,1
-Claude Sonnet,baseline,100,60,0.6,36,0.36,57,0.57,8,0.08,5,0.05,30,0.3,30,0.3,1,0.01,1,0.01,1,0.01,32,0.32,0,0,25,0,25,3
-GPT-5.4,baseline,100,66,0.66,55,0.55,42,0.42,7,0.07,3,0.03,15,0.15,15,0.15,1,0.01,2,0.02,0,0,15,0.15,0,0,29,0,29,3

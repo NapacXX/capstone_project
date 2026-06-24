@@ -1,4 +1,0 @@
-model_clean,n_cases,mean_variation_ratio,median_variation_ratio,exact_match_cases,exact_match_rate,cases_with_any_variation,max_variation_ratio,krippendorff_alpha,alpha_interpretation
-Claude Opus 4.6,100,0.2740000000000001,0.19999999999999996,38,0.38,62,0.8,0.5753928090437905,Low agreement
-Claude Sonnet 4.6,100,0.5380000000000001,0.6,4,0.04,96,0.8,0.22035022498911339,Low agreement
-GPT-5.4,100,0.6159999999999999,0.6,2,0.02,98,0.8,0.14154524601815655,Low agreement

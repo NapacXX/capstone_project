@@ -1,0 +1,101 @@
+case_id,disagreement_score,disagreed_features
+DM063,5,basal_insulin_active; dpp4i_active; glp1_active; insulin_any_active; sglt2i_active
+DM067,5,basal_insulin_active; glp1_active; insulin_any_active; metformin_active; sglt2i_active
+DM026(3),4,basal_insulin_active; glp1_active; insulin_any_active; sulfonylurea_active
+DM033,4,gip_glp1_active; glp1_active; sglt2i_active; tzd_active
+DM049,4,basal_insulin_active; dpp4i_active; insulin_any_active; sglt2i_active
+DM070,4,basal_insulin_active; insulin_any_active; metformin_active; sglt2i_active
+DM106,4,basal_insulin_active; glp1_active; insulin_any_active; metformin_active
+DM120,4,glp1_active; metformin_active; prandial_insulin_active; sglt2i_active
+DM022,3,glp1_active; sglt2i_active; tzd_active
+DM074,3,basal_insulin_active; glp1_active; insulin_any_active
+DM077,3,basal_insulin_active; insulin_any_active; sglt2i_active
+DM091,3,basal_insulin_active; insulin_any_active; metformin_active
+DM095,3,basal_insulin_active; insulin_any_active; sglt2i_active
+DM096,3,basal_insulin_active; insulin_any_active; sglt2i_active
+DM098,3,basal_insulin_active; insulin_any_active; metformin_active
+DM102,3,glp1_active; metformin_active; sglt2i_active
+DM115,3,dpp4i_active; glp1_active; sglt2i_active
+DM117,3,glp1_active; metformin_active; sglt2i_active
+DM021,2,glp1_active; sglt2i_active
+DM024,2,sglt2i_active; tzd_active
+DM028,2,glp1_active; sglt2i_active
+DM030,2,glp1_active; sglt2i_active
+DM031,2,glp1_active; sulfonylurea_active
+DM034,2,glp1_active; sglt2i_active
+DM035,2,glp1_active; sglt2i_active
+DM036,2,glp1_active; tzd_active
+DM037,2,glp1_active; sglt2i_active
+DM040,2,glp1_active; sglt2i_active
+DM044,2,glp1_active; sglt2i_active
+DM045,2,glp1_active; sglt2i_active
+DM055,2,basal_insulin_active; insulin_any_active
+DM056,2,glp1_active; sglt2i_active
+DM057,2,dpp4i_active; metformin_active
+DM060,2,glp1_active; metformin_active
+DM068,2,glp1_active; metformin_active
+DM071,2,basal_insulin_active; insulin_any_active
+DM075,2,glp1_active; metformin_active
+DM080,2,basal_insulin_active; insulin_any_active
+DM082,2,basal_insulin_active; insulin_any_active
+DM097,2,basal_insulin_active; insulin_any_active
+DM107,2,glp1_active; sglt2i_active
+DM108,2,basal_insulin_active; insulin_any_active
+DM113,2,glp1_active; sglt2i_active
+DM114,2,basal_insulin_active; insulin_any_active
+DM118,2,basal_insulin_active; insulin_any_active
+DM121,2,prandial_insulin_active; sglt2i_active
+DM020,1,glp1_active
+DM025,1,metformin_active
+DM027,1,sglt2i_active
+DM038,1,sglt2i_active
+DM039,1,glp1_active
+DM043,1,sglt2i_active
+DM047,1,sglt2i_active
+DM048,1,sglt2i_active
+DM051,1,glp1_active
+DM052,1,glp1_active
+DM058,1,sglt2i_active
+DM059,1,sglt2i_active
+DM061,1,dpp4i_active
+DM065,1,dpp4i_active
+DM066,1,glp1_active
+DM072,1,sglt2i_active
+DM073,1,sglt2i_active
+DM078,1,sglt2i_active
+DM079,1,sglt2i_active
+DM089,1,sglt2i_active
+DM094,1,metformin_active
+DM099,1,metformin_active
+DM100,1,metformin_active
+DM109,1,sglt2i_active
+DM119,1,sglt2i_active
+DM023,0,
+DM026(1),0,
+DM026(2),0,
+DM029,0,
+DM032,0,
+DM041,0,
+DM042,0,
+DM046,0,
+DM050,0,
+DM053,0,
+DM054,0,
+DM062,0,
+DM064,0,
+DM069,0,
+DM076,0,
+DM081,0,
+DM083,0,
+DM084,0,
+DM090,0,
+DM092,0,
+DM093,0,
+DM101,0,
+DM103,0,
+DM104,0,
+DM105,0,
+DM110,0,
+DM111,0,
+DM112,0,
+DM116,0,

@@ -27,8 +27,8 @@ library(readr)
 # Paths
 # -----------------------------
 
-input_file <- "data/raw/final_results_capstone_data_ver2.csv"
-output_dir <- "data/transform_data/outputs"
+input_file <- here::here("data", "raw", "final_results_capstone_data (2).csv")
+output_dir <- "../Data/transform_data/outputs"
 
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 

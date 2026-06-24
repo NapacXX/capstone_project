@@ -26,7 +26,7 @@ library(stringr)
 library(readr)
 library(purrr)
 
-output_dir <- "data/transform_data/outputs"
+input_file <- here::here("data", "raw", "final_results_capstone_data (2).csv")
 
 standardized <- read_csv(
   file.path(output_dir, "standardized_model_responses.csv"),

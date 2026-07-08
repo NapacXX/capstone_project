@@ -1,0 +1,121 @@
+case_id,vignette_text,age,sex,race_ethnicity,duration_dm_years,current_dm_drugs,current_dm_drug_doses,hba1c_percent,egfr_ml_min_1_73m2,uacr_mg_g,creatinine_mg_dl,bmi_kg_m2,sbp,dbp,total_cholesterol_mg_dl,hdl_cholesterol_mg_dl,ldl_cholesterol_mg_dl,triglycerides_mg_dl,current_smoker,htn_medications,lipid_medications,heart_failure_present,hf_type,hf_ef_percent,recent_hf_hospitalization,hf_etiology,hf_medications,masld_present,mash_present,diabetic_retinopathy,peripheral_neuropathy,chronic_kidney_disease,stage_ckd,mi_history,stroke_tia_history,coronary_artery_disease,coronary_stent_history,unstable_angina,atrial_fibrillation,alzheimers_dementia,anemia,asthma,bph,cancer_breast,cancer_endometrial,cancer_colon,cancer_lung,cancer_prostate,cataracts,copd,depression,glaucoma,hip_fracture,hyperlipidemia,hypertension,hypothyroidism,rheumatoid_arthritis,osteoporosis,gi_distress_history,gu_infection_history,financial_limitations,preference_tighter_control,preference_simple_regimen,reluctant_injections,prompt,model,treatment_plan,medication,rationale,model_clean,current_dm_drugs_clean,advanced_ckd,ckd_or_albuminuria,sglt2i_eligible_by_egfr,heart_failure,ascvd,obesity,mash_or_masld,severe_hyperglycemia,baseline_metformin,baseline_dpp4i,baseline_insulin,baseline_prandial_insulin,cost_barrier,injection_reluctance,gu_infection_caution,simple_regimen_preference
+DM020,"A 72-year-old Black female with type 2 diabetes diagnosed 14 years ago presents for diabetes management. She was initially treated with metformin, followed by addition of sitagliptin, and more recently basal insulin glargine after worsening glycemic control. She currently takes metformin 1000 mg twice daily, sitagliptin 100 mg daily, and insulin glargine 26 units nightly. She has a history of hypertension, hyperlipidemia, heart failure with preserved ejection fraction related to hypertensive heart disease, chronic kidney disease stage 3a, obesity, and metabolic dysfunction-associated steatotic liver disease with suspected steatohepatitis based on prior imaging and elevated liver enzymes. She reports progressive numbness in both feet and occasional blurred vision. She was hospitalized 8 months ago for volume overload related to heart failure. She reports difficulty affording medications after transitioning to a fixed retirement income and prefers a simple diabetes regimen with as few injections as possible. On examination, BMI is 35 kg/m2, blood pressure 138/74 mmHg, pulse 78 bpm, trace bilateral lower extremity edema, and decreased vibration sensation in both feet. Labs: HbA1c 8.9%, eGFR 48 mL/min/1.73m2, creatinine 1.3 mg/dL, urine albumin-creatinine ratio 240 mg/g, potassium 4.6 mmol/L, total cholesterol 188 mg/dL, HDL 43 mg/dL, LDL 103 mg/dL, triglycerides 210 mg/dL. She is a former smoker with a 30 pack-year history who quit 12 years ago. Current medications include losartan, carvedilol, furosemide, spironolactone, atorvastatin, and aspirin.",72,female,Black,14,"metformin, sitagliptin, insulin glargine","1000 mg twice daily, 100 mg daily, 26 units nightly",8.9,48,240,1.3,35,138,74,188,43,103,210,former,"losartan, carvedilol, furosemide, spironolactone",atorvastatin,yes,HFpEF,NA,yes,hypertensive heart disease,"carvedilol, furosemide, spironolactone",yes,yes,no,yes,yes,3,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,yes,yes,no,no,no,no,no,yes,no,yes,yes,"You are a primary care provider helping this patient manage their diabetes. They present for a
+visit in your office with the following history. Please recommend changes or additions to their
+diabetes medications.
+
+PLANNING (DO NOT SHOW THIS WORK):
+- Before writing your response, think through the full medication plan internally
+- If you consider two or more similar or overlapping medications (e.g., two types of insulin,
+  one as an alternative to the other), resolve this BEFORE producing the table - choose the
+  ONE best medication/option and drop the other(s). The table must never contain two
+  medications that duplicate or substitute for each other
+- Do not include contingency options, alternatives, or ""or"" choices anywhere
+- Once you have settled on a single, internally consistent plan, output ONLY that final plan
+- Do NOT show your reasoning, drafts, earlier versions, or revised tables. The response must
+  contain exactly ONE table and ONE paragraph, reflecting only your final plan
+
+FORMAT RULES - FOLLOW EXACTLY:
+- Output the table first with NO label or heading above it
+- Output the paragraph second with NO label or heading above it
+- Do NOT write ""PART 1"", ""PART 2"", ""Table"", ""Rationale"" or any other heading or label anywhere
+  in the response
+- Do NOT use a horizontal dividing line (---) between the table and paragraph
+- Use ONLY standard ASCII characters throughout the entire response
+- Do NOT use em dashes. Use a simple hyphen (-) instead
+- Do NOT use curly quotes or smart quotes. Use straight quotes only
+- Do NOT use any Unicode characters. Every character must be standard ASCII
+
+TABLE RULES:
+- Exactly two columns, in this order: ""Medication"", ""Plan""
+- Separate columns with the pipe character (|), markdown-table style
+- One row per drug
+- ""Medication"" column: the medication name only, spelled correctly with correct grammar
+  (capitalizing the first letter, as the start of the row, is fine)
+- ""Plan"" column: change status (CONTINUE, STOP, START, or CHANGE) plus the dose and frequency to use,
+  e.g. ""CONTINUE - 50 mg basal insulin nightly""
+- No rationale or explanation in the table
+- Keep each cell concise
+- Format must be copyable into a CSV file
+
+PARAGRAPH RULES:
+- One paragraph only, after the table
+- Explain the overall clinical reasoning for all medication decisions together (not per drug)
+- Plain text, no bullet points or subheadings
+
+MEDICATION RULES:
+- ONLY include antihyperglycemic medications
+- No vitamins, blood pressure medications, lipid-lowering medications, or other non-diabetes drugs
+- Give ONE single plan per medication - no contingency options or alternatives
+- Use lowercase generic drug names in the paragraph (e.g., ""metformin"", ""insulin glargine"",
+  ""semaglutide""), even at the start of a sentence. In the table's Medication column, a
+  capitalized first letter is fine, but the rest of the name must remain lowercase
+
+Patient Vignette:
+A 72-year-old Black female with type 2 diabetes diagnosed 14 years ago presents for diabetes management. She was initially treated with metformin, followed by addition of sitagliptin, and more recently basal insulin glargine after worsening glycemic control. She currently takes metformin 1000 mg twice daily, sitagliptin 100 mg daily, and insulin glargine 26 units nightly. She has a history of hypertension, hyperlipidemia, heart failure with preserved ejection fraction related to hypertensive heart disease, chronic kidney disease stage 3a, obesity, and metabolic dysfunction-associated steatotic liver disease with suspected steatohepatitis based on prior imaging and elevated liver enzymes. She reports progressive numbness in both feet and occasional blurred vision. She was hospitalized 8 months ago for volume overload related to heart failure. She reports difficulty affording medications after transitioning to a fixed retirement income and prefers a simple diabetes regimen with as few injections as possible. On examination, BMI is 35 kg/m2, blood pressure 138/74 mmHg, pulse 78 bpm, trace bilateral lower extremity edema, and decreased vibration sensation in both feet. Labs: HbA1c 8.9%, eGFR 48 mL/min/1.73m2, creatinine 1.3 mg/dL, urine albumin-creatinine ratio 240 mg/g, potassium 4.6 mmol/L, total cholesterol 188 mg/dL, HDL 43 mg/dL, LDL 103 mg/dL, triglycerides 210 mg/dL. She is a former smoker with a 30 pack-year history who quit 12 years ago. Current medications include losartan, carvedilol, furosemide, spironolactone, atorvastatin, and aspirin.",bedrock/us.anthropic.claude-opus-4-6-v1,"| Medication | Plan |
+|---|---|
+| Metformin | CHANGE - 500 mg twice daily |
+| Sitagliptin | STOP |
+| Insulin glargine | CONTINUE - 26 units nightly |
+| Semaglutide | START - 0.25 mg subcutaneous injection once weekly, titrate to 1 mg weekly as tolerated |
+| Empagliflozin | START - 10 mg daily |
+
+This patient has poorly controlled type 2 diabetes with an HbA1c of 8.9% and multiple comorbidities that should guide medication selection, including heart failure with preserved ejection fraction, CKD stage 3a with albuminuria, obesity, and suspected steatohepatitis. Empagliflozin is started for its proven cardiorenal benefits - it reduces heart failure hospitalizations and slows CKD progression independent of glycemic control, and it is appropriate at an eGFR of 48. Semaglutide, a GLP-1 receptor agonist, is started to provide substantial A1c reduction, promote weight loss beneficial for her obesity and liver disease, and offer cardiovascular benefit; it replaces sitagliptin, which is a less potent DPP-4 inhibitor that should not be combined with a GLP-1 receptor agonist due to overlapping incretin-based mechanisms and lack of additive benefit. Metformin is reduced from 1000 mg to 500 mg twice daily given her eGFR of 48, which warrants dose reduction to minimize the risk of lactic acidosis while preserving some insulin-sensitizing benefit. Insulin glargine is continued at the current dose to maintain basal coverage, with the expectation that the addition of semaglutide and empagliflozin will substantially improve glycemic control and may allow future insulin dose reduction. This regimen addresses her preference for simplicity by requiring only one weekly injection of semaglutide alongside her existing nightly insulin, while simultaneously targeting her heart failure, kidney disease, weight, and liver disease through agents with proven benefits in these conditions.","• Change metformin to 500 mg twice daily <br>• Stop sitagliptin <br>• Continue insulin glargine 26 units nightly <br>• Start semaglutide 0.25 mg subcutaneous injection once weekly, titrate to 1 mg weekly as tolerated <br>• Start empagliflozin 10 mg daily <br> <br> <br>","This patient has poorly controlled type 2 diabetes with an HbA1c of 8.9% and multiple comorbidities that should guide medication selection, including heart failure with preserved ejection fraction, CKD stage 3a with albuminuria, obesity, and suspected steatohepatitis. Empagliflozin is started for its proven cardiorenal benefits - it reduces heart failure hospitalizations and slows CKD progression independent of glycemic control, and it is appropriate at an eGFR of 48. Semaglutide, a GLP-1 receptor agonist, is started to provide substantial A1c reduction, promote weight loss beneficial for her obesity and liver disease, and offer cardiovascular benefit; it replaces sitagliptin, which is a less potent DPP-4 inhibitor that should not be combined with a GLP-1 receptor agonist due to overlapping incretin-based mechanisms and lack of additive benefit. Metformin is reduced from 1000 mg to 500 mg twice daily given her eGFR of 48, which warrants dose reduction to minimize the risk of lactic acidosis while preserving some insulin-sensitizing benefit. Insulin glargine is continued at the current dose to maintain basal coverage, with the expectation that the addition of semaglutide and empagliflozin will substantially improve glycemic control and may allow future insulin dose reduction. This regimen addresses her preference for simplicity by requiring only one weekly injection of semaglutide alongside her existing nightly insulin, while simultaneously targeting her heart failure, kidney disease, weight, and liver disease through agents with proven benefits in these conditions.",Claude Opus 4.6,"metformin, sitagliptin, insulin glargine",FALSE,TRUE,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,TRUE,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,TRUE
+DM021,"A 77-year-old White male with type 2 diabetes diagnosed 18 years ago presents for diabetes follow-up. He was initially treated with metformin, then glipizide was added, and basal-bolus insulin therapy was started 6 years ago after progressive worsening glycemic control. Glipizide was discontinued following recurrent hypoglycemia. He currently takes insulin glargine 34 units nightly and insulin aspart 10 units before each meal. Metformin was stopped 2 years ago when renal function declined. He has a history of hypertension, hyperlipidemia, coronary artery disease with prior myocardial infarction requiring drug-eluting stent placement 4 years ago, chronic kidney disease stage 4, and diabetic retinopathy treated with laser photocoagulation. He reports intermittent symptomatic hypoglycemia, especially when meals are delayed, and increasing difficulty managing multiple daily injections because of impaired vision and hand tremor. He was hospitalized 1 year ago for unstable angina but has had no heart failure admissions. On examination, BMI is 26 kg/m2, blood pressure 136/72 mmHg, pulse 68 bpm, diminished sensation to monofilament testing in both feet, and mild bilateral hand tremor. Labs: HbA1c 7.9%, eGFR 24 mL/min/1.73m2, creatinine 2.5 mg/dL, urine albumin-creatinine ratio 510 mg/g, potassium 5.0 mmol/L, total cholesterol 154 mg/dL, HDL 41 mg/dL, LDL 79 mg/dL, triglycerides 172 mg/dL. He is a former smoker with a 40 pack-year history who quit after his myocardial infarction. Current medications include lisinopril, metoprolol succinate, atorvastatin, aspirin, and clopidogrel. He prefers a simpler diabetes regimen and is reluctant to continue multiple injections daily.",77,male,White,18,"insulin glargine, insulin aspart","34 units nightly, 10 units before each meal",7.9,24,510,2.5,26,136,72,154,41,79,172,former,"lisinopril, metoprolol succinate",atorvastatin,no,NA,NA,no,NA,none,no,no,yes,yes,yes,4,yes,no,yes,yes,yes,no,no,no,no,no,no,no,no,no,no,no,no,no,no,no,yes,yes,no,no,no,no,no,no,no,yes,yes,"You are a primary care provider helping this patient manage their diabetes. They present for a
+visit in your office with the following history. Please recommend changes or additions to their
+diabetes medications.
+
+PLANNING (DO NOT SHOW THIS WORK):
+- Before writing your response, think through the full medication plan internally
+- If you consider two or more similar or overlapping medications (e.g., two types of insulin,
+  one as an alternative to the other), resolve this BEFORE producing the table - choose the
+  ONE best medication/option and drop the other(s). The table must never contain two
+  medications that duplicate or substitute for each other
+- Do not include contingency options, alternatives, or ""or"" choices anywhere
+- Once you have settled on a single, internally consistent plan, output ONLY that final plan
+- Do NOT show your reasoning, drafts, earlier versions, or revised tables. The response must
+  contain exactly ONE table and ONE paragraph, reflecting only your final plan
+
+FORMAT RULES - FOLLOW EXACTLY:
+- Output the table first with NO label or heading above it
+- Output the paragraph second with NO label or heading above it
+- Do NOT write ""PART 1"", ""PART 2"", ""Table"", ""Rationale"" or any other heading or label anywhere
+  in the response
+- Do NOT use a horizontal dividing line (---) between the table and paragraph
+- Use ONLY standard ASCII characters throughout the entire response
+- Do NOT use em dashes. Use a simple hyphen (-) instead
+- Do NOT use curly quotes or smart quotes. Use straight quotes only
+- Do NOT use any Unicode characters. Every character must be standard ASCII
+
+TABLE RULES:
+- Exactly two columns, in this order: ""Medication"", ""Plan""
+- Separate columns with the pipe character (|), markdown-table style
+- One row per drug
+- ""Medication"" column: the medication name only, spelled correctly with correct grammar
+  (capitalizing the first letter, as the start of the row, is fine)
+- ""Plan"" column: change status (CONTINUE, STOP, START, or CHANGE) plus the dose and frequency to use,
+  e.g. ""CONTINUE - 50 mg basal insulin nightly""
+- No rationale or explanation in the table
+- Keep each cell concise
+- Format must be copyable into a CSV file
+
+PARAGRAPH RULES:
+- One paragraph only, after the table
+- Explain the overall clinical reasoning for all medication decisions together (not per drug)
+- Plain text, no bullet points or subheadings
+
+MEDICATION RULES:
+- ONLY include antihyperglycemic medications
+- No vitamins, blood pressure medications, lipid-lowering medications, or other non-diabetes drugs
+- Give ONE single plan per medication - no contingency options or alternatives
+- Use lowercase generic drug names in the paragraph (e.g., ""metformin"", ""insulin glargine"",
+  ""semaglutide""), even at the start of a sentence. In the table's Medication column, a
+  capitalized first letter is fine, but the rest of the name must remain lowercase
+
+Patient Vignette:
+A 77-year-old White male with type 2 diabetes diagnosed 18 years ago presents for diabetes follow-up. He was initially treated with metformin, then glipizide was added, and basal-bolus insulin therapy was started 6 years ago after progressive worsening glycemic control. Glipizide was discontinued following recurrent hypoglycemia. He currently takes insulin glargine 34 units nightly and insulin aspart 10 units before each meal. Metformin was stopped 2 years ago when renal function declined. He has a history of hypertension, hyperlipidemia, coronary artery disease with prior myocardial infarction requiring drug-eluting stent placement 4 years ago, chronic kidney disease stage 4, and diabetic retinopathy treated with laser photocoagulation. He reports intermittent symptomatic hypoglycemia, especially when meals are delayed, and increasing difficulty managing multiple daily injections because of impaired vision and hand tremor. He was hospitalized 1 year ago for unstable angina but has had no heart failure admissions. On examination, BMI is 26 kg/m2, blood pressure 136/72 mmHg, pulse 68 bpm, diminished sensation to monofilament testing in both feet, and mild bilateral hand tremor. Labs: HbA1c 7.9%, eGFR 24 mL/min/1.73m2, creatinine 2.5 mg/dL, urine albumin-creatinine ratio 510 mg/g, potassium 5.0 mmol/L, total cholesterol 154 mg/dL, HDL 41 mg/dL, LDL 79 mg/dL, triglycerides 172 mg/dL. He is a former smoker with a 40 pack-year history who quit after his myocardial infarction. Current medications include lisinopril, metoprolol succinate, atorvastatin, aspirin, and clopidogrel. He prefers a simpler diabetes regimen and is reluctant to continue multiple injections daily.",bedrock/us.anthropic.claude-opus-4-6-v1,"| Medication | Plan |
+|---|---|
+| Insulin glargine | CHANGE - 36 units nightly |
+| Insulin aspart | STOP |
+| Insulin degludec U-200/liraglutide (iDegLira) | START - 16 dose steps subcutaneously once daily, titrate per fasting glucose |
+
+This patient is a 77-year-old man with longstanding type 2 diabetes, CKD stage 4 (eGFR 24), established atherosclerotic cardiovascular disease, and an HbA1c of 7.9% on a basal-bolus insulin regimen that is causing recurrent hypoglycemia and significant injection burden given his impaired vision and hand tremor. The primary goals are to simplify his regimen, reduce hypoglycemia risk, and maintain reasonable glycemic control with a relaxed A1c target of approximately 7.5-8.0% given his age, comorbidities, and hypoglycemia vulnerability. Stopping the thrice-daily insulin aspart eliminates the most burdensome and hypoglycemia-prone component of his regimen. Transitioning to a fixed-ratio combination of insulin degludec/liraglutide (iDegLira) administered once daily provides both basal insulin coverage and the incremental prandial glucose-lowering effect of liraglutide in a single injection, which directly addresses his preference for simplicity. Insulin degludec offers a more stable pharmacokinetic profile with lower hypoglycemia risk compared to insulin glargine, and liraglutide has proven cardiovascular benefit in patients with established ASCVD. Although liraglutide requires dose adjustment awareness in CKD, it is not renally cleared and can be used in CKD stage 4 with monitoring for gastrointestinal tolerance. The existing insulin glargine is changed to a modestly increased dose temporarily to bridge glycemic control during the transition period and will be tapered and discontinued as iDegLira is titrated upward to the therapeutic range; however, given the complexity of overlapping basal insulins, the plan is to start iDegLira at 16 dose steps (providing 16 units of degludec and 0.58 mg of liraglutide), reduce glargine to 36 units initially, and taper glargine off over 1-2 weeks as iDegLira is uptitrated based on fasting glucose readings, with a goal of consolidating to iDegLira monotherapy. An SGLT2 inhibitor, which would otherwise be strongly indicated for his CKD and ASCVD, is not started at this time because his eGFR of 24 is at or below the threshold for initiation of most agents in this class, and the risk of volume depletion and hyperkalemia (potassium already 5.0) in the setting of his current medications warrants caution. Close follow-up in 2-4 weeks is planned to reassess fasting glucose, complete the glargine taper, and monitor renal function and potassium.","• Change insulin glargine to 36 units nightly <br>• Stop insulin aspart <br>• Start insulin degludec U-200/liraglutide (iDegLira) 16 dose steps subcutaneously once daily, titrate per fasting glucose <br> <br> <br>","This patient is a 77-year-old man with longstanding type 2 diabetes, CKD stage 4 (eGFR 24), established atherosclerotic cardiovascular disease, and an HbA1c of 7.9% on a basal-bolus insulin regimen that is causing recurrent hypoglycemia and significant injection burden given his impaired vision and hand tremor. The primary goals are to simplify his regimen, reduce hypoglycemia risk, and maintain reasonable glycemic control with a relaxed A1c target of approximately 7.5-8.0% given his age, comorbidities, and hypoglycemia vulnerability. Stopping the thrice-daily insulin aspart eliminates the most burdensome and hypoglycemia-prone component of his regimen. Transitioning to a fixed-ratio combination of insulin degludec/liraglutide (iDegLira) administered once daily provides both basal insulin coverage and the incremental prandial glucose-lowering effect of liraglutide in a single injection, which directly addresses his preference for simplicity. Insulin degludec offers a more stable pharmacokinetic profile with lower hypoglycemia risk compared to insulin glargine, and liraglutide has proven cardiovascular benefit in patients with established ASCVD. Although liraglutide requires dose adjustment awareness in CKD, it is not renally cleared and can be used in CKD stage 4 with monitoring for gastrointestinal tolerance. The existing insulin glargine is changed to a modestly increased dose temporarily to bridge glycemic control during the transition period and will be tapered and discontinued as iDegLira is titrated upward to the therapeutic range; however, given the complexity of overlapping basal insulins, the plan is to start iDegLira at 16 dose steps (providing 16 units of degludec and 0.58 mg of liraglutide), reduce glargine to 36 units initially, and taper glargine off over 1-2 weeks as iDegLira is uptitrated based on fasting glucose readings, with a goal of consolidating to iDegLira monotherapy. An SGLT2 inhibitor, which would otherwise be strongly indicated for his CKD and ASCVD, is not started at this time because his eGFR of 24 is at or below the threshold for initiation of most agents in this class, and the risk of volume depletion and hyperkalemia (potassium already 5.0) in the setting of his current medications warrants caution. Close follow-up in 2-4 weeks is planned to reassess fasting glucose, complete the glargine taper, and monitor renal function and potassium.",Claude Opus 4.6,"insulin glargine, insulin aspart",TRUE,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE

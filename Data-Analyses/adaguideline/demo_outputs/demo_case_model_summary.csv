@@ -1,0 +1,7 @@
+case_id,model_clean,adherent,caution_addressed,guideline_supported,preference_sensitive_omission,not_applicable,potential_omission
+DM020,Claude Opus 4.6,3,1,1,0,0,0
+DM020,Claude Sonnet 4.6,3,1,0,1,0,0
+DM020,GPT-5.4,3,1,0,1,0,0
+DM021,Claude Opus 4.6,2,1,1,0,1,2
+DM021,Claude Sonnet 4.6,2,1,1,0,1,2
+DM021,GPT-5.4,2,1,1,0,1,2

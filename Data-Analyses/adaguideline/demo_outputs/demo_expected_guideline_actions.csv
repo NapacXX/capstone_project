@@ -1,0 +1,13 @@
+case_id,rule_id,drug_class,expected_action,expected_dose_label,rule_strength,supporting_chunk_ids,expected_reason
+DM020,ADA2026_RULE_DPP4_WITH_GLP1_AVOID,DPP-4 inhibitor,stop_or_avoid,do_not_use_with_glp1,hard_avoid_if_combined,ADA2026_REC_9_18_DPP4_GLP1_AVOID,"If GLP-1 RA is expected and DPP-4 inhibitor is present, stop or avoid DPP-4 inhibitor."
+DM020,ADA2026_RULE_OBESITY_MASH_GLP1RA,GLP-1 RA,consider,standard_starting_dose,preference_sensitive,ADA2026_REC_9_7_ASCVD_GLP1_SGLT2,Obesity or MASLD/MASH supports GLP-1 RA consideration.
+DM020,ADA2026_RULE_CKD_SGLT2I_OR_GLP1RA,SGLT2 inhibitor,recommend_or_consider,standard_starting_dose_if_eligible,strong_recommend,ADA2026_REC_9_10_CKD_SGLT2_GLP1,CKD or albuminuria with eGFR above threshold supports SGLT2 inhibitor consideration.
+DM020,ADA2026_RULE_HF_SGLT2I,SGLT2 inhibitor,recommend,standard_starting_dose_if_eligible,strong_recommend,ADA2026_REC_9_8_HF_SGLT2,Heart failure supports SGLT2 inhibitor use if eligible.
+DM020,ADA2026_RULE_METFORMIN_EGFR_GE30_BASELINE,metformin,continue_allowed_or_renal_caution,same_or_reduced_dose,caution,ADA2026_METFORMIN_EGFR_RATIONALE,eGFR is at least 30 and metformin is already used; continuation is allowed with kidney caution.
+DM021,ADA2026_RULE_ADVANCED_CKD_GLP1RA,GLP-1 RA,prefer_or_consider,standard_starting_dose,strong_recommend,ADA2026_REC_9_11_ADV_CKD_GLP1,Advanced CKD supports GLP-1 RA preference for glycemic management.
+DM021,ADA2026_RULE_ASCVD_GLP1RA,GLP-1 RA,consider,standard_starting_dose,strong_recommend,ADA2026_REC_9_7_ASCVD_GLP1_SGLT2,ASCVD supports GLP-1 RA consideration for cardiovascular benefit.
+DM021,ADA2026_RULE_ASCVD_SGLT2I,SGLT2 inhibitor,consider,standard_starting_dose_if_eligible,strong_recommend,ADA2026_REC_9_7_ASCVD_GLP1_SGLT2,ASCVD supports SGLT2 inhibitor consideration for cardiovascular benefit.
+DM021,ADA2026_RULE_CKD_SGLT2I_OR_GLP1RA,SGLT2 inhibitor,recommend_or_consider,standard_starting_dose_if_eligible,strong_recommend,ADA2026_REC_9_10_CKD_SGLT2_GLP1,CKD or albuminuria with eGFR above threshold supports SGLT2 inhibitor consideration.
+DM021,ADA2026_RULE_INSULIN_ADV_CKD_CAUTION,insulin,dose_caution_or_deintensify,individualized_lower_dose_possible,caution,ADA2026_REC_9_22_GLP1_WITH_INSULIN,Insulin doses may need reduction as eGFR decreases.
+DM021,ADA2026_RULE_METFORMIN_EGFR_LT30,metformin,avoid_or_stop,do_not_use,hard_avoid,ADA2026_METFORMIN_EGFR_RATIONALE,"eGFR is below 30, so metformin should be avoided or stopped."
+DM021,ADA2026_RULE_PRANDIAL_INSULIN_SIMPLE_REGIMEN,prandial insulin,consider_deintensification,individualized,preference_sensitive,ADA2026_REC_9_5_PERSON_CENTERED,Prandial insulin deintensification may align with simple-regimen preference if clinically appropriate.

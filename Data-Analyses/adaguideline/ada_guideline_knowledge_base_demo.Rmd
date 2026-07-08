@@ -1,0 +1,754 @@
+---
+title: "ADA Guideline Knowledge Base and Executable Decision Model Demo"
+date: "2026-07-07"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+
+library(dplyr)
+library(readr)
+library(stringr)
+library(tidyr)
+library(purrr)
+library(tibble)
+library(knitr)
+library(kableExtra)
+library(jsonlite)
+
+raw_path <- "../../data/raw/final_results_capstone_data_ver2.csv"
+kb_dir <- "knowledge_base"
+demo_dir <- "demo_outputs"
+
+dir.create(kb_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(demo_dir, showWarnings = FALSE, recursive = TRUE)
+
+clean_yes <- function(x) {
+  str_to_lower(str_squish(as.character(x))) %in%
+    c("yes", "y", "true", "1", "present")
+}
+
+clean_text <- function(x) {
+  str_to_lower(str_squish(coalesce(as.character(x), "")))
+}
+
+format_model <- function(x) {
+  case_when(
+    str_detect(x, "gpt-5\\.4") ~ "GPT-5.4",
+    str_detect(x, "claude-opus") ~ "Claude Opus 4.6",
+    str_detect(x, "claude-sonnet") ~ "Claude Sonnet 4.6",
+    TRUE ~ x
+  )
+}
+
+show_table <- function(data, caption = NULL) {
+  data %>%
+    kable(caption = caption) %>%
+    kable_styling(
+      full_width = FALSE,
+      bootstrap_options = c("striped", "hover", "condensed")
+    )
+}
+```
+
+# Purpose
+
+This workflow creates a small ADA 2026 pharmacotherapy knowledge base and
+demonstrates an executable guideline decision model on the first six rows
+of `final_results_capstone_data_ver2.csv`.
+
+The key design choice is that the decision tree is **not only a CSV**.
+The CSV rule registry is an audit table, while the actual decision model is
+implemented as deterministic R functions in this R Markdown file.
+
+# Load Demo Data
+
+```{r load-data}
+raw_data <- read_csv(raw_path, show_col_types = FALSE) %>%
+  select(-starts_with("..."))
+
+demo_responses <- raw_data %>%
+  slice(1:6) %>%
+  mutate(model_clean = format_model(model))
+
+demo_cases <- demo_responses %>%
+  arrange(case_id, model_clean) %>%
+  distinct(case_id, .keep_all = TRUE)
+
+demo_overview <- tibble(
+  metric = c("demo response rows", "unique demo cases", "unique models"),
+  value = c(
+    nrow(demo_responses),
+    n_distinct(demo_responses$case_id),
+    n_distinct(demo_responses$model_clean)
+  )
+)
+```
+
+```{r show-demo-overview}
+show_table(demo_overview, "Demo data overview")
+```
+
+```{r show-demo-cases}
+demo_cases %>%
+  select(
+    case_id, age, sex, race_ethnicity, hba1c_percent,
+    egfr_ml_min_1_73m2, uacr_mg_g, bmi_kg_m2,
+    current_dm_drugs, heart_failure_present, hf_type,
+    chronic_kidney_disease, stage_ckd, coronary_artery_disease,
+    mi_history, masld_present, mash_present, financial_limitations,
+    preference_simple_regimen, reluctant_injections
+  ) %>%
+  show_table("Case-level patient features used in the demo")
+```
+
+# Knowledge Base Layer 1: Text Chunks With Metadata
+
+These chunks are short derived summaries with metadata. They are intended
+for retrieval and traceability, not redistribution of long ADA passages.
+
+```{r text-chunks}
+ada_text_chunks <- tribble(
+  ~chunk_id, ~source_type, ~recommendation_id, ~source_page,
+  ~condition, ~drug_class, ~clinical_trigger, ~action_type,
+  ~rule_strength, ~evidence_grade, ~summary_text, ~retrieval_keywords,
+  "ADA2026_REC_9_7_ASCVD_GLP1_SGLT2", "recommendation", "9.7", 8,
+  "ASCVD or high CVD risk", "GLP-1 RA; SGLT2 inhibitor",
+  "established ASCVD or high CVD risk", "include",
+  "strong_recommend", "A",
+  "For type 2 diabetes with established or high ASCVD risk, include a GLP-1 RA and/or SGLT2 inhibitor with cardiovascular benefit irrespective of A1c.",
+  "ASCVD CVD GLP-1 SGLT2 cardiovascular benefit",
+  "ADA2026_REC_9_8_HF_SGLT2", "recommendation", "9.8", 8,
+  "Heart failure", "SGLT2 inhibitor",
+  "heart failure with reduced or preserved ejection fraction", "recommend",
+  "strong_recommend", "A",
+  "For type 2 diabetes with heart failure, recommend an SGLT2 inhibitor for glycemic management and prevention of HF hospitalization irrespective of A1c.",
+  "heart failure HFpEF HFrEF SGLT2",
+  "ADA2026_REC_9_10_CKD_SGLT2_GLP1", "recommendation", "9.10", 8,
+  "CKD", "SGLT2 inhibitor; GLP-1 RA",
+  "eGFR 20-60 or albuminuria", "use",
+  "strong_recommend", "A",
+  "For type 2 diabetes with CKD, use an SGLT2 inhibitor or GLP-1 RA with demonstrated benefit for glycemic management, CKD progression, and cardiovascular event reduction.",
+  "CKD eGFR albuminuria SGLT2 GLP-1",
+  "ADA2026_REC_9_11_ADV_CKD_GLP1", "recommendation", "9.11", 8,
+  "Advanced CKD", "GLP-1 RA",
+  "eGFR below 30", "prefer",
+  "strong_recommend", "B/C",
+  "For type 2 diabetes with advanced CKD, GLP-1 RA is preferred for glycemic management because of lower hypoglycemia risk and cardiovascular benefit.",
+  "advanced CKD eGFR <30 GLP-1",
+  "ADA2026_REC_9_18_DPP4_GLP1_AVOID", "recommendation", "9.18", 10,
+  "Medication combination", "DPP-4 inhibitor; GLP-1 RA",
+  "concurrent DPP-4 inhibitor and GLP-1 RA", "avoid",
+  "hard_avoid_if_combined", "B",
+  "Concurrent DPP-4 inhibitor use with GLP-1 RA or dual GIP/GLP-1 RA is not recommended because it adds no glucose-lowering benefit.",
+  "DPP-4 GLP-1 combination avoid",
+  "ADA2026_REC_9_20_INSULIN_SEVERE_HYPERGLYCEMIA", "recommendation", "9.20", 10,
+  "Severe hyperglycemia", "insulin",
+  "symptoms, A1c >10, or glucose >=300", "consider",
+  "preference_sensitive", "E",
+  "Insulin initiation should be considered when symptoms are present or A1c/glucose levels are very high.",
+  "insulin A1c >10 glucose 300 symptoms",
+  "ADA2026_REC_9_21_GLP1_BEFORE_INSULIN", "recommendation", "9.21", 10,
+  "Injectable therapy", "GLP-1 RA",
+  "no severe hyperglycemia or crisis", "prefer",
+  "strong_recommend", "A",
+  "Without severe hyperglycemia or crisis, GLP-1-based therapy is preferred to insulin for initial or add-on glucose-lowering therapy.",
+  "GLP-1 before insulin injectable therapy",
+  "ADA2026_REC_9_22_GLP1_WITH_INSULIN", "recommendation", "9.22", 10,
+  "Insulin combination", "GLP-1 RA; insulin",
+  "insulin is used", "combine_or_reassess",
+  "strong_recommend", "A",
+  "If insulin is used, GLP-1 RA combination is recommended for glycemic effectiveness and benefits on weight and hypoglycemia risk; insulin dosing should be reassessed.",
+  "insulin GLP-1 combination dose reassess",
+  "ADA2026_METFORMIN_EGFR_RATIONALE", "rationale", NA_character_, 15,
+  "Kidney function", "metformin",
+  "eGFR below 30 or eGFR 30-45", "avoid_or_caution",
+  "hard_avoid", NA_character_,
+  "Metformin is generally safe at eGFR >=30; risk rises when eGFR is below 30, and eGFR 30-45 warrants caution.",
+  "metformin eGFR 30 lactic acidosis kidney"
+)
+
+write_csv(ada_text_chunks, file.path(kb_dir, "ada_text_chunks.csv"))
+```
+
+```{r show-text-chunks}
+ada_text_chunks %>%
+  select(
+    chunk_id, recommendation_id, source_page, condition,
+    drug_class, action_type, rule_strength, summary_text
+  ) %>%
+  show_table("Text chunks with metadata")
+```
+
+# Knowledge Base Layer 2: Structured Medication Table
+
+This table is a drug-class property table derived from ADA Table 9.2. It is
+not a detailed prescribing-dose table.
+
+```{r medication-table}
+ada_medication_table_structured <- tribble(
+  ~drug_class, ~route, ~glycemic_efficacy, ~hypoglycemia_risk,
+  ~weight_effect, ~mace_effect, ~heart_failure_effect,
+  ~ckd_progression_effect, ~kidney_dosing_consideration,
+  ~mash_effect, ~major_cautions, ~contraindicated_egfr_lt30,
+  ~can_start_egfr_ge20_for_cardiorenal_benefit,
+  ~reduced_glycemic_effect_egfr_lt45,
+  ~renal_dose_adjustment_needed, ~ckd_hypoglycemia_caution,
+  ~dose_label_default, ~source_table, ~source_page,
+  "metformin", "oral", "high", "no",
+  "neutral/modest loss", "potential benefit", "neutral",
+  "neutral", "contraindicated with eGFR <30",
+  "neutral", "GI intolerance; vitamin B12 deficiency",
+  TRUE, FALSE, FALSE, "yes", FALSE,
+  "same_or_reduced_dose", "Table 9.2", 11,
+  "SGLT2 inhibitor", "oral", "intermediate to high", "no",
+  "loss", "benefit for selected agents", "benefit for selected agents",
+  "benefit for selected agents",
+  "glucose-lowering effect reduced at eGFR <45; may start/continue for cardiorenal benefit if eGFR >20",
+  "unknown", "DKA risk; genital infections; UTI; volume depletion",
+  FALSE, TRUE, TRUE, "agent_specific", FALSE,
+  "standard_starting_dose_if_eligible", "Table 9.2", 11,
+  "GLP-1 RA", "subcutaneous/oral semaglutide", "high to very high", "no",
+  "loss", "benefit for selected agents", "benefit for semaglutide SQ",
+  "kidney endpoint benefit for selected agents",
+  "no dose adjustment for dulaglutide/liraglutide/semaglutide; monitor kidney function with severe GI reactions",
+  "benefit for semaglutide SQ", "GI effects; pancreatitis concern; gallbladder disease; retinopathy monitoring",
+  FALSE, FALSE, FALSE, "no", FALSE,
+  "standard_starting_dose", "Table 9.2", 12,
+  "dual GIP/GLP-1 RA", "subcutaneous", "very high", "no",
+  "loss very high", "under investigation", "benefit for tirzepatide",
+  "potential benefit", "no dose adjustment; monitor kidney function with severe GI reactions",
+  "potential benefit", "GI effects; pancreatitis concern; gallbladder disease",
+  FALSE, FALSE, FALSE, "no", FALSE,
+  "standard_starting_dose", "Table 9.2", 12,
+  "DPP-4 inhibitor", "oral", "intermediate", "no",
+  "neutral", "neutral", "neutral/potential saxagliptin risk",
+  "neutral", "renal dose adjustment for sitagliptin/saxagliptin/alogliptin; not linagliptin",
+  "unknown", "pancreatitis reports; joint pain; bullous pemphigoid",
+  FALSE, FALSE, FALSE, "yes", FALSE,
+  "renal_adjusted_dose_if_needed", "Table 9.2", 13,
+  "pioglitazone/TZD", "oral", "high", "no",
+  "gain", "potential benefit", "increased HF risk",
+  "neutral", "generally not recommended in kidney impairment due to fluid retention",
+  "potential benefit", "fluid retention/HF; fracture risk; bladder cancer caution",
+  FALSE, FALSE, FALSE, "no", FALSE,
+  "avoid_in_hf", "Table 9.2", 13,
+  "sulfonylurea", "oral", "high", "yes",
+  "gain", "neutral", "neutral",
+  "neutral", "glyburide generally not recommended in CKD; glipizide/glimepiride conservative initiation",
+  "unknown", "hypoglycemia risk; CV warning based on older sulfonylurea",
+  FALSE, FALSE, FALSE, "agent_specific", TRUE,
+  "conservative_start_or_avoid_high_risk", "Table 9.2", 13,
+  "insulin", "subcutaneous", "high to very high", "yes",
+  "gain", "neutral", "neutral",
+  "neutral", "lower doses required as eGFR decreases; titrate clinically",
+  "unknown", "injection reactions; hypoglycemia risk increases with kidney impairment",
+  FALSE, FALSE, FALSE, "yes", TRUE,
+  "individualized", "Table 9.2", 14
+)
+
+write_csv(
+  ada_medication_table_structured,
+  file.path(kb_dir, "ada_medication_table_structured.csv")
+)
+```
+
+```{r show-medication-table}
+ada_medication_table_structured %>%
+  select(
+    drug_class, glycemic_efficacy, hypoglycemia_risk, weight_effect,
+    heart_failure_effect, ckd_progression_effect,
+    kidney_dosing_consideration, major_cautions
+  ) %>%
+  show_table("Structured Medication Table from ADA Table 9.2")
+```
+
+# Knowledge Base Layer 3: Rule Registry
+
+The rule registry is a human-readable audit table. It documents the
+decision logic, but it is not the executable decision model. The executable
+model is implemented in the next section.
+
+```{r rule-registry}
+ada_decision_rule_registry <- tribble(
+  ~rule_id, ~source_figure_or_recommendation, ~source_page,
+  ~trigger_logic, ~condition, ~drug_class, ~expected_action,
+  ~expected_dose_label, ~rule_strength, ~exception_variables,
+  ~supporting_chunk_ids, ~reason_template,
+  "ADA2026_RULE_METFORMIN_EGFR_LT30", "Metformin rationale/Table 9.2", "11, 15",
+  "egfr_ml_min_1_73m2 < 30", "advanced CKD", "metformin",
+  "avoid_or_stop", "do_not_use", "hard_avoid", "none",
+  "ADA2026_METFORMIN_EGFR_RATIONALE",
+  "eGFR is below 30, so metformin should be avoided or stopped.",
+  "ADA2026_RULE_METFORMIN_EGFR_GE30_BASELINE", "Metformin rationale/Table 9.2", "11, 15",
+  "egfr_ml_min_1_73m2 >= 30 and baseline_metformin", "CKD caution", "metformin",
+  "continue_allowed_or_renal_caution", "same_or_reduced_dose", "caution", "GI intolerance; low eGFR trend",
+  "ADA2026_METFORMIN_EGFR_RATIONALE",
+  "eGFR is at least 30 and metformin is already used; continuation is allowed with kidney caution.",
+  "ADA2026_RULE_HF_SGLT2I", "Recommendation 9.8/Figure 9.4", "8",
+  "heart_failure", "heart failure", "SGLT2 inhibitor",
+  "recommend", "standard_starting_dose_if_eligible", "strong_recommend", "GU infection; intolerance; cost",
+  "ADA2026_REC_9_8_HF_SGLT2",
+  "Heart failure supports SGLT2 inhibitor use if eligible.",
+  "ADA2026_RULE_CKD_SGLT2I_OR_GLP1RA", "Recommendation 9.10/Figure 9.4", "8",
+  "ckd_or_albuminuria and sglt2i_eligible_by_egfr", "CKD/albuminuria", "SGLT2 inhibitor",
+  "recommend_or_consider", "standard_starting_dose_if_eligible", "strong_recommend", "GU infection; intolerance; cost",
+  "ADA2026_REC_9_10_CKD_SGLT2_GLP1",
+  "CKD or albuminuria with eGFR above threshold supports SGLT2 inhibitor consideration.",
+  "ADA2026_RULE_ADVANCED_CKD_GLP1RA", "Recommendation 9.11/Figure 9.4", "8",
+  "advanced_ckd", "advanced CKD", "GLP-1 RA",
+  "prefer_or_consider", "standard_starting_dose", "strong_recommend", "severe GI intolerance; pancreatitis risk",
+  "ADA2026_REC_9_11_ADV_CKD_GLP1",
+  "Advanced CKD supports GLP-1 RA preference for glycemic management.",
+  "ADA2026_RULE_ASCVD_GLP1RA", "Recommendation 9.7/Figure 9.4", "8",
+  "ascvd", "ASCVD", "GLP-1 RA",
+  "consider", "standard_starting_dose", "strong_recommend", "severe GI intolerance; pancreatitis risk",
+  "ADA2026_REC_9_7_ASCVD_GLP1_SGLT2",
+  "ASCVD supports GLP-1 RA consideration for cardiovascular benefit.",
+  "ADA2026_RULE_ASCVD_SGLT2I", "Recommendation 9.7/Figure 9.4", "8",
+  "ascvd", "ASCVD", "SGLT2 inhibitor",
+  "consider", "standard_starting_dose_if_eligible", "strong_recommend", "GU infection; intolerance; cost",
+  "ADA2026_REC_9_7_ASCVD_GLP1_SGLT2",
+  "ASCVD supports SGLT2 inhibitor consideration for cardiovascular benefit.",
+  "ADA2026_RULE_OBESITY_MASH_GLP1RA", "Figure 9.4/Table 9.2", "9, 12",
+  "obesity or mash_or_masld", "weight/MASLD/MASH", "GLP-1 RA",
+  "consider", "standard_starting_dose", "preference_sensitive", "injection reluctance; severe GI intolerance; cost",
+  "ADA2026_REC_9_7_ASCVD_GLP1_SGLT2",
+  "Obesity or MASLD/MASH supports GLP-1 RA consideration.",
+  "ADA2026_RULE_DPP4_WITH_GLP1_AVOID", "Recommendation 9.18", "10",
+  "glp1_expected and baseline_dpp4i", "GLP-1 + DPP-4 combination", "DPP-4 inhibitor",
+  "stop_or_avoid", "do_not_use_with_glp1", "hard_avoid_if_combined", "none",
+  "ADA2026_REC_9_18_DPP4_GLP1_AVOID",
+  "If GLP-1 RA is expected and DPP-4 inhibitor is present, stop or avoid DPP-4 inhibitor.",
+  "ADA2026_RULE_A1C_GT10_INSULIN_CONSIDER", "Recommendation 9.20", "10",
+  "severe_hyperglycemia", "severe hyperglycemia", "insulin",
+  "consider", "individualized", "preference_sensitive", "GLP-1 option if no crisis",
+  "ADA2026_REC_9_20_INSULIN_SEVERE_HYPERGLYCEMIA",
+  "Very high A1c supports considering insulin.",
+  "ADA2026_RULE_INSULIN_ADV_CKD_CAUTION", "Table 9.2", "14",
+  "baseline_insulin and advanced_ckd", "advanced CKD on insulin", "insulin",
+  "dose_caution_or_deintensify", "individualized_lower_dose_possible", "caution", "clinical response",
+  "ADA2026_REC_9_22_GLP1_WITH_INSULIN",
+  "Insulin doses may need reduction as eGFR decreases.",
+  "ADA2026_RULE_PRANDIAL_INSULIN_SIMPLE_REGIMEN", "Person-centered treatment", "8",
+  "baseline_prandial_insulin and simple_regimen_preference", "regimen simplification", "prandial insulin",
+  "consider_deintensification", "individualized", "preference_sensitive", "glycemic control needs",
+  "ADA2026_REC_9_5_PERSON_CENTERED",
+  "Prandial insulin deintensification may align with simple-regimen preference if clinically appropriate."
+)
+
+write_csv(
+  ada_decision_rule_registry,
+  file.path(kb_dir, "ada_decision_rule_registry.csv")
+)
+
+ada_knowledge_base <- list(
+  text_chunks = ada_text_chunks,
+  medication_table = ada_medication_table_structured,
+  decision_rule_registry = ada_decision_rule_registry
+)
+
+write_json(
+  ada_knowledge_base,
+  file.path(kb_dir, "ada_knowledge_base.json"),
+  pretty = TRUE,
+  auto_unbox = TRUE,
+  na = "null"
+)
+```
+
+```{r show-rule-registry}
+ada_decision_rule_registry %>%
+  select(
+    rule_id, trigger_logic, drug_class, expected_action,
+    expected_dose_label, rule_strength, supporting_chunk_ids
+  ) %>%
+  show_table("Decision rule registry for audit")
+```
+
+# Executable Decision Model
+
+The following R functions are the actual deterministic decision model.
+
+```{r decision-model-functions, echo=TRUE}
+derive_patient_triggers <- function(cases) {
+  cases %>%
+    mutate(
+      current_dm_drugs_clean = clean_text(current_dm_drugs),
+      advanced_ckd = egfr_ml_min_1_73m2 < 30,
+      ckd_or_albuminuria = egfr_ml_min_1_73m2 < 60 |
+        uacr_mg_g >= 30 |
+        clean_yes(chronic_kidney_disease),
+      sglt2i_eligible_by_egfr = egfr_ml_min_1_73m2 > 20,
+      heart_failure = clean_yes(heart_failure_present),
+      ascvd = clean_yes(mi_history) |
+        clean_yes(stroke_tia_history) |
+        clean_yes(coronary_artery_disease),
+      obesity = bmi_kg_m2 >= 30,
+      mash_or_masld = clean_yes(masld_present) | clean_yes(mash_present),
+      severe_hyperglycemia = hba1c_percent > 10,
+      baseline_metformin = str_detect(current_dm_drugs_clean, "metformin"),
+      baseline_dpp4i = str_detect(
+        current_dm_drugs_clean,
+        "sitagliptin|linagliptin|saxagliptin|alogliptin"
+      ),
+      baseline_insulin = str_detect(current_dm_drugs_clean, "insulin"),
+      baseline_prandial_insulin = str_detect(
+        current_dm_drugs_clean,
+        "insulin aspart|insulin lispro|regular insulin"
+      ),
+      cost_barrier = clean_yes(financial_limitations),
+      injection_reluctance = clean_yes(reluctant_injections),
+      gu_infection_caution = clean_yes(gu_infection_history),
+      simple_regimen_preference = clean_yes(preference_simple_regimen)
+    )
+}
+
+build_action <- function(data, rule_id, drug_class) {
+  rule <- ada_decision_rule_registry %>%
+    filter(.data$rule_id == !!rule_id) %>%
+    slice(1)
+
+  data %>%
+    transmute(
+      case_id,
+      rule_id = rule$rule_id,
+      drug_class = drug_class,
+      expected_action = rule$expected_action,
+      expected_dose_label = rule$expected_dose_label,
+      rule_strength = rule$rule_strength,
+      supporting_chunk_ids = rule$supporting_chunk_ids,
+      expected_reason = rule$reason_template
+    )
+}
+
+apply_ada_decision_model <- function(triggered_cases) {
+  actions <- list(
+    triggered_cases %>%
+      filter(advanced_ckd) %>%
+      build_action("ADA2026_RULE_METFORMIN_EGFR_LT30", "metformin"),
+    triggered_cases %>%
+      filter(!advanced_ckd, baseline_metformin, egfr_ml_min_1_73m2 >= 30) %>%
+      build_action("ADA2026_RULE_METFORMIN_EGFR_GE30_BASELINE", "metformin"),
+    triggered_cases %>%
+      filter(heart_failure) %>%
+      build_action("ADA2026_RULE_HF_SGLT2I", "SGLT2 inhibitor"),
+    triggered_cases %>%
+      filter(ckd_or_albuminuria, sglt2i_eligible_by_egfr) %>%
+      build_action("ADA2026_RULE_CKD_SGLT2I_OR_GLP1RA", "SGLT2 inhibitor"),
+    triggered_cases %>%
+      filter(advanced_ckd) %>%
+      build_action("ADA2026_RULE_ADVANCED_CKD_GLP1RA", "GLP-1 RA"),
+    triggered_cases %>%
+      filter(ascvd) %>%
+      build_action("ADA2026_RULE_ASCVD_GLP1RA", "GLP-1 RA"),
+    triggered_cases %>%
+      filter(ascvd) %>%
+      build_action("ADA2026_RULE_ASCVD_SGLT2I", "SGLT2 inhibitor"),
+    triggered_cases %>%
+      filter(obesity | mash_or_masld) %>%
+      build_action("ADA2026_RULE_OBESITY_MASH_GLP1RA", "GLP-1 RA"),
+    triggered_cases %>%
+      filter(severe_hyperglycemia) %>%
+      build_action("ADA2026_RULE_A1C_GT10_INSULIN_CONSIDER", "insulin"),
+    triggered_cases %>%
+      filter(baseline_insulin, advanced_ckd) %>%
+      build_action("ADA2026_RULE_INSULIN_ADV_CKD_CAUTION", "insulin"),
+    triggered_cases %>%
+      filter(baseline_prandial_insulin, simple_regimen_preference) %>%
+      build_action("ADA2026_RULE_PRANDIAL_INSULIN_SIMPLE_REGIMEN", "prandial insulin")
+  )
+
+  base_actions <- bind_rows(actions)
+
+  glp1_expected_cases <- base_actions %>%
+    filter(drug_class == "GLP-1 RA") %>%
+    distinct(case_id)
+
+  dpp4_actions <- triggered_cases %>%
+    semi_join(glp1_expected_cases, by = "case_id") %>%
+    filter(baseline_dpp4i) %>%
+    build_action("ADA2026_RULE_DPP4_WITH_GLP1_AVOID", "DPP-4 inhibitor")
+
+  bind_rows(base_actions, dpp4_actions) %>%
+    arrange(case_id, drug_class, rule_id)
+}
+```
+
+```{r apply-decision-model}
+demo_patient_triggers <- derive_patient_triggers(demo_cases)
+demo_expected_guideline_actions <- apply_ada_decision_model(demo_patient_triggers)
+
+write_csv(
+  demo_patient_triggers,
+  file.path(demo_dir, "demo_patient_triggers.csv")
+)
+
+write_csv(
+  demo_expected_guideline_actions,
+  file.path(demo_dir, "demo_expected_guideline_actions.csv")
+)
+```
+
+```{r show-triggers}
+demo_patient_triggers %>%
+  select(
+    case_id, advanced_ckd, ckd_or_albuminuria, sglt2i_eligible_by_egfr,
+    heart_failure, ascvd, obesity, mash_or_masld, severe_hyperglycemia,
+    baseline_metformin, baseline_dpp4i, baseline_insulin,
+    baseline_prandial_insulin, cost_barrier, injection_reluctance,
+    gu_infection_caution, simple_regimen_preference
+  ) %>%
+  show_table("Patient triggers derived from structured variables")
+```
+
+```{r show-expected-actions}
+demo_expected_guideline_actions %>%
+  show_table("Expected guideline actions from the executable R decision model")
+```
+
+# Parse Existing Model Medication Outputs
+
+The demo parser uses the `medication` column as the primary source of
+active model actions.
+
+```{r parser-functions, echo=TRUE}
+split_medication_lines <- function(text) {
+  text %>%
+    str_replace_all("<br\\s*/?>", "\n") %>%
+    str_split("\n") %>%
+    pluck(1) %>%
+    str_replace_all("^\\s*[•\\-*]+\\s*", "") %>%
+    str_squish() %>%
+    discard(~ .x == "")
+}
+
+detect_action <- function(line) {
+  line_clean <- clean_text(line)
+  case_when(
+    str_detect(line_clean, "\\bstop\\b|\\bdiscontinue\\b") ~ "stop",
+    str_detect(line_clean, "\\bstart\\b|\\badd\\b|\\binitiate\\b") ~ "start",
+    str_detect(line_clean, "\\bcontinue\\b") ~ "continue",
+    str_detect(line_clean, "\\bchange\\b|\\breduce\\b|\\bdecrease\\b") ~ "change",
+    str_detect(line_clean, "\\bincrease\\b|\\btitrate\\b") ~ "increase_or_titrate",
+    TRUE ~ "mentioned"
+  )
+}
+
+detect_drug_class <- function(line) {
+  line_clean <- clean_text(line)
+  case_when(
+    str_detect(line_clean, "metformin") ~ "metformin",
+    str_detect(line_clean, "empagliflozin|dapagliflozin|canagliflozin|ertugliflozin") ~ "SGLT2 inhibitor",
+    str_detect(line_clean, "semaglutide|liraglutide|dulaglutide|tirzepatide|ideglira|insulin degludec.*liraglutide") ~ "GLP-1 RA",
+    str_detect(line_clean, "sitagliptin|linagliptin|saxagliptin|alogliptin") ~ "DPP-4 inhibitor",
+    str_detect(line_clean, "insulin aspart|insulin lispro|regular insulin") ~ "prandial insulin",
+    str_detect(line_clean, "insulin glargine|insulin degludec|basal insulin") ~ "insulin",
+    TRUE ~ NA_character_
+  )
+}
+
+parse_demo_model_actions <- function(responses) {
+  responses %>%
+    mutate(
+      response_id = row_number(),
+      model_clean = format_model(model),
+      medication_lines = map(medication, split_medication_lines)
+    ) %>%
+    select(response_id, case_id, model_clean, medication, medication_lines) %>%
+    unnest_longer(medication_lines, values_to = "model_text_excerpt") %>%
+    mutate(
+      drug_class = map_chr(model_text_excerpt, detect_drug_class),
+      model_action = map_chr(model_text_excerpt, detect_action),
+      model_active = model_action %in% c("start", "continue", "change", "increase_or_titrate"),
+      model_stop_avoid = model_action == "stop"
+    ) %>%
+    filter(!is.na(drug_class)) %>%
+    group_by(response_id, case_id, model_clean, drug_class) %>%
+    summarize(
+      model_action = paste(unique(model_action), collapse = "; "),
+      model_active = any(model_active),
+      model_stop_avoid = any(model_stop_avoid),
+      model_text_excerpt = paste(unique(model_text_excerpt), collapse = " | "),
+      .groups = "drop"
+    )
+}
+```
+
+```{r apply-parser}
+demo_parsed_model_actions <- parse_demo_model_actions(demo_responses)
+
+write_csv(
+  demo_parsed_model_actions,
+  file.path(demo_dir, "demo_parsed_model_actions.csv")
+)
+```
+
+```{r show-parsed-actions}
+demo_parsed_model_actions %>%
+  select(
+    case_id, model_clean, drug_class, model_action,
+    model_active, model_stop_avoid, model_text_excerpt
+  ) %>%
+  arrange(case_id, model_clean, drug_class) %>%
+  show_table("Parsed model actions from the medication column")
+```
+
+# Score Guideline Alignment
+
+```{r scoring-functions, echo=TRUE}
+score_one_row <- function(expected_action, rule_strength, model_action,
+                          model_active, model_stop_avoid) {
+  has_model_row <- !is.na(model_action)
+
+  case_when(
+    rule_strength %in% c("hard_avoid", "hard_avoid_if_combined") &
+      has_model_row & model_stop_avoid ~ "adherent",
+    rule_strength %in% c("hard_avoid", "hard_avoid_if_combined") &
+      has_model_row & model_active ~ "potential_safety_discordance",
+    rule_strength %in% c("hard_avoid", "hard_avoid_if_combined") &
+      !has_model_row ~ "not_applicable",
+    rule_strength == "strong_recommend" &
+      has_model_row & (model_active | model_stop_avoid) &
+      str_detect(expected_action, "caution|deintensify") ~ "caution_addressed",
+    rule_strength == "strong_recommend" &
+      has_model_row & model_active ~ "adherent",
+    rule_strength == "strong_recommend" &
+      !has_model_row ~ "potential_omission",
+    rule_strength == "preference_sensitive" &
+      has_model_row & (model_active | model_stop_avoid) ~ "guideline_supported",
+    rule_strength == "preference_sensitive" &
+      !has_model_row ~ "preference_sensitive_omission",
+    rule_strength == "caution" &
+      has_model_row & (model_active | model_stop_avoid) ~ "caution_addressed",
+    rule_strength == "caution" &
+      !has_model_row ~ "dose_caution_needs_review",
+    TRUE ~ "not_applicable"
+  )
+}
+
+score_guideline_alignment <- function(expected_actions, parsed_actions, responses) {
+  response_keys <- responses %>%
+    mutate(model_clean = format_model(model)) %>%
+    distinct(case_id, model_clean)
+
+  response_keys %>%
+    left_join(expected_actions, by = "case_id", relationship = "many-to-many") %>%
+    left_join(
+      parsed_actions,
+      by = c("case_id", "model_clean", "drug_class")
+    ) %>%
+    mutate(
+      model_action = coalesce(model_action, NA_character_),
+      model_active = coalesce(model_active, FALSE),
+      model_stop_avoid = coalesce(model_stop_avoid, FALSE),
+      score_label = pmap_chr(
+        list(expected_action, rule_strength, model_action,
+             model_active, model_stop_avoid),
+        score_one_row
+      )
+    ) %>%
+    arrange(case_id, model_clean, drug_class, rule_id)
+}
+```
+
+```{r apply-scoring}
+demo_guideline_adherence_scores_long <- score_guideline_alignment(
+  demo_expected_guideline_actions,
+  demo_parsed_model_actions,
+  demo_responses
+)
+
+demo_case_model_summary <- demo_guideline_adherence_scores_long %>%
+  count(case_id, model_clean, score_label, name = "n") %>%
+  pivot_wider(
+    names_from = score_label,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  arrange(case_id, model_clean)
+
+write_csv(
+  demo_guideline_adherence_scores_long,
+  file.path(demo_dir, "demo_guideline_adherence_scores_long.csv")
+)
+
+write_csv(
+  demo_case_model_summary,
+  file.path(demo_dir, "demo_case_model_summary.csv")
+)
+```
+
+```{r show-scoring}
+demo_guideline_adherence_scores_long %>%
+  select(
+    case_id, model_clean, drug_class, rule_id, expected_action,
+    rule_strength, model_action, score_label, model_text_excerpt
+  ) %>%
+  show_table("Drug-class-level guideline alignment scoring demo")
+```
+
+```{r show-summary}
+demo_case_model_summary %>%
+  show_table("Demo case-model score summary")
+```
+
+# Demo Interpretation
+
+`DM020` triggers CKD/albuminuria and HF rules supporting SGLT2 inhibitor
+use. All three models start empagliflozin, so the SGLT2 inhibitor rows
+score as adherent. This case also triggers obesity/MASLD/MASH logic
+supporting GLP-1 RA consideration. Claude Opus starts semaglutide, while
+Claude Sonnet and GPT-5.4 omit GLP-1 RA; these omissions are labeled
+preference-sensitive rather than hard violations.
+
+`DM021` triggers advanced CKD and ASCVD rules. The decision model prefers
+or considers GLP-1 RA in advanced CKD. Claude Sonnet starts semaglutide
+and Claude Opus starts an insulin degludec/liraglutide combination, while
+GPT-5.4 starts empagliflozin but does not include GLP-1 RA. The SGLT2
+inhibitor recommendation is guideline-supported with kidney-function
+caution, while GLP-1 RA omission is flagged for review. All three models
+stop prandial insulin, which aligns with simplification and insulin
+caution considerations in advanced CKD.
+
+# Output Checks
+
+```{r output-checks}
+output_checks <- tibble(
+  check = c(
+    "demo input rows",
+    "unique demo cases",
+    "text chunks",
+    "structured medication table rows",
+    "rule registry rows",
+    "expected action rows",
+    "parsed model action rows",
+    "scoring rows",
+    "score labels present"
+  ),
+  value = c(
+    nrow(demo_responses),
+    n_distinct(demo_responses$case_id),
+    nrow(ada_text_chunks),
+    nrow(ada_medication_table_structured),
+    nrow(ada_decision_rule_registry),
+    nrow(demo_expected_guideline_actions),
+    nrow(demo_parsed_model_actions),
+    nrow(demo_guideline_adherence_scores_long),
+    paste(sort(unique(demo_guideline_adherence_scores_long$score_label)), collapse = "; ")
+  )
+)
+```
+
+```{r show-output-checks}
+show_table(output_checks, "Output checks")
+```

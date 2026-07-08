@@ -1,0 +1,23 @@
+response_id,case_id,model_clean,drug_class,model_action,model_active,model_stop_avoid,model_text_excerpt
+1,DM020,Claude Sonnet 4.6,DPP-4 inhibitor,stop,FALSE,TRUE,Stop sitagliptin
+1,DM020,Claude Sonnet 4.6,SGLT2 inhibitor,start,TRUE,FALSE,Start empagliflozin 10 mg daily
+1,DM020,Claude Sonnet 4.6,insulin,continue,TRUE,FALSE,Continue insulin glargine 26 units nightly
+1,DM020,Claude Sonnet 4.6,metformin,continue,TRUE,FALSE,Continue metformin 1000 mg twice daily
+2,DM020,GPT-5.4,DPP-4 inhibitor,stop,FALSE,TRUE,Stop sitagliptin discontinue
+2,DM020,GPT-5.4,SGLT2 inhibitor,start,TRUE,FALSE,Start empagliflozin 10 mg once daily
+2,DM020,GPT-5.4,insulin,change,TRUE,FALSE,Change insulin glargine to 30 units nightly
+2,DM020,GPT-5.4,metformin,continue,TRUE,FALSE,Continue metformin 1000 mg twice daily
+3,DM020,Claude Opus 4.6,DPP-4 inhibitor,stop,FALSE,TRUE,Stop sitagliptin
+3,DM020,Claude Opus 4.6,GLP-1 RA,start,TRUE,FALSE,"Start semaglutide 0.25 mg subcutaneous injection once weekly, titrate to 1 mg weekly as tolerated"
+3,DM020,Claude Opus 4.6,SGLT2 inhibitor,start,TRUE,FALSE,Start empagliflozin 10 mg daily
+3,DM020,Claude Opus 4.6,insulin,continue,TRUE,FALSE,Continue insulin glargine 26 units nightly
+3,DM020,Claude Opus 4.6,metformin,change,TRUE,FALSE,Change metformin to 500 mg twice daily
+4,DM021,Claude Sonnet 4.6,GLP-1 RA,start,TRUE,FALSE,"Start semaglutide 0.5 mg subcutaneously once weekly, titrate to 1 mg after 4 weeks as tolerated"
+4,DM021,Claude Sonnet 4.6,insulin,continue,TRUE,FALSE,Continue insulin glargine 34 units subcutaneously nightly
+4,DM021,Claude Sonnet 4.6,prandial insulin,stop,FALSE,TRUE,Stop insulin aspart
+5,DM021,GPT-5.4,SGLT2 inhibitor,start,TRUE,FALSE,Start empagliflozin 10 mg by mouth once daily
+5,DM021,GPT-5.4,insulin,change,TRUE,FALSE,Change insulin glargine to 30 units subcutaneously nightly
+5,DM021,GPT-5.4,prandial insulin,stop,FALSE,TRUE,Stop insulin aspart discontinue
+6,DM021,Claude Opus 4.6,GLP-1 RA,start,TRUE,FALSE,"Start insulin degludec U-200/liraglutide (iDegLira) 16 dose steps subcutaneously once daily, titrate per fasting glucose"
+6,DM021,Claude Opus 4.6,insulin,change,TRUE,FALSE,Change insulin glargine to 36 units nightly
+6,DM021,Claude Opus 4.6,prandial insulin,stop,FALSE,TRUE,Stop insulin aspart

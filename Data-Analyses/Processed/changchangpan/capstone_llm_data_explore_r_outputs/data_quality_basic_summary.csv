@@ -1,6 +1,0 @@
-metric,value
-n_rows,300
-n_columns_after_dropping_unnamed,71
-unique_case_id,98
-unique_vignette_uid_by_clinical_content,100
-n_models,3

@@ -146,6 +146,58 @@ pairwise_kappa <-map_dfr(model_pairs,function(p){
 pairwise_kappa
 ```
 
+
+# Bootstrap CI for overall alpha
+
+```{r kripp-ci}
+set.seed(42)
+boot_alpha <-replicate(2000,{
+  idx <-sample(ncol(big),ncol(big),replace=TRUE)
+  tryCatch(kripp.alpha(big[,idx],method="nominal")$value,error=function(e) NA_real_)
+})
+alpha_ci <-tibble(
+  overall_alpha=overall_alpha,
+  ci_low=round(quantile(boot_alpha,0.025,na.rm=TRUE),3),
+  ci_high=round(quantile(boot_alpha,0.975,na.rm=TRUE),3)
+)
+alpha_ci
+```
+
+# SGLT2i agreement stratified by heart failure and CKD
+
+```{r stratified-agreement}
+strat_agree <-function(flag_col){
+  map_dfr(c("0","1"),function(lvl){
+    ids <-wide %>% filter(as.integer(str_to_lower(as.character(.data[[flag_col]]))=="yes")==as.integer(lvl)) %>% pull(case_id)
+    w <-wide %>% filter(case_id %in% ids) %>%
+      select(case_id,model_short,value=sglt2i_active) %>%
+      pivot_wider(names_from=model_short,values_from=value) %>% drop_na()
+    tibble(stratum=flag_col,present=lvl,n_cases=nrow(w),
+           pct_agree=round(100*mean(apply(w[,-1],1,function(r) length(unique(r))==1)),1))
+  })
+}
+sglt2_stratified <-bind_rows(strat_agree("heart_failure_present"),
+                             strat_agree("chronic_kidney_disease"))
+sglt2_stratified
+```
+
+# Recommendation rate by eGFR band and model
+
+```{r egfr-band-rates}
+egfr_band_rates <-wide %>%
+  mutate(egfr_band=cut(as.numeric(egfr_ml_min_1_73m2),
+                       breaks=c(-Inf,30,45,60,Inf),
+                       labels=c("<30","30-44","45-59",">=60"),right=FALSE)) %>%
+  group_by(egfr_band,model_short) %>%
+  summarise(n=n(),
+            pct_sglt2i=round(100*mean(sglt2i_active,na.rm=TRUE)),
+            pct_glp1=round(100*mean(glp1_active,na.rm=TRUE)),
+            .groups="drop")
+egfr_band_rates
+```
+
+
+
 # Disagreement vs clinical complexity
 
 ```{r complexity}
@@ -245,5 +297,53 @@ table7 <-pairwise_kappa %>%
   rename(`Model pair`=pair,`Cohen's kappa`=mean_kappa) %>%
   bind_rows(tibble(`Model pair`="Overall (Krippendorff's alpha)",`Cohen's kappa`=0.725))
 kable(table7,caption="Table 7. Pairwise Cohen's kappa across active drug classes and overall Krippendorff's alpha.")
+```
+
+
+```{r}
+library(ggplot2)
+
+out <-here::here("data","processed","my_inter_model_outputs")
+
+label_map <-c(
+  metformin_active="Metformin", sglt2i_active="SGLT2 inhibitor",
+  glp1_active="GLP-1 RA", gip_glp1_active="GIP/GLP-1",
+  dpp4i_active="DPP-4 inhibitor", insulin_any_active="Insulin (any)",
+  basal_insulin_active="Basal insulin", prandial_insulin_active="Prandial insulin",
+  sulfonylurea_active="Sulfonylurea", tzd_active="TZD",
+  cost_mentioned="Cost mentioned", urgent_eval_mentioned="Urgent eval"
+)
+
+heat <-rec_rates %>%
+  select(model_short,starts_with("pct_")) %>%
+  pivot_longer(-model_short,names_to="feature",values_to="pct") %>%
+  mutate(feature=str_remove(feature,"^pct_"),
+         label=recode(feature,!!!label_map),
+         model_short=factor(model_short,
+           levels=c("Claude Opus 4.6","Claude Sonnet 4.6","GPT-5.4")))
+
+fig6 <-ggplot(heat,aes(x=reorder(label,-pct),y=model_short,fill=pct))+
+  geom_tile(color="white",linewidth=0.6)+
+  geom_text(aes(label=paste0(pct,"%")),size=3)+
+  scale_fill_gradient(low="#e8a33d",high="#1f7a4d",name="Rate (%)")+
+  labs(x="Medication class",y=NULL,
+       title="Active-Recommendation Rate by Model and Medication Class")+
+  theme_minimal(base_size=11)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),
+        panel.grid=element_blank(),
+        plot.title=element_text(face="bold",size=11))
+fig6
+
+ggsave(file.path(out,"figure6_recommendation_rate_heatmap.png"),
+       fig6,width=9,height=3.2,dpi=300)
+
+write_csv(
+  pairwise_kappa %>% bind_rows(tibble(pair="Overall (Krippendorff's alpha)",mean_kappa=0.725)),
+  file.path(out,"table7_kappa_and_alpha.csv")
+)
+
+write_csv(alpha_ci, file.path(out,"inter_model_alpha_bootstrap_ci.csv"))
+write_csv(sglt2_stratified, file.path(out,"sglt2i_agreement_by_hf_ckd.csv"))
+write_csv(egfr_band_rates,   file.path(out,"recommendation_rates_by_egfr_band.csv"))
 ```
 

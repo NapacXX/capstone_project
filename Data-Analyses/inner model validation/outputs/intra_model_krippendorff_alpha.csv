@@ -1,4 +1,0 @@
-model_clean,krippendorff_alpha,n_cases,n_repeats,interpretation
-Claude Opus 4.6,0.5753928090437905,100,5,Low agreement
-Claude Sonnet 4.6,0.22035022498911339,100,5,Low agreement
-GPT-5.4,0.14154524601815655,100,5,Low agreement

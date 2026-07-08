@@ -1,0 +1,13 @@
+egfr_band,model_short,n,pct_sglt2i,pct_glp1
+<30,Claude Opus 4.6,13,15,46
+<30,Claude Sonnet 4.6,13,0,31
+<30,GPT-5.4,13,46,23
+30-44,Claude Opus 4.6,20,95,70
+30-44,Claude Sonnet 4.6,20,65,85
+30-44,GPT-5.4,20,100,60
+45-59,Claude Opus 4.6,19,89,53
+45-59,Claude Sonnet 4.6,19,63,42
+45-59,GPT-5.4,19,89,26
+>=60,Claude Opus 4.6,48,42,58
+>=60,Claude Sonnet 4.6,48,23,58
+>=60,GPT-5.4,48,25,46

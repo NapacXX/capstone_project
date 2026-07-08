@@ -1,0 +1,5 @@
+pair,mean_kappa
+GPT-5.4 vs Claude Opus 4.6,0.503
+GPT-5.4 vs Claude Sonnet 4.6,0.514
+Claude Opus 4.6 vs Claude Sonnet 4.6,0.561
+Overall (Krippendorff's alpha),0.725

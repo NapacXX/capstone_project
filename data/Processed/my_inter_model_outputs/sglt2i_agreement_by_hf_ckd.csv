@@ -1,0 +1,5 @@
+stratum,present,n_cases,pct_agree
+heart_failure_present,0,88,53.4
+heart_failure_present,1,12,100
+chronic_kidney_disease,0,45,55.6
+chronic_kidney_disease,1,55,61.8

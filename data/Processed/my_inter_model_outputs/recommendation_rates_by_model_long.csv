@@ -1,0 +1,37 @@
+model_short,n,feature,pct
+Claude Opus 4.6,100,metformin_active,66
+Claude Opus 4.6,100,sglt2i_active,58
+Claude Opus 4.6,100,glp1_active,58
+Claude Opus 4.6,100,gip_glp1_active,7
+Claude Opus 4.6,100,dpp4i_active,4
+Claude Opus 4.6,100,insulin_any_active,24
+Claude Opus 4.6,100,basal_insulin_active,24
+Claude Opus 4.6,100,prandial_insulin_active,2
+Claude Opus 4.6,100,sulfonylurea_active,0
+Claude Opus 4.6,100,tzd_active,4
+Claude Opus 4.6,100,urgent_eval_mentioned,0
+Claude Opus 4.6,100,cost_mentioned,25
+Claude Sonnet 4.6,100,metformin_active,60
+Claude Sonnet 4.6,100,sglt2i_active,36
+Claude Sonnet 4.6,100,glp1_active,57
+Claude Sonnet 4.6,100,gip_glp1_active,8
+Claude Sonnet 4.6,100,dpp4i_active,5
+Claude Sonnet 4.6,100,insulin_any_active,30
+Claude Sonnet 4.6,100,basal_insulin_active,30
+Claude Sonnet 4.6,100,prandial_insulin_active,1
+Claude Sonnet 4.6,100,sulfonylurea_active,1
+Claude Sonnet 4.6,100,tzd_active,1
+Claude Sonnet 4.6,100,urgent_eval_mentioned,0
+Claude Sonnet 4.6,100,cost_mentioned,32
+GPT-5.4,100,metformin_active,66
+GPT-5.4,100,sglt2i_active,55
+GPT-5.4,100,glp1_active,42
+GPT-5.4,100,gip_glp1_active,7
+GPT-5.4,100,dpp4i_active,3
+GPT-5.4,100,insulin_any_active,15
+GPT-5.4,100,basal_insulin_active,15
+GPT-5.4,100,prandial_insulin_active,1
+GPT-5.4,100,sulfonylurea_active,2
+GPT-5.4,100,tzd_active,0
+GPT-5.4,100,urgent_eval_mentioned,0
+GPT-5.4,100,cost_mentioned,15

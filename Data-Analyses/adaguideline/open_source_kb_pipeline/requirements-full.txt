@@ -1,0 +1,2 @@
+-r requirements-minimal.txt
+docling>=2.30.0

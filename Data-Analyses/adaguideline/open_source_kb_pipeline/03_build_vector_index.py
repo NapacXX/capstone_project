@@ -15,6 +15,7 @@ DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 def load_kb(kb_dir: Path) -> pd.DataFrame:
     files = [
+        ("enhanced", "enhanced_guideline_kb_records.csv"),
         ("text", "full_guideline_text_chunks.csv"),
         ("table", "full_guideline_structured_tables.csv"),
         ("figure_or_page", "full_guideline_figure_pages.csv"),
@@ -46,6 +47,11 @@ def main() -> None:
     parser.add_argument("--kb-dir", default="outputs/full_guideline_kb")
     parser.add_argument("--output-dir", default="outputs/vector_index")
     parser.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL)
+    parser.add_argument(
+        "--local-files-only",
+        action="store_true",
+        help="Use only locally cached embedding model files; do not try downloads.",
+    )
     args = parser.parse_args()
 
     try:
@@ -62,7 +68,13 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     corpus = load_kb(kb_dir)
-    model = SentenceTransformer(args.embedding_model)
+    try:
+        model = SentenceTransformer(
+            args.embedding_model,
+            local_files_only=args.local_files_only,
+        )
+    except TypeError:
+        model = SentenceTransformer(args.embedding_model)
     embeddings = model.encode(
         corpus["retrieval_text"].tolist(),
         batch_size=32,

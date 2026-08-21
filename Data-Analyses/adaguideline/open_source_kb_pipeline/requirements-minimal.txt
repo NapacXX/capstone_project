@@ -7,3 +7,4 @@ sentence-transformers>=3.0.0
 faiss-cpu>=1.8.0
 tqdm>=4.66.0
 requests>=2.31.0
+jsonschema>=4.22.0

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
@@ -17,9 +18,13 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_PDF = (
-    "/Users/jiayiwei/Documents/Capstone/materials/"
-    "ada 2026 pharmacotherapy guidelines.pdf"
+TABLE_CAPTION_PATTERN = re.compile(
+    r"\b(Table\s+\d+(?:\.\d+)?)\s*[\u2013\u2014-]",
+    re.IGNORECASE,
+)
+FIGURE_CAPTION_PATTERN = re.compile(
+    r"\b(Fig(?:ure)?\.?\s+\d+(?:\.\d+)?)\s*[\u2013\u2014-]",
+    re.IGNORECASE,
 )
 
 
@@ -53,6 +58,14 @@ class PageRecord:
 def require_pdf(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"PDF not found: {path}")
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def ensure_dirs(output_dir: Path) -> dict[str, Path]:
@@ -169,22 +182,27 @@ def split_page_text_blocks(pages: list[tuple[int, str]]) -> list[TextBlock]:
 
 def detect_tables_from_blocks(blocks: list[TextBlock]) -> list[TableBlock]:
     tables: list[TableBlock] = []
-    table_pattern = re.compile(r"(Table\s+\d+(?:\.\d+)?)", re.IGNORECASE)
     for block in blocks:
-        is_table = block.content_type == "markdown_table" or bool(
-            table_pattern.search(block.text)
-        )
+        # A bare reference such as "see Table 9.2" does not make the page a
+        # table asset.  Require a caption dash (including "—Continued") for
+        # page-text extraction; Docling Markdown tables remain explicit.
+        caption_match = TABLE_CAPTION_PATTERN.search(block.text)
+        is_table = block.content_type == "markdown_table" or bool(caption_match)
         if not is_table:
             continue
         table_id = f"tbl_{len(tables) + 1:04d}"
-        match = table_pattern.search(block.text)
         tables.append(
             TableBlock(
                 table_id=table_id,
                 page_number=block.page_number,
-                table_or_figure_id=match.group(1) if match else "",
+                table_or_figure_id=(
+                    caption_match.group(1) if caption_match else ""
+                ),
                 raw_table_text=block.text,
-                extraction_method="docling_markdown_or_text_pattern",
+                extraction_method=(
+                    "docling_markdown" if block.content_type == "markdown_table"
+                    else "page_text_pattern"
+                ),
             )
         )
     return tables
@@ -192,16 +210,20 @@ def detect_tables_from_blocks(blocks: list[TextBlock]) -> list[TableBlock]:
 
 def build_page_manifest(pages: list[tuple[int, str]]) -> list[PageRecord]:
     records: list[PageRecord] = []
-    table_pattern = re.compile(r"Table\s+\d+(?:\.\d+)?", re.IGNORECASE)
-    figure_pattern = re.compile(r"Fig(?:ure)?\.?\s+\d+(?:\.\d+)?", re.IGNORECASE)
     for page_number, text in pages:
         compact = re.sub(r"\s+", " ", text).strip()
+        table_ids = sorted(
+            {match.group(1).strip() for match in TABLE_CAPTION_PATTERN.finditer(text)}
+        )
+        figure_ids = sorted(
+            {match.group(1).strip() for match in FIGURE_CAPTION_PATTERN.finditer(text)}
+        )
         records.append(
             PageRecord(
                 page_number=page_number,
                 text_char_count=len(compact),
-                table_ids="; ".join(sorted(set(table_pattern.findall(text)))),
-                figure_ids="; ".join(sorted(set(figure_pattern.findall(text)))),
+                table_ids="; ".join(table_ids),
+                figure_ids="; ".join(figure_ids),
                 page_text_preview=compact[:1000],
             )
         )
@@ -210,7 +232,11 @@ def build_page_manifest(pages: list[tuple[int, str]]) -> list[PageRecord]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pdf", default=DEFAULT_PDF)
+    parser.add_argument(
+        "--pdf",
+        required=True,
+        help="Path to the source guideline PDF (required; no contributor-specific default).",
+    )
     parser.add_argument("--output-dir", default="outputs")
     args = parser.parse_args()
 
@@ -220,13 +246,15 @@ def main() -> None:
     dirs = ensure_dirs(output_dir)
     raw_dir = dirs["raw"]
 
-    markdown, doc_payload = safe_docling_extract(pdf_path, raw_dir)
+    _markdown, doc_payload = safe_docling_extract(pdf_path, raw_dir)
     pages = extract_pages_with_pypdf(pdf_path)
 
-    if markdown:
-        text_blocks = split_markdown_blocks(markdown)
-    else:
-        text_blocks = split_page_text_blocks(pages)
+    # The page-level extraction is the canonical KB input even when Docling is
+    # available.  Docling's flattened Markdown export does not retain reliable
+    # page coordinates; using it here silently produced page_number=None for
+    # every text block and broke source traceability.  The richer Docling
+    # document remains available in document.json for future structured use.
+    text_blocks = split_page_text_blocks(pages)
 
     tables = detect_tables_from_blocks(text_blocks)
     page_manifest = build_page_manifest(pages)
@@ -234,6 +262,7 @@ def main() -> None:
     doc_payload.update(
         {
             "source_pdf": str(pdf_path),
+            "source_pdf_sha256": sha256_file(pdf_path),
             "n_pages": len(pages),
             "n_text_blocks": len(text_blocks),
             "n_tables_detected": len(tables),

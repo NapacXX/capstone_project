@@ -121,6 +121,24 @@ review.
 Running without `--use-ollama` creates provenance-preserving placeholders only.
 Those placeholders cannot pass the release validator.
 
+If one pass on one asset reaches its bounded output limit, rerun only that pass
+from a one-asset manifest into a **separate** directory. Do not edit or
+overwrite the primary run. `merge_visual_logic_retry.py` will create a third,
+completed directory only when the primary run and retry agree on the asset,
+page, source/image hashes, model tag and digest, Ollama version, and runtime
+identity, and when their successful pass names are disjoint:
+
+```bash
+python merge_visual_logic_retry.py \
+  --primary-raw-dir outputs/visual_logic_raw_review_20260823 \
+  --retry-raw-dir outputs/visual_logic_retry_page_009_r02_c02 \
+  --output-dir outputs/visual_logic_raw_review_20260823_completed \
+  --expected-assets 60
+```
+
+This is a narrow recovery path, not general checkpoint/resume support. A failed
+or provenance-mismatched retry remains quarantined.
+
 ### 3. Validate and create the human-review sheet
 
 ```bash
@@ -167,6 +185,49 @@ For automated pipeline runs, add `--require-valid-candidates` to fail if step 07
 produces no valid candidates, and add `--require-released-records` after review
 to fail if no records pass the human-release gate. Both checks are opt-in so the
 initial review-sheet generation remains a successful workflow step.
+
+### 3a. Export a sanitized package for distributed manual review
+
+Canonical Step 06/07 outputs remain under the Git-ignored `outputs/` tree. To
+share review tables through Git without adding the source PDF, rendered images,
+raw per-asset model JSON, or release/KB artifacts, export an explicit sanitized
+package after a **completed** Step 06 run and its matching Step 07 validation:
+
+```bash
+REVIEW_RUN_ID="ada_principles_20260823"
+REVIEW_RAW_DIR="outputs/visual_logic_raw_${REVIEW_RUN_ID}"
+REVIEW_STRUCTURED_DIR="outputs/visual_logic_structured_${REVIEW_RUN_ID}"
+
+python 07_validate_visual_logic_outputs.py \
+  --raw-dir "$REVIEW_RAW_DIR" \
+  --output-dir "$REVIEW_STRUCTURED_DIR" \
+  --require-valid-candidates
+
+python export_manual_review_package.py \
+  --raw-dir "$REVIEW_RAW_DIR" \
+  --structured-dir "$REVIEW_STRUCTURED_DIR" \
+  --destination "manual_review_packages/$REVIEW_RUN_ID" \
+  --require-review-records
+```
+
+The exporter is read-only with respect to the canonical outputs. It verifies
+Step 06 completion, reconciles Step 06/07 asset and record counts, requires the
+approval sheet to match the detailed records, removes absolute local paths, and
+generates `package_inventory.json`, `SHA256SUMS`, and a package-specific
+`README.md`. It refuses to write inside any `outputs/` directory or over a
+nonempty destination.
+
+The tracked package is a review coordination artifact, not standalone source
+evidence. Reviewers still need controlled access to the exact PDF and rendered
+images whose SHA-256 values appear in the package manifest. They must join the
+approval sheet to the detailed tables by `record_id` and compare every record
+and complete figure/table against those controlled source assets. After review,
+the edited approval CSV must be returned to the pipeline operator and processed
+again by Step 07 against the unchanged canonical Step 06 output.
+
+Import CSV columns as text, or use a CSV-aware editor that does not evaluate
+cells as formulas. Clinical `+` markers are source content and must not be
+reinterpreted or altered by spreadsheet software.
 
 ### 4. Build and index only released evidence
 
@@ -215,6 +276,7 @@ outputs/visual_logic_raw/                     # untrusted model JSON
 outputs/visual_logic_structured/               # candidates, approvals, releases
 outputs/enhanced_guideline_kb/                 # released retrieval corpus
 outputs/vector_index_enhanced/                 # FAISS index + audit metadata
+manual_review_packages/<review-run-id>/        # sanitized, trackable review metadata
 ```
 
 ## Tests
@@ -226,7 +288,9 @@ python -m unittest discover -s tests -v
 The focused suite covers tile geometry and provenance, Ollama preflight and
 error bodies, strict model-response validation, ID collision handling, graph
 and symbol validation, fingerprint-bound approval, duplicate-ID rejection, and
-fail-closed enhanced/vector KB integration.
+fail-closed enhanced/vector KB integration. It also covers review-package
+allowlisting, source immutability, path sanitization, count/checksum inventory,
+incomplete-run rejection, and overwrite protection.
 
 ## Review priorities
 

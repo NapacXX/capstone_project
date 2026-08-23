@@ -241,6 +241,49 @@ class VisualValidationTests(unittest.TestCase):
             second = pd.read_csv(fixture.output / "visual_candidate_retrieval_records.csv")
             self.assertEqual(first_ids, second["record_id"].tolist())
 
+    def test_empty_model_title_uses_manifest_identifier_without_mutating_raw_json(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            value = payload()
+            value["visual_items"][0]["title"] = ""  # type: ignore[index]
+            fixture.write(value, table_ids="Table 9.2")
+            fixture.run()
+
+            candidates = pd.read_csv(
+                fixture.output / "visual_candidate_retrieval_records.csv"
+            )
+            nodes = pd.read_csv(fixture.output / "visual_decision_nodes.csv")
+            raw = json.loads(fixture.json_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(candidates), 5)
+            self.assertTrue(
+                (candidates["table_or_figure_id"] == "Figure 9.4; Table 9.2").all()
+            )
+            self.assertTrue((nodes["validation_status"] == "valid").all())
+            self.assertTrue(
+                nodes["validation_warnings"]
+                .fillna("")
+                .str.contains("title derived from manifest figure_ids/table_ids")
+                .all()
+            )
+            self.assertEqual(raw["visual_items"][0]["title"], "")
+
+    def test_empty_title_without_manifest_identifier_remains_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            value = payload()
+            value["visual_items"][0]["title"] = ""  # type: ignore[index]
+            fixture.write(value, figure_ids="", table_ids="")
+            fixture.run()
+
+            candidates = pd.read_csv(
+                fixture.output / "visual_candidate_retrieval_records.csv"
+            )
+            nodes = pd.read_csv(fixture.output / "visual_decision_nodes.csv")
+            self.assertTrue(candidates.empty)
+            self.assertTrue(
+                nodes["validation_errors"].str.contains("title is required").all()
+            )
+
     def test_nonempty_evidence_bbox_requires_declared_normalized_space(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             fixture = Fixture(Path(directory))

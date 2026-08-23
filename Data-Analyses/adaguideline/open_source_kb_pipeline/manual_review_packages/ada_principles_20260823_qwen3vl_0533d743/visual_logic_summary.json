@@ -1,0 +1,15 @@
+{
+  "approval_csv": "PACKAGE/visual_review_approvals.csv",
+  "n_decision_nodes": 168,
+  "n_drug_actions": 220,
+  "n_human_approved_release_records": 0,
+  "n_invalid_candidate_records": 207,
+  "n_manual_review_items": 760,
+  "n_ordinal_symbols": 22,
+  "n_recommendation_edges": 136,
+  "n_symbols_or_footnotes": 77,
+  "n_valid_candidate_records": 416,
+  "n_visual_assets": 60,
+  "release_gate": "human_approval_required",
+  "symbol_registry": "PIPELINE_METADATA/guideline_symbol_registry.csv"
+}

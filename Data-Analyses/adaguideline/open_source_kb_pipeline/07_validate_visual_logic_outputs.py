@@ -371,6 +371,14 @@ def as_list(value: Any, field: str, errors: list[str]) -> list[Any]:
     return value
 
 
+def manifest_item_title(row: pd.Series) -> str:
+    """Return authoritative visual identifiers without inventing a clinical title."""
+    identifiers = [
+        normalize(row.get(field)) for field in ("figure_ids", "table_ids")
+    ]
+    return "; ".join(dict.fromkeys(value for value in identifiers if value))
+
+
 def manifest_bbox(row: pd.Series, errors: list[str]) -> list[float] | None:
     values = [row.get(name) for name in ("bbox_x0", "bbox_y0", "bbox_x1", "bbox_y1")]
     if all(is_missing(value) or normalize(value) == "" for value in values):
@@ -753,7 +761,13 @@ def evidence_fields(
     return evidence_text, canonical_json(bbox) if bbox is not None else ""
 
 
-def item_metadata(item: Any, item_index: int, errors: list[str]) -> dict[str, Any] | None:
+def item_metadata(
+    item: Any,
+    item_index: int,
+    errors: list[str],
+    *,
+    title_fallback: str = "",
+) -> dict[str, Any] | None:
     if not isinstance(item, dict):
         errors.append(f"visual_items[{item_index}] must be an object")
         return None
@@ -761,7 +775,15 @@ def item_metadata(item: Any, item_index: int, errors: list[str]) -> dict[str, An
     normalized = dict(item)
     normalized["item_id"] = parse_string(item.get("item_id"), "item_id", local_errors)
     normalized["item_type"] = parse_string(item.get("item_type"), "item_type", local_errors)
-    normalized["title"] = parse_string(item.get("title"), "title", local_errors)
+    normalized["title"] = parse_string(
+        item.get("title"), "title", local_errors, required=False
+    )
+    if not normalized["title"]:
+        normalized["title"] = normalize(title_fallback)
+        if normalized["title"]:
+            normalized["_title_from_manifest"] = True
+        else:
+            local_errors.append("title is required")
     normalized["clinical_scope"] = parse_string(
         item.get("clinical_scope"), "clinical_scope", local_errors
     )
@@ -1537,11 +1559,20 @@ def flatten_payload(
     if not visual_items:
         provenance_errors.append("visual_items must contain at least one item")
 
+    fallback_title = manifest_item_title(manifest_row)
     item_parse_errors: list[str] = []
     items = [
         parsed
         for index, item in enumerate(visual_items)
-        if (parsed := item_metadata(item, index, item_parse_errors)) is not None
+        if (
+            parsed := item_metadata(
+                item,
+                index,
+                item_parse_errors,
+                title_fallback=fallback_title,
+            )
+        )
+        is not None
     ]
     item_ids = Counter(item["item_id"] for item in items if item["item_id"])
     for item_id, count in item_ids.items():
@@ -1553,8 +1584,7 @@ def flatten_payload(
             provenance,
             provenance_errors + item_parse_errors,
             provenance_warnings,
-            title=normalize(manifest_row.get("figure_ids"))
-            or normalize(manifest_row.get("table_ids")),
+            title=fallback_title,
         )
     )
 
@@ -1568,6 +1598,11 @@ def flatten_payload(
     all_records: list[dict[str, Any]] = []
     for item in items:
         item_errors = list(provenance_errors) + list(item.get("_errors", []))
+        item_warnings = list(provenance_warnings)
+        if item.get("_title_from_manifest"):
+            item_warnings.append(
+                "visual item title derived from manifest figure_ids/table_ids"
+            )
         if item_ids.get(item["item_id"], 0) > 1:
             item_errors.append(f"duplicate item_id {item['item_id']!r} within asset")
         item_records: list[dict[str, Any]] = []
@@ -1582,7 +1617,7 @@ def flatten_payload(
                     approvals,
                     registry,
                     item_errors,
-                    provenance_warnings,
+                    item_warnings,
                 )
                 output[output_key].append(record)
                 item_records.append(record)
@@ -1594,7 +1629,7 @@ def flatten_payload(
                     provenance,
                     list(item.get("_errors", []))
                     + (["visual item contains no child records"] if not item_records else []),
-                    provenance_warnings,
+                    item_warnings,
                     item_id=item["item_id"],
                     title=item["title"],
                 )

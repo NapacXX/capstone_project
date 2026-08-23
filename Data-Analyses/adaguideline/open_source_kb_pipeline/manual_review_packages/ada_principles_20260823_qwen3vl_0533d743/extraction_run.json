@@ -1,0 +1,49 @@
+{
+  "asset_selection": "tiles_preferred",
+  "extraction_passes": [
+    "structure",
+    "actions",
+    "symbols"
+  ],
+  "finished_at": "2026-08-23T16:30:47.064491+00:00",
+  "image_manifest": "OMITTED_IMAGE_MANIFEST/page_image_manifest.csv",
+  "merged_at": "2026-08-23T16:46:27.965395+00:00",
+  "model": "qwen3-vl:8b-instruct",
+  "model_architecture": "qwen3vl",
+  "model_digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+  "model_family": "qwen3vl",
+  "n_assets": 60,
+  "n_manifest_assets": 70,
+  "num_ctx": 12288,
+  "num_predict": 6144,
+  "ollama_url": "http://127.0.0.1:11434",
+  "ollama_version": "0.32.9",
+  "retry_provenance": [
+    {
+      "asset_id": "page_009_tile_r02_c02",
+      "extraction_passes": [
+        "structure"
+      ],
+      "merge_utility": "merge_visual_logic_retry.py",
+      "primary_extraction_run_sha256": "84a2b26a292e49837fb0a70e82b56bd9b9b4d9be6a53845c13869e69382f6155",
+      "primary_manifest_sha256": "47c0e3d9de3a51385b94f9cfae28a6268c35fb4702d7b5e6feec5d7c1afd7ea6",
+      "primary_payload_sha256": "60d82308d443ffd1d2ce7048a585df83f3f6a7abe4519c0d580b89763ded12c6",
+      "primary_raw_dir": "SANITIZED_ABSOLUTE_PATH/visual_logic_raw_review_20260823",
+      "replaced_primary_error": "structure: Ollama truncated the structure response at 6144 generated tokens. Increase the configured context/output budget or reduce the per-pass schema bounds.",
+      "retry_extraction_run_sha256": "836465fc560f870f9ee0dfba728e2c0f672d916317676c0785d16ed5576bcb27",
+      "retry_finished_at": "2026-08-23T16:33:24.629248+00:00",
+      "retry_manifest_sha256": "4de1a8f896f8fec9ead6f15a9a29be181b5d20d8053ba0344608aed3499fbcc9",
+      "retry_num_ctx": 16384,
+      "retry_num_predict": 8192,
+      "retry_payload_sha256": "d20e98846c812d54efe0bcaac3e54d10da9f303d0dfd6b852647d130dcffa195",
+      "retry_raw_dir": "SANITIZED_ABSOLUTE_PATH/visual_logic_retry_page_009_r02_c02",
+      "retry_started_at": "2026-08-23T16:31:45.069894+00:00"
+    }
+  ],
+  "started_at": "2026-08-23T15:10:40.193047+00:00",
+  "status": "completed_unvalidated",
+  "status_counts": {
+    "extracted_unvalidated": 60
+  },
+  "vision_probe_completed": true
+}

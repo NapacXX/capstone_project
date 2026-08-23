@@ -1,0 +1,11 @@
+symbol_family,raw_symbol,symbol_type,symbol_count,ordinal_level,direction_default,meaning,scoring_use,manual_review_required
+plus,+,relative_advantage,1,low,context_dependent,Low relative advantage or low relative strength,Context only; do not use as hard adherence criterion,true
+plus,++,relative_advantage,2,moderate,context_dependent,Moderate relative advantage or moderate relative strength,Context only; do not use as hard adherence criterion,true
+plus,+++,relative_advantage,3,high,context_dependent,High relative advantage or high relative strength,Context only; do not use as hard adherence criterion,true
+plus,++++,relative_advantage,4,very_high,context_dependent,Very high relative advantage or very high relative strength,Context only; do not use as hard adherence criterion,true
+plus,+++++,relative_advantage,5,highest,context_dependent,Highest relative advantage or highest relative strength,Context only; do not use as hard adherence criterion,true
+dollar,$,relative_cost,1,low,more_is_worse,Low relative cost,Context and preference-sensitive scoring only,true
+dollar,$$,relative_cost,2,moderate,more_is_worse,Moderate relative cost,Context and preference-sensitive scoring only,true
+dollar,$$$,relative_cost,3,high,more_is_worse,High relative cost,Context and preference-sensitive scoring only,true
+dollar,$$$$,relative_cost,4,very_high,more_is_worse,Very high relative cost,Context and preference-sensitive scoring only,true
+dollar,$$$$$,relative_cost,5,highest,more_is_worse,Highest relative cost,Context and preference-sensitive scoring only,true

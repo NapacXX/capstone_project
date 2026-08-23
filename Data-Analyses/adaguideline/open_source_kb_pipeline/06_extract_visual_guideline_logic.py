@@ -596,14 +596,18 @@ def image_hash_for_row(row: pd.Series) -> str:
     return normalize(row.get("image_sha256")) or normalize(row.get("asset_sha256"))
 
 
+def manifest_item_title(row: pd.Series) -> str:
+    """Return authoritative visual identifiers without inventing a clinical title."""
+    identifiers = [
+        normalize(row.get(field)) for field in ("figure_ids", "table_ids")
+    ]
+    return "; ".join(dict.fromkeys(value for value in identifiers if value))
+
+
 def placeholder_payload(row: pd.Series, status: str, message: str) -> dict[str, Any]:
     page_number = int(row["page_number"])
     asset_id = asset_id_for_row(row)
-    title = "; ".join(
-        value
-        for value in [normalize(row.get("figure_ids")), normalize(row.get("table_ids"))]
-        if value
-    )
+    title = manifest_item_title(row)
     return {
         "asset_id": asset_id,
         "page_number": page_number,
@@ -771,6 +775,14 @@ def extract_asset(
         for item_index, item in enumerate(parsed.get("visual_items", []), start=1):
             raw_item_id = safe_id(item.get("item_id") or f"item_{item_index:02d}")
             item["item_id"] = f"{safe_id(asset_id)}__{pass_name}__{raw_item_id}"
+            if not normalize(item.get("title")):
+                fallback_title = manifest_item_title(row)
+                if fallback_title:
+                    item["title"] = fallback_title
+                    combined["extraction_warnings"].append(
+                        f"{pass_name}: visual item title derived from manifest "
+                        "figure_ids/table_ids"
+                    )
             item["extraction_pass"] = pass_name
             combined["visual_items"].append(item)
         for warning in parsed.get("extraction_warnings", []):

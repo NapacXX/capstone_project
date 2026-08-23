@@ -1,12 +1,12 @@
 # ADA Guideline RAG Pipeline — Current Implementation and Project Status
 
-> Audit date: 2026-08-22
+> Audit date: 2026-08-23
 >
 > Repository baseline audited: `main` at `d4d09f1c5d8eab91d66bfd44eaebd965dd8f2a3a`; execution evidence was collected against the candidate patch later prepared for commit
 >
 > Evidence rule: results below are explicitly separated into tracked repository evidence, current code that was executed, and synthetic software-fixture evidence. Synthetic records are not ADA guideline findings.
 >
-> **Current live-validation update:** Ollama 0.32.9 and `qwen3-vl:8b-instruct` were subsequently exercised against real rendered tiles. One Figure 9.4 tile completed all three extraction passes and produced 34 structurally valid, unreleased candidates. A full run was interrupted after 33 of 60 tiles and did not produce a canonical final manifest. No visual candidate received human approval, so the enhanced KB remains 234 base records plus 0 released visual records. See `ADA_VISUAL_RAG_VALIDATION_REPORT.md` for the detailed live-run evidence. Historical placeholder results below are retained only where explicitly labeled as the earlier baseline.
+> **Current live-validation update:** Ollama 0.32.9 and `qwen3-vl:8b-instruct` completed all 60 rendered detail tiles. One dense Figure 9.4 structure pass was rerun with a larger bounded budget and merged through a provenance-checked utility. Step 07 produced 623 child records: 416 structurally valid/unreleased and 207 invalid/quarantined, with 760 review-queue rows and 623 pending approvals. No record has received human approval, so the enhanced KB remains 234 base records plus 0 released visual records. A sanitized review package is tracked under `open_source_kb_pipeline/manual_review_packages/ada_principles_20260823_qwen3vl_0533d743/`. Historical placeholder, smoke, and interrupted-run results below are retained only when explicitly labeled as earlier milestones.
 
 ## 1. Executive Summary
 
@@ -18,11 +18,11 @@ The technical problem is real: conventional PDF text extraction can recover near
 
 The current implementation adds a deliberately gated visual branch. It renders selected pages as a whole-page overview and overlapping high-resolution tiles; sends tiles to a local vision model in separate structure, medication-action, and symbol passes; validates the returned graph, schema, symbols, source paths, and hashes; requires human approval tied to an exact content fingerprint; and merges only released visual records into the enhanced knowledge base. The current default local model is `qwen3-vl:8b-instruct`, selected after the thinking tag returned JSON only in Ollama's reasoning field. An Ollama preflight is designed to stop before extraction when the server, model, architecture, structured-output support, or vision runner is incompatible.
 
-The software and non-vision portions performed well in this audit. All eight scripts compiled and exposed a working CLI in an isolated Python 3.12.4 environment, and all 94 focused tests passed. The 29 tracked knowledge-base records—9 text summaries, 8 medication-class rows, and 12 decision rules—were embedded with `sentence-transformers/all-MiniLM-L6-v2` and indexed with FAISS. Six distinct cases selected from the tracked 300-row/100-case capstone file each returned eight records, producing 48 retrieval rows with no missing scores or duplicate case/chunk pairs. This proves the current code can index and retrieve the existing compact KB; it does not establish retrieval relevance or clinical correctness.
+The software and non-vision portions performed well in this audit. All eight numbered scripts compiled and exposed a working CLI in Python 3.12.4, and all 113 focused tests passed. The 29 tracked knowledge-base records—9 text summaries, 8 medication-class rows, and 12 decision rules—were embedded with `sentence-transformers/all-MiniLM-L6-v2` and indexed with FAISS. Six distinct cases selected from the tracked 300-row/100-case capstone file each returned eight records, producing 48 retrieval rows with no missing scores or duplicate case/chunk pairs. This proves the current code can index and retrieve the existing compact KB; it does not establish retrieval relevance or clinical correctness.
 
 A real local source is now available: the untracked 1,517,392-byte file `ADA principles for pharmacologic therapy.pdf`, whose metadata identifies the 33-page ADA Standards of Care in Diabetes—2026 pharmacotherapy section. Step 01 processed all 33 PDF pages with the `pypdf` fallback and recorded source SHA-256 `7c2913f79b61bc60f8f51327bb73b80391988fd277116b29e57df4242b2a2404`. Step 02 produced a 234-record full KB (193 text chunks, 8 table records, and 33 page/figure records) and a 177-record Type 2-focused KB (148, 8, and 21 records, respectively). Both were indexed, and six real capstone cases produced 48 retrieval rows per corpus. These are genuine source-processing and retrieval runs, but retrieval relevance was not graded.
 
-The real renderer selected ten source pages: Figures 9.1–9.5 on PDF pages 2, 6, 8, 9, and 16; the four-page Table 9.2 on pages 11–14; and Table 9.3 on page 21. Table 9.2 pages 11–13 are sideways, while page 14 mixes a sideways table region with upright prose. The renderer retained ten 220-DPI overviews and created sixty overlapping 320-DPI tiles. A caption-aware selection fix made ordinary in-text references ineligible as figure/table assets and is covered by regression tests. Live Step 06 now works for a real one-tile smoke test: 11 nodes, 11 edges, 5 medication actions, and 7 symbol/footnote items yielded 34 structurally valid candidates. The attempted full run was interrupted after 33 of 60 tiles, so it is diagnostic rather than canonical. No candidate was human-approved or released; Step 08 therefore still contains the same 234 text-only records. The most accurate conclusion is that real source extraction, rendering, indexing, retrieval mechanics, one-tile visual transcription, and fail-closed controls work, while complete transcription, clinical correctness, human release, enhanced retrieval benefit, and downstream guideline-adherence performance remain unproven.
+The real renderer selected ten source pages: Figures 9.1–9.5 on PDF pages 2, 6, 8, 9, and 16; the four-page Table 9.2 on pages 11–14; and Table 9.3 on page 21. Table 9.2 pages 11–13 are sideways, while page 14 mixes a sideways table region with upright prose. The renderer retained ten 220-DPI overviews and created sixty overlapping 320-DPI tiles. Step 06 processed all 60 tiles. Fifty-nine completed on the first run; one dense Figure 9.4 structure pass reached the 6,144-token limit and was recovered through a separately recorded, larger-budget retry. Step 07 then produced 416 structurally valid candidates and quarantined 207 invalid records. No candidate was human-approved or released; Step 08 therefore still contains the same 234 text-only records. The most accurate conclusion is that real source extraction, rendering, indexing, retrieval mechanics, full-scale visual transcription, automated quarantine, and fail-closed controls work, while clinical/source correctness, human release, enhanced retrieval benefit, and downstream guideline-adherence performance remain unproven.
 
 Earlier synthetic and simulated tests remain useful as regression evidence. A two-page synthetic PDF produced two overviews and twelve tiles, and a clearly labeled simulated five-record model payload verified that candidates remained quarantined until approval. Those tests validate software contracts only; they are not ADA guideline findings and are kept separate from the real-source metrics above.
 
@@ -177,7 +177,7 @@ Without `--use-ollama`, it creates placeholders with `needs_visual_model`; these
 
 **Why it matters.** It turns a potential visual interpretation into an explicit, reviewable candidate representation instead of silently treating model prose as guideline truth.
 
-**Status.** The initial `qwen3-vl:8b` thinking-tag attempt was rejected because it returned JSON only in Ollama's `thinking` field; the pipeline now accepts only direct response content and defaults to `qwen3-vl:8b-instruct`. A final one-tile Figure 9.4 smoke test completed all three passes. A subsequent full run produced 33 of 60 tile JSONs before interruption: 32 assets completed all passes, while one dense tile's structure pass was rejected for reaching the 4,096-token output cap. Because the interrupted run never wrote its final manifest or run record, its output remains a quarantined diagnostic and cannot enter canonical validation.
+**Status.** The initial `qwen3-vl:8b` thinking-tag attempt was rejected because it returned JSON only in Ollama's `thinking` field; the pipeline now accepts only direct response content and defaults to `qwen3-vl:8b-instruct`. The completed run processed all 60 tiles with a 12,288-token context and 6,144-token output budget. Fifty-nine assets completed all passes. One dense Figure 9.4 structure pass reached the output cap; the action and symbol passes were preserved, the structure pass alone was rerun with a 16,384-token context and 8,192-token output budget, and `merge_visual_logic_retry.py` verified matching asset, page, source/image hashes, model digest, Ollama/runtime identity, and disjoint pass names before writing a separate completed output. The completed manifest reports 60 `extracted_unvalidated` assets.
 
 ### `guideline_symbol_registry.csv`
 
@@ -218,7 +218,7 @@ Warnings do not automatically invalidate a record, so a human must adjudicate th
 
 **Why it matters.** This is the main scientific safety boundary between model transcription and retrievable evidence.
 
-**Status.** The final real one-tile smoke test yielded 11 nodes, 11 edges, 5 medication actions, and 7 symbol/footnote items. Step 07 accepted all 34 children as structurally valid candidates, generated 35 manual-review rows, and released 0 records because no human approval was supplied. The interrupted 33-tile run was not submitted to canonical Step 07 because Step 06 never completed its manifest. The older placeholder run (0 candidates, 120 review rows) remains useful fail-closed baseline evidence only. No qualified clinical review occurred.
+**Status.** The completed real run yielded 168 nodes, 136 edges, 220 medication actions, 77 symbol/footnote items, and 22 ordinal symbols: 623 child records total. Step 07 accepted 416 as structurally valid, unreleased candidates and quarantined 207 as invalid. It generated 760 manual-review rows and 623 pending approval rows, and released 0 records because no human approval was supplied. Blank model titles now fall back only to a nonempty manifest figure/table ID, with an explicit warning and no raw-JSON mutation; this removed false invalidation caused by missing presentation text without changing clinical logic. The older smoke/placeholder results remain historical fail-closed evidence only. No qualified clinical review occurred.
 
 ### `08_build_enhanced_guideline_kb.py`
 
@@ -236,7 +236,7 @@ Warnings do not automatically invalidate a record, so a human must adjudicate th
 
 ### Documentation, dependencies, and tests
 
-The current README is rewritten around tiled extraction, compatibility preflight, human release, strict automation flags, and macOS vector-runtime safety. `requirements-minimal.txt` now includes `jsonschema`; `requirements.txt` points to the full requirements file, which adds Docling. Seven test modules contain 94 passing tests covering the text source contract, caption-only visual selection, tile provenance, Ollama preflight, direct-response and truncation handling, schema handling, normalized evidence boxes, graph and symbol checks, approval invalidation, duplicate IDs, vector/retrieval contracts, correctly cased default vignette path, and fail-closed integration.
+The current README is rewritten around tiled extraction, compatibility preflight, human release, strict automation flags, sanitized package export, and macOS vector-runtime safety. `requirements-minimal.txt` includes `jsonschema`; `requirements.txt` points to the full requirements file, which adds Docling. The current test suite contains 113 passing tests covering the text source contract, caption-only visual selection, tile provenance, Ollama preflight, direct-response and truncation handling, schema handling, normalized evidence boxes, graph and symbol checks, approval invalidation, retry-merge provenance, package allowlisting/path sanitization/checksums, duplicate IDs, vector/retrieval contracts, correctly cased default vignette path, and fail-closed integration.
 
 ## 6. Current End-to-End Architecture
 
@@ -282,7 +282,7 @@ flowchart TD
 
 ### Audit environment and evidence boundaries
 
-The system interpreter was Python 3.12.4 at `/opt/anaconda3/bin/python3`. It had NumPy and Pandas, but it did not have the complete minimal pipeline stack: `pypdf`, PyMuPDF, SentenceTransformers, FAISS, and Docling were absent, and some installed package versions were below the declared minimums. The audit therefore used a disposable environment:
+The initial audit used a disposable Python 3.12.4 environment because the system interpreter did not then contain the complete pipeline stack:
 
 ```text
 AUDIT_ROOT=/private/tmp/ada-rag-real-20260813
@@ -292,6 +292,8 @@ Python 3.12.4
 ```
 
 `pip install -r requirements-minimal.txt` succeeded. The embedding model was already in the local cache, so indexing and retrieval used `--local-files-only`. No API key was required or exposed. Docling was not installed; Step 01 therefore used its documented `pypdf` fallback. The real generated outputs were retained under the pipeline's Git-ignored `outputs/` directory. Temporary failure-gate and smoke-test artifacts remained under `/private/tmp` during the audit.
+
+The completed 2026-08-23 vision run used Python 3.12.4 at `/opt/anaconda3/bin/python3`, Ollama 0.32.9 at `127.0.0.1:11434`, and the locally installed `qwen3-vl:8b-instruct` digest recorded below. It required no cloud API key. The final test suite was also run with that interpreter.
 
 The supplied PDF is local repository content and is intentionally excluded by the pipeline `.gitignore`; it is not part of the proposed commit. Its bytes were verified before every source-dependent stage:
 
@@ -306,7 +308,7 @@ The supplied PDF is local repository content and is intentionally excluded by th
 | Dependency install | `python3 -m venv /private/tmp/ada-rag-real-20260813/venv` then the environment's `pip install -r requirements-minimal.txt` | SUCCESS | Minimal Python 3.12.4 stack installed; optional Docling absent. |
 | Static compile | `$AUDIT_PY -m py_compile 01_...py ... 08_...py` | SUCCESS | All eight scripts compiled. |
 | CLI smoke | `$AUDIT_PY <script> --help` for Steps 01–08 | SUCCESS | All eight CLIs loaded in the configured environment. |
-| Automated tests | `python -m pytest -q` | SUCCESS | 94 tests passed after the live-runtime fixes. |
+| Automated tests | `/opt/anaconda3/bin/python3 -m unittest discover -s tests -v` | SUCCESS | 113 tests passed; 0 failures and 0 errors. |
 | 01, real PDF | `$AUDIT_PY 01_extract_guideline_content.py --pdf 'ADA principles for pharmacologic therapy.pdf' --output-dir outputs` | SUCCESS | 33 pages/blocks, 8 caption-defined table records, `pypdf_fallback`; source hash recorded. |
 | 02, full | `$AUDIT_PY 02_build_type2_kb.py --raw-dir outputs/raw_extracted --output-dir outputs/full_guideline_kb --scope full` | SUCCESS | 193 text + 8 table + 33 page records = 234. |
 | 02, Type 2 | Same command with `--output-dir outputs/type2_kb --scope type2` | SUCCESS | 148 text + 8 table + 21 page records = 177. |
@@ -315,9 +317,11 @@ The supplied PDF is local repository content and is intentionally excluded by th
 | 04, full | `$AUDIT_PY 04_demo_retrieval.py --raw-data ../../../data/Raw/final_results_capstone_data_ver2.csv --vector-dir outputs/vector_index --output-dir outputs/demo_retrieval --n-rows 6 --top-k 8 --local-files-only` | SUCCESS | 6 distinct cases × 8 = 48 hits; no missing scores or duplicate case/chunk pairs. Relevance ungraded. |
 | 03/04, Type 2 | Steps 03/04 with `outputs/type2_kb`, `outputs/vector_index_type2`, and `outputs/demo_retrieval_type2` | SUCCESS | 177 vectors and 48 retrieval rows. Relevance ungraded. |
 | 06, live one-tile smoke | Step 06 against a one-tile Figure 9.4 manifest with `--use-ollama --model qwen3-vl:8b-instruct --num-ctx 8192 --num-predict 4096` | SUCCESS | Three passes completed; 11 nodes, 11 edges, 5 actions, and 7 symbol/footnote items. |
-| 06, live full attempt | Step 06 against the 60-tile real manifest with the same model and token budgets | PARTIAL | Interrupted after 33/60 JSONs; 32 full assets and 1 partial asset. No final manifest or run record, so the directory is diagnostic only. |
+| 06, live full extraction | `/opt/anaconda3/bin/python3 06_extract_visual_guideline_logic.py --image-manifest outputs/page_images/page_image_manifest.csv --output-dir outputs/visual_logic_raw_review_20260823 --use-ollama --model qwen3-vl:8b-instruct --ollama-url http://127.0.0.1:11434 --timeout 300 --num-ctx 12288 --num-predict 6144` | PARTIAL | All 60 assets attempted: 59 complete and 1 partial because one Figure 9.4 structure pass reached the output cap. |
+| 06, targeted retry/merge | Structure-only retry for `page_009_tile_r02_c02` with `--num-ctx 16384 --num-predict 8192`, followed by `merge_visual_logic_retry.py --primary-raw-dir outputs/visual_logic_raw_review_20260823 --retry-raw-dir outputs/visual_logic_retry_page_009_r02_c02 --output-dir outputs/visual_logic_raw_review_20260823_completed --expected-assets 60` | SUCCESS | Retry produced 12 nodes/11 edges; provenance-checked merged output has 60 complete assets without modifying either source run. |
 | 06, earlier placeholder baseline | `$AUDIT_PY 06_extract_visual_guideline_logic.py --image-manifest outputs/page_images/page_image_manifest.csv --output-dir outputs/visual_logic_raw` | PARTIAL | 60 tile placeholders, all `needs_visual_model`; no model inference. |
-| 07, live one-tile smoke | Step 07 against the completed one-tile smoke output with `--require-valid-candidates` | SUCCESS | 34 structurally valid candidates, 35 manual-review rows, and 0 human-approved releases. |
+| 07, completed full run | `/opt/anaconda3/bin/python3 07_validate_visual_logic_outputs.py --raw-dir outputs/visual_logic_raw_review_20260823_completed --output-dir outputs/visual_logic_structured_review_20260823 --symbol-registry guideline_symbol_registry.csv --require-valid-candidates` | SUCCESS | 623 children: 416 valid/unreleased, 207 invalid/quarantined; 760 queue rows, 623 pending approvals, 0 releases. |
+| Manual-review export | `/opt/anaconda3/bin/python3 export_manual_review_package.py --raw-dir outputs/visual_logic_raw_review_20260823_completed --structured-dir outputs/visual_logic_structured_review_20260823 --destination manual_review_packages/ada_principles_20260823_qwen3vl_0533d743 --symbol-registry guideline_symbol_registry.csv --require-review-records` | SUCCESS | Sanitized 15-file, 4.7 MB package; counts reconciled, absolute paths removed, SHA-256 inventory generated. |
 | 07, earlier placeholders | `$AUDIT_PY 07_validate_visual_logic_outputs.py --raw-dir outputs/visual_logic_raw --output-dir outputs/visual_logic_structured --symbol-registry guideline_symbol_registry.csv` | PARTIAL | 60 assets, 0 child logic/candidates/releases, 120 manual-review rows. |
 | 07 strict candidate gate | Previous command plus `--require-valid-candidates` | FAILED | Expected exit 2 because no valid candidates existed; prevents false completion. |
 | 08, non-strict | `$AUDIT_PY 08_build_enhanced_guideline_kb.py --kb-dir outputs/full_guideline_kb --visual-dir outputs/visual_logic_structured --output-dir outputs/enhanced_guideline_kb` | PARTIAL | 234 existing rows + 0 visual rows = text-only snapshot. |
@@ -341,8 +345,9 @@ The generated `outputs/` tree is approximately 22 MB and is ignored by Git. File
 | `outputs/type2_kb/` | 148 text chunks, 8 table records, and 21 page records = 177 unique chunk IDs; no exact duplicate rows. |
 | `outputs/page_images/` | 70 manifest rows and unique asset/image hashes: 10 overviews at 220 DPI and 60 tiles at 320 DPI. No invalid bounding boxes. Target pages: 2, 6, 8, 9, 11–14, 16, and 21. |
 | `outputs/visual_logic_raw/` | Earlier baseline: 60 JSON placeholders and a 60-row manifest; every status is `needs_visual_model`. `extraction_run.json` says `placeholders_only`. |
-| `outputs/visual_logic_raw_live/` | Interrupted diagnostic: 33 real tile JSON files; 32 complete assets + 1 partial; 98 completed pass items; 105 nodes, 87 edges, 107 actions, 67 footnote/symbol items, 22 ordinal symbols, and 163 warnings. It has no final manifest/run record, is quarantined, and is ignored by Git. Counts describe raw model output, not correctness. |
-| `outputs/visual_logic_structured/` | Earlier placeholder baseline: 0 nodes, 0 edges, 0 actions, 0 footnotes, 0 ordinal symbols, 0 candidates, 0 approvals, 0 releases, and 120 manual-review rows. |
+| `outputs/visual_logic_raw_review_20260823_completed/` | Completed canonical local run: 60 assets, all `extracted_unvalidated`; 168 nodes, 136 edges, 220 actions, 77 footnote/symbol items, and 22 ordinal symbols. It is Git-ignored and contains untrusted raw model JSON. Counts describe extraction volume, not correctness. |
+| `outputs/visual_logic_structured_review_20260823/` | 623 detailed records; 416 valid/unreleased candidates, 207 invalid/quarantined records, 760 review-queue rows, 623 pending approval rows, and 0 releases. |
+| `manual_review_packages/ada_principles_20260823_qwen3vl_0533d743/` | Sanitized 15-file review handoff with the 60-row manifest, 623 approval/detail rows, 416 candidate rows, 760 queue rows, registry, run/summary metadata, inventory, and checksums. It excludes the PDF, images, raw per-asset JSON, releases, KB, and vectors. |
 | `outputs/enhanced_guideline_kb/` | 234 unique records: 234 existing text/table/page rows and 0 visual rows. It is text-only despite the directory name. |
 | `outputs/vector_index/` | FAISS index and Parquet metadata for 234 full-KB records; model `sentence-transformers/all-MiniLM-L6-v2`. |
 | `outputs/vector_index_type2/` | FAISS index and metadata for 177 Type 2-filtered records. |
@@ -360,7 +365,7 @@ The generated `outputs/` tree is approximately 22 MB and is ignored by Git. File
 
 ### Automated validation that succeeded
 
-- All 94 focused tests passed in the configured environment.
+- All 113 focused tests passed in the configured environment.
 - All eight scripts compiled and loaded their CLIs.
 - The real PDF path/hash remained consistent across Steps 01, 02, and 05.
 - Caption-only selection reduced the real render set from a faulty 19 pages/133 assets to the correct 10 pages/70 assets, while retaining all four Table 9.2 continuation pages.
@@ -369,6 +374,8 @@ The generated `outputs/` tree is approximately 22 MB and is ignored by Git. File
 - Placeholders could not become candidates or releases; strict Step 07 and Step 08 gates rejected a no-visual build.
 - A valid simulated graph produced stable node, edge, action, and symbol records but no release before approval.
 - Approval created releases only for the exact current fingerprints.
+- The one-pass retry merge failed closed on mismatched asset/source/model/runtime provenance and preserved both original runs.
+- The review-package exporter reconciled 60 assets and 623 approval/detail IDs, removed local absolute paths, excluded raw/source/release artifacts, and generated verifiable checksums.
 - Step 08 and Step 03 independently accepted canonical releases and rejected unsafe release states in the test suite.
 - The vector indexes and metadata row counts/dimensions matched in every real retrieval run.
 - The corrected default `data/Raw` path succeeded without an explicit raw-data argument.
@@ -376,7 +383,7 @@ The generated `outputs/` tree is approximately 22 MB and is ignored by Git. File
 
 ### Manual review flags and representative inspection
 
-The completed one-tile live smoke generated 34 structurally valid candidates and 35 review rows. It released nothing because no accountable human approval was supplied. The earlier placeholder run generated 120 review rows—one asset-level and one placeholder-item-level entry for each of 60 tiles—and also released nothing. The interrupted 33-tile diagnostic was not canonically validated because its Step 06 manifest was never finalized.
+The completed full run generated 623 child records. Step 07 classified 416 as structurally valid/unreleased and 207 as invalid/quarantined. It created 760 queue rows: 623 child rows plus 60 asset-level and 77 item-level diagnostics. All 623 approval rows remain pending, and nothing was released because no accountable human approval was supplied. The earlier smoke, placeholder, and interrupted outputs remain historical diagnostics rather than the current review baseline.
 
 The PDF and representative rendered assets were visually reviewed. Figure 9.1 on PDF page 2 contains repeated `+` and `$` scales whose count must remain associated with both a row and a clinical dimension. Figure 9.4 on page 9 is a dense, two-sided medication algorithm with many boxes, arrowheads, dashed feedback paths, special symbols, and small footnotes; its overview preserved context, while sampled tiles made labels and arrowheads substantially more legible. Figure 9.3 on page 8 and Figure 9.5 on page 16 also contain branching treatment logic. Table 9.2 spans pages 11–14: pages 11–13 are sideways, while page 14 combines a sideways table region with upright prose. The text is sharp, but only table regions—not all of page 14—should be rotated for a future experiment. Table 9.3 on page 21 uses literal currency, so a `$` glyph there must not automatically be interpreted as the registry's ordinal scale.
 
@@ -386,17 +393,18 @@ The earlier simulated payload generated five candidate records and demonstrated 
 
 ### Problems detected
 
-1. **Incomplete live run.** Ollama 0.32.9 and `qwen3-vl:8b-instruct` worked for the final smoke, but the full attempt stopped after 33 of 60 tiles and did not write a canonical manifest. The server was not running when rechecked on 2026-08-22.
-2. **No released visual transcription.** Real candidate records now exist in smoke and partial diagnostic outputs, but none has received qualified human source review. There are still zero approved or released live visual records.
+1. **Manual retry needed.** Ollama 0.32.9 and `qwen3-vl:8b-instruct` completed all 60 tiles, but one dense structure pass required a separately orchestrated retry. Step 06 does not yet provide automatic checkpoint/resume and bounded retry orchestration.
+2. **No released visual transcription.** The completed run contains 416 structurally valid candidates, but none has received qualified human source review. There are still zero approved or released live visual records.
 3. **Rotated and cross-page content.** Table 9.2 spans four pages; pages 11–13 are sideways and page 14 is mixed-orientation. The pipeline selects all pages but does not rotate table-only regions or reconstruct row/column continuity across pages.
-4. **Unsupported or invented relationships.** A spot-check found a rotated table tile represented as graph edges even though the source layout did not support that graph interpretation.
-5. **Evidence overreach.** At least one extracted action included dosing/eGFR detail that was not fully supported by its quoted evidence text. Schema validity therefore must not be treated as source accuracy.
-6. **Retrieval noise and redundancy.** Copyright/licensing and reference-page text can rank highly; page-level and chunk-level representations of the same source page compete for result slots.
-7. **No semantic retrieval assessment.** Similarity scores are rankings, not correctness labels. There is no recall@k, precision@k, or clinician-judged old-versus-enhanced comparison.
-8. **No visual benefit comparison yet.** Base and “enhanced” rankings are exactly identical because the enhanced snapshot contains zero visual rows.
-9. **Source/licensing decision.** The ADA PDF is intentionally ignored and excluded from the commit. The team should document authorized acquisition and redistribution rules separately.
-10. **Broken legacy cross-reference.** Rule `ADA2026_RULE_PRANDIAL_INSULIN_SIMPLE_REGIMEN` cites `ADA2026_REC_9_5_PERSON_CENTERED`, which is absent from the nine tracked compact-KB text chunks. The other 11 rule references resolve.
-11. **Environment reproducibility.** The system Python is incomplete for this project, requirements are minimum ranges rather than a lock, and no supported Python version file is tracked.
+4. **Unsupported or simplified relationships.** A spot-check found a structurally valid Figure 9.4 goal node whose single `true_branch` oversimplified a multi-branch pathway. Table tiles can also be misrepresented as graph logic.
+5. **Evidence overreach.** Some actions/branches can contain details or relationships not fully supported by the quoted evidence region. Schema validity therefore must not be treated as source accuracy.
+6. **High quarantine volume.** Of 623 children, 207 are invalid. Common reasons include missing triggers, drug classes/actions, unresolved endpoints, duplicates, and symbol-registry mismatch; all 22 ordinal symbols are currently invalid.
+7. **Retrieval noise and redundancy.** Copyright/licensing and reference-page text can rank highly; page-level and chunk-level representations of the same source page compete for result slots.
+8. **No semantic retrieval assessment.** Similarity scores are rankings, not correctness labels. There is no recall@k, precision@k, or clinician-judged old-versus-enhanced comparison.
+9. **No visual benefit comparison yet.** Base and “enhanced” rankings are exactly identical because the enhanced snapshot contains zero visual rows.
+10. **Source/licensing decision.** The ADA PDF and rendered images are intentionally excluded from the public package. Reviewers need controlled access to authorized, hash-matching copies.
+11. **Broken legacy cross-reference.** Rule `ADA2026_RULE_PRANDIAL_INSULIN_SIMPLE_REGIMEN` cites `ADA2026_REC_9_5_PERSON_CENTERED`, which is absent from the nine tracked compact-KB text chunks. The other 11 rule references resolve.
+12. **Environment reproducibility.** Requirements are minimum ranges rather than a lock, and no supported Python version file is tracked.
 
 ## 10. Before vs After
 
@@ -435,18 +443,20 @@ The earlier simulated payload generated five candidate records and demonstrated 
 - Human approval and correction workflow bound to current content and source bytes.
 - Strict enhanced-KB and vector-corpus release gates.
 - Focused tests for the major safety and data-contract paths.
+- A provenance-checked targeted-retry merge and a sanitized manual-review package exporter.
 
 ### B. Successfully validated in this audit
 
-- 94/94 tests, all eight compiles, and all eight CLIs.
+- 113/113 tests, all eight compiles, and all eight CLIs.
 - Real page-preserving extraction of all 33 PDF pages with a recorded SHA-256.
 - A 234-record full KB and a 177-record Type 2 KB with unique IDs and no exact duplicate rows.
 - Caption-aware page selection and real rendering of 10 overviews plus 60 high-resolution tiles.
 - Manual visual inspection of Figures 9.1, 9.3, 9.4, and 9.5 and the four Table 9.2 pages, including their orientation differences.
 - Real 234- and 177-record FAISS indexes and 48-row retrieval runs for six distinct capstone cases.
 - The corrected default vignette path on a no-override smoke run.
-- A real one-tile Figure 9.4 smoke completed all three passes and produced 34 structurally valid, quarantined candidates.
-- A larger real attempt produced 33 of 60 tile JSONs before interruption; it remained outside canonical validation because it lacked a final manifest.
+- Full real extraction completed for 60/60 tiles with one provenance-checked targeted retry.
+- Canonical validation produced 416 valid/unreleased and 207 invalid/quarantined child records.
+- A sanitized review package with reconciled counts, sanitized paths, inventory, and checksums was generated for collaborator review.
 - Real visual candidates and earlier placeholders remained quarantined and released nothing.
 - Strict candidate and visual-record gates failed closed when real visual evidence did not exist.
 - The 29-record tracked compact KB indexed successfully.
@@ -454,7 +464,6 @@ The earlier simulated payload generated five candidate records and demonstrated 
 
 ### C. Not yet fully validated / future work
 
-- Completion of all 60 tiles with `qwen3-vl:8b-instruct`, including a canonical manifest and run record.
 - Accuracy and completeness of real nodes, arrows, medication classes, thresholds, footnotes, and `+`/`$` counts.
 - Qualified human review and release of real visual evidence.
 - A genuinely visually enhanced ADA KB and its index; the retained Step 08 snapshot is text-only.
@@ -464,7 +473,7 @@ The earlier simulated payload generated five candidate records and demonstrated 
 
 ## 12. Current Limitations
 
-- **Source licensing/version control remains external.** The supplied PDF is local, ignored, and excluded from the commit. It should not be distributed until the team confirms permission and provenance.
+- **Source licensing/version control remains external.** The supplied PDF and images are local, ignored, and excluded from the commit. The review CSVs still contain model-transcribed evidence snippets, so the team should confirm public redistribution permissions and provenance.
 - **No OCR.** Scanned/image-only pages without embedded text are not handled by the canonical Step 01 path.
 - **Heuristic text/table detection.** Step 01 recognizes table labels/text patterns; it does not reconstruct cell geometry from the canonical `pypdf` path. Step 02 relevance and tags are keyword rules.
 - **Rotated table handling.** The renderer does not automatically rotate or join the four pages of Table 9.2 into a logical table.
@@ -497,16 +506,16 @@ The older R demo is useful as a prototype of the final comparison layer: it deri
 
 ## 14. Recommended Next Steps
 
-1. **Finish the canonical live run.** Start the installed Ollama 0.32.9 service, add checkpoint/resume plus bounded retry behavior, and complete all 60 tiles with `qwen3-vl:8b-instruct` so Step 06 writes a final manifest and run record.
-2. **Resolve source governance.** Record acquisition/licensing information; keep the ignored ADA PDF outside Git unless redistribution is authorized, and retain its edition and SHA-256 in the reproducibility record.
-3. **Run orientation-aware table experiments.** Compare original and clockwise-rotated table-only regions for all four Table 9.2 pages. Do not rotate the whole mixed-orientation page 14.
-4. **Conduct blinded or double-checked clinical transcription review.** Manually compare a stratified sample of nodes, edges, actions, thresholds, symbols, and footnotes with the source. Report precision, recall/completeness, symbol-count accuracy, edge-direction accuracy, and inter-reviewer agreement.
-5. **Improve visual preprocessing/reconciliation.** Add orientation-aware table crops, figure-region detection, overlap-aware entity matching, cross-tile graph reconstruction, and evidence-box review tooling.
-6. **Clean and diversify retrieval.** Exclude or down-rank licensing and bibliography content, define whether page records should coexist with their text chunks, and add source/page diversity to top-k retrieval.
-7. **Build and freeze the real enhanced KB.** Use the strict Step 07 and 08 flags; archive source/model digests, manifests, approval sheets, excluded counts, and release counts.
-8. **Evaluate retrieval quality.** Create clinician-reviewed query/relevance judgments; measure recall@k, precision@k, and page/logic coverage. Compare text-only with approved enhanced retrieval on identical cases.
-9. **Repair reproducibility/data defects.** Add or correct `ADA2026_REC_9_5_PERSON_CENTERED`, declare supported Python/Ollama versions, and add an environment lock.
-10. **Integrate only after validation.** Define guideline-adherence metrics and how retrieved evidence, exceptions, uncertainty, and human adjudication feed the capstone workflow before reporting model-performance conclusions.
+1. **Start accountable source review.** Give qualified reviewers controlled access to the hash-matching PDF/images and the sanitized package; triage all 760 queue rows and reconcile complete figure/table coverage.
+2. **Resolve invalid records.** Categorize the 207 quarantined children for permitted correction, new extraction, or rejection; do not bulk-approve structurally valid records.
+3. **Resolve source governance.** Record acquisition/licensing information; keep the ignored ADA PDF/images outside public Git unless redistribution is authorized, and retain their hashes in the reproducibility record.
+4. **Run orientation-aware table experiments.** Compare original and clockwise-rotated table-only regions for all four Table 9.2 pages with a table-aware schema. Do not rotate the whole mixed-orientation page 14.
+5. **Measure extraction quality.** Use blinded or double-checked review to report correctness, recall/completeness, symbol-count accuracy, edge-direction accuracy, and inter-reviewer agreement.
+6. **Add automatic recovery.** Add checkpoint/resume plus bounded retry orchestration so a dense pass does not require manual recovery.
+7. **Improve visual preprocessing/reconciliation.** Add orientation-aware table crops, figure-region detection, overlap-aware entity matching, cross-tile graph reconstruction, and evidence-box review tooling.
+8. **Build and freeze the real enhanced KB.** Use the strict Step 07 and 08 flags only after fingerprinted approval; archive source/model digests, manifests, approval sheets, excluded counts, and release counts.
+9. **Evaluate retrieval quality.** Clean/down-rank nonclinical text, create clinician-reviewed relevance judgments, and compare text-only with approved enhanced retrieval on identical cases.
+10. **Integrate only after validation.** Repair the broken legacy reference, pin the environment, and define adherence metrics, exceptions, uncertainty, and adjudication before reporting model-performance conclusions.
 
 ## 15. Reproducibility / How to Run
 
@@ -592,32 +601,62 @@ python 05_render_pdf_pages_to_images.py \
 
 python 06_extract_visual_guideline_logic.py \
   --image-manifest outputs/page_images/page_image_manifest.csv \
-  --output-dir outputs/visual_logic_raw \
+  --output-dir outputs/visual_logic_raw_review_20260823 \
   --use-ollama \
   --model qwen3-vl:8b-instruct \
-  --num-ctx 8192 \
-  --num-predict 4096
+  --ollama-url http://127.0.0.1:11434 \
+  --timeout 300 \
+  --num-ctx 12288 \
+  --num-predict 6144
+
+# If a single pass reaches its output limit, create a one-asset manifest and
+# rerun only that pass into a separate directory. Never overwrite the primary
+# run. The completed 2026-08-23 run used:
+python 06_extract_visual_guideline_logic.py \
+  --image-manifest <one-asset-retry-manifest.csv> \
+  --output-dir outputs/visual_logic_retry_page_009_r02_c02 \
+  --use-ollama \
+  --model qwen3-vl:8b-instruct \
+  --ollama-url http://127.0.0.1:11434 \
+  --timeout 300 \
+  --num-ctx 16384 \
+  --num-predict 8192 \
+  --prompt-mode simple \
+  --extraction-pass structure
+
+python merge_visual_logic_retry.py \
+  --primary-raw-dir outputs/visual_logic_raw_review_20260823 \
+  --retry-raw-dir outputs/visual_logic_retry_page_009_r02_c02 \
+  --output-dir outputs/visual_logic_raw_review_20260823_completed \
+  --expected-assets 60
 
 python 07_validate_visual_logic_outputs.py \
-  --raw-dir outputs/visual_logic_raw \
-  --output-dir outputs/visual_logic_structured \
+  --raw-dir outputs/visual_logic_raw_review_20260823_completed \
+  --output-dir outputs/visual_logic_structured_review_20260823 \
   --symbol-registry guideline_symbol_registry.csv \
   --require-valid-candidates
+
+python export_manual_review_package.py \
+  --raw-dir outputs/visual_logic_raw_review_20260823_completed \
+  --structured-dir outputs/visual_logic_structured_review_20260823 \
+  --destination manual_review_packages/ada_principles_20260823_qwen3vl_0533d743 \
+  --symbol-registry guideline_symbol_registry.csv \
+  --require-review-records
 ```
 
 At this point, stop. Open the source PDF, overview/tile images, candidate CSV, manual-review queue, and `visual_review_approvals.csv`. A qualified reviewer must approve the exact candidates as described in the README. Then rerun:
 
 ```bash
 python 07_validate_visual_logic_outputs.py \
-  --raw-dir outputs/visual_logic_raw \
-  --output-dir outputs/visual_logic_structured \
+  --raw-dir outputs/visual_logic_raw_review_20260823_completed \
+  --output-dir outputs/visual_logic_structured_review_20260823 \
   --symbol-registry guideline_symbol_registry.csv \
   --require-valid-candidates \
   --require-released-records
 
 python 08_build_enhanced_guideline_kb.py \
   --kb-dir outputs/full_guideline_kb \
-  --visual-dir outputs/visual_logic_structured \
+  --visual-dir outputs/visual_logic_structured_review_20260823 \
   --output-dir outputs/enhanced_guideline_kb \
   --require-visual-records
 
@@ -633,7 +672,7 @@ python 04_demo_retrieval.py \
   --top-k 8
 ```
 
-Expected visual outputs are `outputs/page_images/`, `outputs/visual_logic_raw/`, `outputs/visual_logic_structured/`, `outputs/enhanced_guideline_kb/`, and `outputs/vector_index_enhanced/`. Do not report visual completion if either strict flag fails.
+Expected visual outputs are `outputs/page_images/`, the chosen completed Step 06/07 run directories, `outputs/enhanced_guideline_kb/`, and `outputs/vector_index_enhanced/`. A sanitized review handoff may be exported under `manual_review_packages/`. Do not report released visual completion if either strict flag fails.
 
 ## 16. File-by-File Change Summary
 
@@ -646,19 +685,22 @@ Expected visual outputs are `outputs/page_images/`, `outputs/visual_logic_raw/`,
 | `03_build_vector_index.py` | New in `6ac739a`; modified in `d4d09f1` and audited patch | FAISS indexing | Enhanced snapshot support, legacy canonicalization, strict visual release gate, duplicate checks, macOS safety. | Real 234-, 177-, and text-only enhanced 234-row indexes passed. |
 | `04_demo_retrieval.py` | New in `6ac739a`; modified in audited patch | Case retrieval demo | Adds distinct-case selection, index/model contracts, safe `top-k`, macOS safety, and corrected `data/Raw` default. | Real retrieval and default-path smoke passed; relevance ungraded. |
 | `05_render_pdf_pages_to_images.py` | New in `d4d09f1`; modified in audited patch | Visual rendering | Adds caption-ID targeting, overview/tile modes, overlap, stable IDs, geometry, and hashes. | Real 70-asset run passed and was visually inspected. |
-| `06_extract_visual_guideline_logic.py` | New in `d4d09f1`; modified in audited patch | Vision extraction | Defaults to `qwen3-vl:8b-instruct`; adds compatibility/vision preflight, direct-response enforcement, bounded pass-specific schemas, explicit token budgets, normalized boxes, provenance, and collision safety. | Real three-pass smoke succeeded; full run interrupted at 33/60 tiles. |
+| `06_extract_visual_guideline_logic.py` | New in `d4d09f1`; modified in audited patch | Vision extraction | Defaults to `qwen3-vl:8b-instruct`; adds compatibility/vision preflight, direct-response enforcement, bounded pass-specific schemas, explicit token budgets, normalized boxes, provenance, collision safety, and manifest-title fallback metadata. | Full 60-tile run completed with one separately recorded retry. |
+| `merge_visual_logic_retry.py` | New in current patch | Safe retry merge | Merges one successful retry pass only after exact asset/source/model/runtime checks and writes a separate output. | Real Figure 9.4 retry merged; tests pass. |
 | `guideline_symbol_registry.csv` | New in `d4d09f1`; clean at HEAD | Symbol semantics | Maps 1–5 plus/dollar glyphs to controlled ordinal metadata and manual-review policy. | 10 rows complete/unique; validation tested. |
-| `07_validate_visual_logic_outputs.py` | New in `d4d09f1`; modified in audited patch | Validation and release | Expands basic flattening into strict graph/symbol/provenance/evidence-box checks, approval sheet, corrections, and fingerprints. | Live smoke yielded 34 valid candidates, 35 reviews, and 0 releases. |
+| `07_validate_visual_logic_outputs.py` | New in `d4d09f1`; modified in audited patch | Validation and release | Expands basic flattening into strict graph/symbol/provenance/evidence-box checks, approval sheet, corrections, fingerprints, and warned manifest-ID title fallback. | Full run yielded 416 valid, 207 invalid, 760 queue rows, and 0 releases. |
+| `export_manual_review_package.py` | New in current patch | Review handoff | Exports an allowlisted, path-sanitized, checksum-inventoried package from matching completed Step 06/07 outputs. | Real 15-file package exported and audited. |
 | `08_build_enhanced_guideline_kb.py` | New in `d4d09f1`; modified in audited patch | Enhanced KB merge | Adds schema harmonization, independent release filter, duplicate rejection, audit preservation, and strict visual flag. | Real non-strict result is 234-row text-only; strict gate failed as intended. |
 | `README.md` | New in `6ac739a`; modified in `d4d09f1` and audited patch | Runbook/safety guidance | Documents compatible-model preflight, caption targeting, tiling, approval, strict gates, and limits. | Updated and inspected. |
 | `requirements-minimal.txt` | New in `6ac739a`; modified later | Minimal local environment | PyMuPDF/visual dependencies in visual commit; current worktree adds JSON Schema. | Installed successfully in temporary venv. |
 | `requirements-full.txt` | New in `6ac739a`; clean at HEAD | Optional richer extraction | Includes minimal requirements plus Docling. | Not installed in audit; optional. |
 | `requirements.txt` | New in `6ac739a`; modified in audited patch | Convenience alias | Audited patch aliases the full requirements file. | Inspected. |
-| `tests/` | Added in audited patch | Regression/safety suite | Seven modules cover source, caption selection, visual, release, vector, and retrieval contracts. | 94 tests passed. |
+| `tests/` | Added/expanded in audited patch | Regression/safety suite | Covers source, caption selection, visual extraction, retry merge, review export, release, vector, and retrieval contracts. | 113 tests passed. |
 | `ADA principles for pharmacologic therapy.pdf` | Local and ignored | Real source corpus | 33-page ADA 2026 Section 9 source used in this run. | Processed and hash-verified; excluded from commit. |
 | `ADA_RAG_PIPELINE_CURRENT_STATUS.md` | Added in audited patch | Full audit report | Repository history, architecture, real commands/results, validation, limitations, and reproduction. | Created and reconciled to the real run. |
 | `ADA_RAG_PROJECT_SUMMARY.md` | Added in audited patch | Collaborator summary | Nontechnical 1–2 page account of verified status. | Created and reconciled to the real run. |
-| `ADA_VISUAL_RAG_VALIDATION_REPORT.md` | Added in audited patch | Live visual validation report | Documents Ollama/model setup, smoke/full-run evidence, manual inspection, and limitations. | Created; records 33/60 interrupted run and zero releases. |
+| `ADA_VISUAL_RAG_VALIDATION_REPORT.md` | Added in audited patch | Live visual validation report | Documents Ollama/model setup, completed full-run evidence, manual inspection, package counts, and limitations. | Updated for 60/60 extraction and zero releases. |
+| `ADA_RAG_MANUAL_REVIEW_GUIDE.md` | New in current patch | Reviewer SOP | Explains roles, candidate/source comparison, correction/reapproval, release gates, and review checklists. | Updated with the current package and counts. |
 
 ## 17. Short Presentation Version
 
@@ -670,10 +712,10 @@ The updated pipeline adds a visual branch. It first renders selected figure and 
 
 The most important design decision is that model output is treated as untrusted. A validator checks the schema, graph endpoints, duplicates, symbols, source files, image and PDF hashes, and evidence metadata. Valid candidates still do not enter retrieval. A reviewer must compare each candidate with the source and approve an exact content fingerprint. If the source, model content, or correction changes, that approval becomes stale. The enhanced KB and vector-index builder independently enforce the same release conditions.
 
-What have we actually demonstrated? The supplied 33-page ADA 2026 pharmacotherapy PDF now runs through the text and rendering branches. It produced 193 text chunks, eight table records, and 33 page records, or 234 full-corpus records. The optional Type 2 filter produced 177 records. The renderer selected the five target figures, all four pages of Table 9.2, and Table 9.3, producing ten overviews and sixty high-resolution tiles. We inspected representative pages, including dense Figure 9.4 and the differing orientations across Table 9.2. All 94 focused tests pass.
+What have we actually demonstrated? The supplied 33-page ADA 2026 pharmacotherapy PDF now runs through the text and rendering branches. It produced 193 text chunks, eight table records, and 33 page records, or 234 full-corpus records. The optional Type 2 filter produced 177 records. The renderer selected the five target figures, all four pages of Table 9.2, and Table 9.3, producing ten overviews and sixty high-resolution tiles. We inspected representative pages, including dense Figure 9.4 and the differing orientations across Table 9.2. All 113 focused tests pass.
 
 The text corpus was embedded locally with SentenceTransformers and indexed with FAISS. Six capstone cases each returned eight results, so the run produced 48 retrieval rows without missing scores or duplicate case/record pairs. But manual inspection found licensing text, bibliography records, and duplicate-like page/chunk hits in the rankings. This means retrieval mechanics work; it does not mean retrieval quality is established.
 
-Live visual inference now works for a controlled smoke test. With Ollama 0.32.9 and `qwen3-vl:8b-instruct`, one Figure 9.4 tile completed three passes and produced 34 structurally valid candidates. The full attempt was interrupted after 33 of 60 tile JSONs, including one tile whose structure pass hit the explicit token cap. It did not create a final manifest and was not canonically validated. No candidate was human-approved, so the resulting “enhanced” KB still has the same 234 text-only rows and exactly the same retrieval rankings as the base corpus.
+Live visual inference has now completed all 60 tiles with Ollama 0.32.9 and `qwen3-vl:8b-instruct`. Fifty-nine tiles completed on the first run. One dense Figure 9.4 structure pass reached its output limit, so we reran only that pass with a larger bounded budget and merged it after verifying the asset, page, source/image hashes, model digest, runtime, and pass provenance. Step 07 produced 623 child records: 416 structurally valid but unreleased and 207 invalid/quarantined. It created 760 review-queue rows and 623 pending approval rows. No candidate was human-approved, so the “enhanced” KB still has the same 234 text-only rows and exactly the same retrieval rankings as the base corpus.
 
-So the project has moved beyond a synthetic-only pipeline: real source extraction, image preparation, local indexing, retrieval plumbing, a controlled live-vision smoke test, and fail-closed controls are demonstrated. It has not yet demonstrated accurate visual transcription or improved retrieval. Next we should add checkpoint/resume and bounded retries, restart the installed Ollama service, finish the 60-tile run, test orientation-aware Table 9.2 regions, and have qualified reviewers measure node, edge, threshold, footnote, and symbol accuracy. We should also remove nonclinical retrieval noise and compare text-only with approved enhanced retrieval using clinician-labeled relevance judgments before connecting the KB to formal guideline-adherence scoring.
+So the project has moved beyond a synthetic-only or smoke-test pipeline: real source extraction, image preparation, local indexing, retrieval plumbing, full-scale local vision extraction, canonical automated validation, a sanitized review handoff, and fail-closed controls are demonstrated. It has not yet demonstrated accurate visual transcription or improved retrieval. The immediate next step is qualified source review using controlled PDF/images, beginning with Figure 9.4, Table 9.2, medication cautions/thresholds, and ordinal symbols. After correcting, re-extracting, or rejecting invalid records, the team can run the strict release gate and compare text-only with approved enhanced retrieval using clinician-labeled judgments before connecting the KB to formal guideline-adherence scoring.

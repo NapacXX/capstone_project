@@ -421,6 +421,39 @@ class ExtractVisualLogicTest(unittest.TestCase):
             "page_009_tile_r02_c03__structure__node_group",
         )
 
+    def test_extract_asset_fills_empty_title_from_manifest_identifier(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / "asset.png"
+            image.write_bytes(b"png")
+            row = asset_row(image)
+            model_payload = valid_payload()
+            model_payload["visual_items"][0]["title"] = ""
+            raw_response = json.dumps(model_payload)
+            with patch.object(
+                extractor,
+                "call_ollama_vision",
+                return_value=(model_payload, raw_response, {}),
+            ):
+                payload, status, error = extractor.extract_asset(
+                    row,
+                    model="vision",
+                    base_url="http://ollama",
+                    timeout=5,
+                    prompt_mode="full",
+                    passes=["structure"],
+                    num_ctx=8192,
+                    num_predict=4096,
+                )
+
+        self.assertEqual(status, "extracted_unvalidated")
+        self.assertEqual(error, "")
+        self.assertEqual(payload["visual_items"][0]["title"], "Figure 9.4")
+        self.assertEqual(payload["raw_model_responses"]["structure"], raw_response)
+        self.assertIn(
+            "title derived from manifest figure_ids/table_ids",
+            "; ".join(payload["extraction_warnings"]),
+        )
+
     def test_main_writes_distinct_asset_scoped_output_filenames(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

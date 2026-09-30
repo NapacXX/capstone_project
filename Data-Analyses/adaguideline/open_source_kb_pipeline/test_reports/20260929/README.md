@@ -1,64 +1,64 @@
-# ADA RAG 测试结果与公开范围
+# ADA RAG Test Results and Publication Scope
 
-本目录公开代码发布前的自动化测试结果，以及2026-09-29新增10例检索测试的内容汇总。病例原文、完整指南证据、原始审批和模型均不随报告公开。工程成功与检索内容适用性是不同结论。
+This directory contains the automated test results collected before code publication and a summary of the additional ten-case retrieval test conducted on September 29, 2026. Case narratives, complete guideline evidence, original approval materials, and model files are distributed separately under controlled access. Successful execution and the applicability of retrieved evidence are evaluated separately.
 
-## 发布前代码复测
+## Code Tests Before Publication
 
-实际复测使用 `run_public_tests.py`，在流水线目录、既有macOS Python 3.12.4环境中运行；结果文件从临时目录复制到本目录。复现时使用新的输出文件：
+The tests were run using `run_public_tests.py` from the pipeline directory in the existing macOS Python 3.12.4 environment. The result file was copied from a temporary directory into this directory. To reproduce the test run, choose a new output file:
 
 ```sh
 python run_public_tests.py --output outputs/my_public_checkout_tests.json
 ```
 
-最终结果为364项中312项通过、52项跳过、0失败、0错误。开始时间、耗时、逐项跳过原因、源码SHA-256见[机器结果](public_checkout_tests.json)。工作区基于远端main，仅加入本次发布的代码和文档，没有复制本地受控fixtures。这不是全新环境安装测试，也不是Windows验收。
+Of 364 tests discovered, 312 passed and 52 were skipped, with zero failures and zero errors. The [machine-readable results](public_checkout_tests.json) record the start time, elapsed time, reason for each skip, and source-code SHA-256 hashes. The checkout was based on the remote main branch with the published code and documentation added; controlled local test fixtures were not copied into it. This run did not test installation in a fresh environment or execution on Windows.
 
-第一轮标准unittest运行中有2项错误，均因发布清单遗漏候选包打包函数需要的 `KB_V1_README.md`；补齐文档后重跑。新增汇总工具首次启动的一处括号错误已在执行测试前修正。一次通过测试后，报告写入因独立工作区目录权限失败，最终改用临时文件保存后复制。没有修改检索排序、审批、知识库内容或生产程序以制造通过结果。
+The first standard unittest run produced two errors because the publication file list omitted `KB_V1_README.md`, which the candidate-package builder requires. The document was added and the tests were rerun. A missing parenthesis in the new reporting utility was also corrected before that utility executed any tests. After one successful test run, saving the report failed because of directory permissions in the separate checkout; the final report was saved to a temporary file and then copied here. Retrieval ranking, approvals, KB content, and production code were not changed to make tests pass.
 
-真实PDF和完整审批工作区不在公开仓库，相关集成测试明确跳过。维护者此前在具有完整受控输入的原工作区完成过364项无跳过测试；不能将那个历史结果当作本次公开工作区复测结果。
+The source PDF and complete approval workspace are not included in the public repository, so the integration tests that require them explicitly report skips. The maintainer previously ran all 364 tests without skips in the original workspace containing the complete controlled inputs. That historical result is separate from the public-checkout result reported here.
 
-## 新增10例检索的实际结果
+## Results for the Additional Ten Cases
 
-测试版本：`ada2026-ch9-cf6259c5b1fb35c5`。实际开始时间为UTC 2026-09-30 00:55，即纽约当地2026-09-29。本次发布只整理已有结果，没有重新选择病例或调整检索参数。
+The tested KB version was `ada2026-ch9-cf6259c5b1fb35c5`. Execution started at 00:55 UTC on September 30, 2026, which was September 29 in New York. This publication summarizes the existing results; cases were not reselected and retrieval parameters were not adjusted.
 
-选择编号为DM021、DM023、DM024、DM026(3)、DM038、DM049、DM053、DM097、DM117、DM120，与此前10例无重叠。仅使用 `case_id,vignette_text`，不把生成方案、提示词或模型回答作为查询。完整输入与80条逐项AI意见受控保留。
+The selected case IDs were DM021, DM023, DM024, DM026(3), DM038, DM049, DM053, DM097, DM117, and DM120, with no overlap with the previous ten cases. Only `case_id,vignette_text` were used; generated plans, prompts, and model responses were excluded from retrieval queries. The complete inputs and item-level AI review of all 80 results are retained under controlled access.
 
-| 检查 | 实际结果 |
+| Check | Observed result |
 | --- | --- |
-| 运行环境 | macOS arm64，Python 3.12.4，CPU，包内模型离线 |
-| 运行方式 | 文本模式，每例top 8，无生成API |
-| 病例／证据组／分窗 | 10／80／16，10例均成功 |
-| 正文／整图表命中 | 60／20 |
-| 不同证据记录 | 25 |
-| 图表命中 | Figure 9.4共10次，Table 9.2共6次，Figure 9.5共4次 |
-| 新增表自然命中 | Table 9.1和9.4均未进入本批top 8 |
-| 实际分窗长度 | 42–256 tokens，全部病例原文完整保留 |
-| 同一病例完全重复记录／原文 | 0；仍存在局部和语义重叠 |
-| 图表审核与来源 | 20次命中均保留批准状态、完整图表字段和来源页图 |
-| 查询耗时 | 2.740秒，包含模型加载及校验 |
-| 自动运行与核验总耗时 | 5.619秒，不包括人工或AI质量审读 |
-| 保护文件 | 553个，测试前后0个改变 |
+| Environment | macOS arm64, Python 3.12.4, CPU, bundled model loaded offline |
+| Retrieval settings | Text mode, top 8 per case, no generation API |
+| Cases / evidence groups / query windows | 10 / 80 / 16; all ten cases completed successfully |
+| Text / whole-chart hits | 60 / 20 |
+| Distinct evidence records | 25 |
+| Chart hits | Figure 9.4: 10; Table 9.2: 6; Figure 9.5: 4 |
+| Natural retrieval of the added tables | Neither Table 9.1 nor Table 9.4 appeared in the top 8 for this batch |
+| Actual query-window lengths | 42–256 tokens; all original case text was preserved |
+| Exact duplicate records / text within a case | 0; partial and semantic overlap still occurred |
+| Chart approval and provenance | All 20 chart hits retained approval status, complete chart fields, and source-page images |
+| Query elapsed time | 2.740 seconds, including model loading and verification |
+| Total automated execution and verification time | 5.619 seconds, excluding human or AI quality review |
+| Protected files | 553 checked; zero changed between the before and after snapshots |
 
-聚合字段及受控原件校验和见[新增10例机器汇总](additional_ten_cases_summary.json)。正式包清单和ZIP校验和也在其中，授权获取原件的组员可以核对；哈希不代替原始数据，也不构成临床验证。
+The [machine-readable ten-case summary](additional_ten_cases_summary.json) contains aggregate metrics and checksums for the controlled originals, including the release manifest and ZIP. Team members with authorized access to those originals can verify them against these hashes. Hashes do not replace the underlying data or establish clinical validity.
 
-首次 `run_001` 的检索命令成功，但新审核脚本在普通正文缺少可选 `evidence_group_id` 时发生KeyError。脚本改为与现有程序一致地回退到 `record_id`，再运行到新目录 `run_002`。两次完整证据JSON对象一致，排序和知识库未改。日志保留的432>256提示来自全文分词计数；独立检查确认16个实际推理窗口均不超过256 tokens。
+The retrieval command succeeded in the initial `run_001`, but the new audit script raised a KeyError when ordinary text evidence lacked the optional `evidence_group_id` field. The audit script was corrected to fall back to `record_id`, matching the existing program, and rerun into a new directory, `run_002`. The complete evidence JSON objects from both runs were identical; ranking and the KB were unchanged. The logged 432>256 warning arose during tokenization of the complete query for token counting. An independent check confirmed that all 16 actual inference windows contained at most 256 tokens.
 
-## 内容质量仍有问题
+## Remaining Evidence Quality Issues
 
-AI辅助检查了全部80组结果：14组相关、42组需限定条件或补充上下文、24组不适用、0组不确定。这不是专家裁定，也不是Precision或临床准确率。
+AI-assisted review covered all 80 evidence groups: 14 were labeled relevant, 42 required conditions or additional context, 24 were not applicable, and zero were uncertain. These labels have not been adjudicated by clinical experts and are not estimates of precision or clinical accuracy.
 
-- 三个2型糖尿病病例返回了1型人群相关证据。
-- 六个病例命中移植后情境，输入未建立该情境。
-- 混合主题片段包含未获病例支持的特殊治疗情境。
-- 存在跨页条件未强制关联、相邻正文重叠和扁平表格与完整表格重复的问题。
-- 每例原文证据约15,060–25,847字符，下游API不能静默丢弃必要脚注和条件。
+- Evidence about the type 1 diabetes population was returned for three type 2 diabetes cases.
+- Post-transplant evidence was returned for six cases whose inputs did not establish that context.
+- Mixed-topic passages included special treatment contexts unsupported by the case inputs.
+- Some cross-page conditions were not explicitly linked; adjacent passages overlapped, and flattened table text sometimes duplicated whole-table evidence.
+- Source evidence totaled approximately 15,060–25,847 characters per case. Downstream API integration must preserve necessary footnotes and conditions when handling that context.
 
-已声明依赖的完整性检查不能发现所有尚未声明的缺失条件。HFpEF/HFrEF等人群适配也不能仅凭工程通过保证。没有专家标注全集，不计算Recall@8，不声称临床准确性提升。新表已经可检索不等于本批一定命中；此前定向图表探针与自然病例检索不是同一种评测。
+Checks of declared dependencies cannot identify every missing condition that has not been declared. Engineering success also does not guarantee population or subtype applicability, such as HFpEF versus HFrEF. Without a complete expert-labeled relevance set, Recall@8 was not calculated and no improvement in clinical accuracy is claimed. Indexing the added tables does not guarantee their retrieval for these cases; the earlier targeted chart probes and natural case retrieval evaluate different behavior.
 
-## 如何复现
+## Reproduction
 
-代码测试可按上面的命令运行，但必须换一个尚不存在的输出文件名。缺少受控输入的测试应报告跳过，不能改为伪造通过。
+Run the code tests using the command above with an output filename that does not already exist. Tests that lack controlled inputs should report skips rather than be counted as passes.
 
-复现新增病例的检索需要有权访问同一正式bundle和原批次 `sample_cases.csv`。取得这两个输入并核对汇总中的SHA-256后，从流水线目录运行：
+Reproducing retrieval for the additional cases requires authorized access to the same released bundle and the original batch's `sample_cases.csv`. After obtaining these inputs and verifying the SHA-256 values in the summary, run the following from the pipeline directory:
 
 ```sh
 python kb_v1.py doctor
@@ -67,8 +67,8 @@ python kb_v1.py query --bundle "/path/to/ADA_KB_V1_TEAM/bundle" --cases "/path/t
 python kb_v1.py verify --bundle "/path/to/ADA_KB_V1_TEAM/bundle"
 ```
 
-以上复现实际检索和bundle校验，不重新生成历史553文件保护快照、AI标签或完整审读报告。历史 `run_test.py` 绑定本机审批、ZIP和旧验收目录，未将它伪装为通用公开测试入口；其原件和日志受控保留。`kb_v1_acceptance.py`使用另一批固定10例，不可拿来替代这次选样。
+These commands reproduce retrieval and bundle verification. They do not regenerate the historical 553-file preservation snapshots, AI labels, or complete review report. The historical `run_test.py` depends on local approval, ZIP, and earlier acceptance directories, so it is retained with its logs under controlled access rather than published as a general-purpose test entry point. `kb_v1_acceptance.py` uses a different fixed set of ten cases and must not be substituted for this sample.
 
-## 未覆盖的验收
+## Validation Still Pending
 
-Windows实机、全新依赖安装、生成API集成、专业成员对全部相关性标签的复核和临床有效性评估均未由本报告完成。建议先建立专家适用证据集，再验证人群过滤、重排序、去重及跨页依赖的改善。
+This report does not establish Windows execution, installation in a fresh environment, generation API integration, expert adjudication of all relevance labels, or clinical validity. The next evaluation should establish an expert-labeled set of applicable evidence, then measure the effects of population filtering, reranking, deduplication, and cross-page dependency handling.

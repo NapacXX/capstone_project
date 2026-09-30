@@ -1,0 +1,270 @@
+{
+  "status": "SUCCESS",
+  "started_at_utc": "2026-09-30T14:58:34.092123+00:00",
+  "elapsed_seconds": 9.926473625004292,
+  "python": "3.12.4",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "tests_run": 364,
+  "passed": 312,
+  "failures": [],
+  "errors": [],
+  "skipped": [
+    {
+      "test": "test_kb_v1_build.TableContainmentTests.test_real_baseline_deduplicates_table_overlap_without_losing_records",
+      "reason": "Optional real repository fixture not present"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_actual_seven_chart_release_and_read_only_approvals",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_chart_cannot_bypass_review_as_ordinary_text",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_chart_windows_consume_one_slot_and_return_complete_parent",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_exact_source_blocks_and_ai_are_distinct_full_parents",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_old_table_page_rows_not_indexed_and_mixed_prose_retained",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_public_evidence_keeps_restrictions_not_machine_specific_document_paths",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_rehashed_false_citation_metadata_is_rejected",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_rehashed_source_or_ai_or_policy_mutation_is_not_approved",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_rehashed_wrong_image_page_mapping_is_rejected",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_release_cannot_mix_chart_and_candidate_or_legacy_inputs",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_relocated_chart_bundle_verifies_from_different_working_directory",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_retrieve_cases_exports_complete_source_ai_and_use_restrictions",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_table_continuation_footnotes_and_page_mapping_survive",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_table_page_sources_include_all_four_images",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_table_supersession_without_text_fallback_is_rejected",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_verified_chart_only_pages_do_not_reenter_as_raw_text",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_integration.ApprovedChartIntegrationTests.test_visual_count_mismatch_rejected",
+      "reason": "Private local ADA PDF and seven approved chart fixtures are unavailable"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_both_new_tables_retain_all_paths_footnotes_and_source_limitations",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_changed_supplement_approval_cannot_inherit_parent_approval",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_nine_is_additive_to_seven_not_another_623_approvals",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_output_cannot_overlap_supplement",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_pending_supplement_fails_even_if_approval_pin_were_updated",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_portable_replay_preserves_all_pages_and_exact_approved_content",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_second_page_source_and_parent_scope_are_required",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedSupplementContractTests.test_source_layout_only_suppresses_table91_pages_not_mixed_page22",
+      "reason": "Local immutable two-table approvals not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_audit_inventory_omission_and_rehashed_decision_tamper_fail",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_changed_projection_policy_dependency_source_ai_or_questions_fail",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_chart_missing_duplicate_or_legacy_visual_cannot_enter",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_flattened_chart_only_text_cannot_reenter_but_mixed_page_prose_is_allowed",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_migration_truncation_reassignment_or_autoapproval_fail_rehashed_inventory",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_modified_frozen_source_or_legacy_canonical_fails_even_with_rehashed_bundle",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_no_overwrite_or_output_inside_frozen_workspace",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_pending_or_rejected_recorded_decision_fails_even_if_pin_were_changed",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_portable_replay_has_seven_approvals_no_legacy_approvals_and_four_table_pages",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_public_source_registry_page_chart_pdf_and_title_must_match_frozen_sources",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_scope_contract_claiming_legacy_approval_fails",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_chart_release.PinnedWholeChartAuditTests.test_table_fourth_source_image_missing_fails",
+      "reason": "Local immutable approval corpus not bundled with source checkout"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_each_new_table_uses_one_rank_slot_and_returns_complete_parent",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_missing_changed_or_nonapproved_supplement_decision_cannot_build",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_mixed_page_keeps_clinical_prose_not_duplicate_table",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_new_table_source_navigation_contains_every_page",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_new_tables_preserve_full_approved_documents_and_limitations",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_nine_chart_bundle_relocates_without_original_absolute_paths",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_nine_complete_approved_parents_and_originals_unchanged",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_old_table_carriers_and_chart_only_text_are_audit_only",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_public_mixed_page_evidence_excludes_removed_table_span",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_public_response_distinguishes_current_from_historical_scope",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_rehashed_mixed_page_excerpt_tampering_rejected",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_rehashed_new_table_approval_projection_mutations_rejected",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_rehashed_removed_or_mislabeled_table_9_1_page_four_rejected",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    },
+    {
+      "test": "test_kb_v1_nine_chart_integration.NineChartIntegrationTests.test_supplement_cannot_be_used_without_original_approved_scope",
+      "reason": "Private ADA source and nine recorded chart approvals are unavailable"
+    }
+  ],
+  "expected_failures": [],
+  "unexpected_successes": [],
+  "source_sha256": {
+    "01_extract_guideline_content.py": "32e644e5acee950456691421f24902df8d42658c97f746fade970d56b34e386b",
+    "02_build_type2_kb.py": "858bc2ade400e2326b9c3231d0aa5463d0df2eabe3f7c3868900c150b452c14e",
+    "03_build_vector_index.py": "f149f2cfb091975b5ec6af1f48fa0001da6deea7cf2e7a97c6b953f4027063a4",
+    "04_demo_retrieval.py": "086c4fff64305d4f810c748290a26cab35b3e17f972b8c1c274d9fc6c96c888f",
+    "05_render_pdf_pages_to_images.py": "8fec854cea7dcf8016db32dc25c0e99140038def6d2c75e6966c825ef4c55214",
+    "06_extract_visual_guideline_logic.py": "aea8fd541f6ac1d71ebbc41b0744f838ec375a68f642b5ae0a214b0dab3c56e9",
+    "07_validate_visual_logic_outputs.py": "6ad54e7c11427331fb86d272788c3c3f8272c6bad2a51a8d9aa7c7fd24e189df",
+    "08_build_enhanced_guideline_kb.py": "1f6343772b6fa73eefa8fd518a7db6fe5111999feab4227cb997eecbec56ee95",
+    "export_manual_review_package.py": "9f8cea781cf99b0998c5bf58d2a4830dd16b0c36907e3853278a4fee1c50b799",
+    "kb_v1.py": "b6f5b2583b6df5a0db03e84533c6a9f014a71deb8756c6c06c3c92a951372a8b",
+    "kb_v1_acceptance.py": "30e285b4bf6d33d6d92c9cfba0d9db01c68b4cc2f5c08eb682ed1f25c896e877",
+    "kb_v1_build.py": "8bbc568b96706483068a7ff6275d63def33cd125b03c5d60d95714ae37940fc7",
+    "kb_v1_chart_acceptance.py": "4b64c848d0b6d7ae9097aa7b0d83223c35d8f53077241e6fcc17418b1981f9f5",
+    "kb_v1_chart_delivery.py": "6e1e52c1303b71eb173a98622f677b53d1c0144d6f7a5ba471115a3f18c6f34a",
+    "kb_v1_chart_release.py": "ab0723259e086f407bf874a7afb67da48e15de576069970d471b2c0511cc78c6",
+    "kb_v1_chart_text.py": "db43c799c05b506c9c71db975142c1b9f9735bd503767a3b1003f3f6f4e2a7cf",
+    "kb_v1_delivery.py": "676c08a862e630a86ff23ffbb73d0fa09d1b0c5a876bab88cb4286fb4617668c",
+    "kb_v1_figure_review.py": "b76cdcea6aabc3689c9d82c58e43b679f69f514e2e8f40c12dee3b5c454f70ca",
+    "kb_v1_review.py": "3d2e5d4dc66ba3e3debfe62ca881e7cf69aa5ed6a16238df24d0ed4f90480daa",
+    "kb_v1_runtime.py": "deac22590c68cf8fa8dea7f1ea436dd9b087a8deef8288aa70292fd1e7f3f8e7",
+    "merge_visual_logic_retry.py": "affd535955d4375e460fd78889261c30e7fec1c18ca4912483d912c7bc1d8970",
+    "run_public_tests.py": "65653b77e7856f0266a3d9e59094b6d6c2b9c21e3f86b7a0836c36502bbb1314",
+    "tests/test_demo_retrieval.py": "ff08af17ca349dd3b4eabaffca5d7302daaf2ddb112d87f19f5c93527208c748",
+    "tests/test_export_manual_review_package.py": "3f61639e99c0d9bad58cc41713e7f73c094ce618d19fa2b1cd7693304966ebca",
+    "tests/test_extract_guideline_content.py": "845a0b003836e173c370cf00f77b115e9644b74b2d7fc8b075c89079796be25a",
+    "tests/test_extract_visual_guideline_logic.py": "f566318a4fbbfa9402926baae7e2b17b86b81cd8ac726dd8f2d4c34ac1c63e2e",
+    "tests/test_kb_release_safety.py": "1e047005f6847a2fe88dc761426faed870153b14334e5d9b0c8ed7fc0c8c64f8",
+    "tests/test_kb_v1_build.py": "9debf412b949ab5729e93d89e41afd76acff142d3251c1ba3b193df88574534b",
+    "tests/test_kb_v1_chart_delivery.py": "72ea0a6d6980561053eb70853156bbd1fa8f2d55f3fb5b62879ed81a87f20b9c",
+    "tests/test_kb_v1_chart_integration.py": "7f442d2eaf8074593f84219f178aa9a9c87534571d146b60ffcdb0ef28f3126d",
+    "tests/test_kb_v1_chart_release.py": "e41a2efd3121381a49bd4f620df4a04fcecafd5a40625757cd39bd86454c56dc",
+    "tests/test_kb_v1_cli.py": "1b80918a7170b83db59ef0c49306c56cba924cc045f8d6b6c979e79e367a315b",
+    "tests/test_kb_v1_figure_cli.py": "355aa714e86abfb96fa6d9ce4740e6eedf98b6e06049e089c96e80bbd75a0ecb",
+    "tests/test_kb_v1_figure_review.py": "f99e731683c3fd0a57f7f1a25bb1b4d0ef5b1ff27d9ca8492fd0d687c932e6bc",
+    "tests/test_kb_v1_figure_review_en.py": "319ad75e4bad0d8a9b411bb69c33802cedabe18ed77da3e135b8148c53bdf054",
+    "tests/test_kb_v1_figure_supplement.py": "cf74ebcbefeb5dac346da3d1c9d8910e340176b8f3c72cfcec9486c601c89cef",
+    "tests/test_kb_v1_handoff.py": "d4f61bea0d860c9f4ae2cc16bb392e41549d9ff3747726d6ef5836208bd07f87",
+    "tests/test_kb_v1_nine_chart_integration.py": "230eb00eb6583c858904250ce3d7e6ae09dc55f4d79b8cf0a3a63087bf755f76",
+    "tests/test_kb_v1_review.py": "7e123d2b0e8eeeec42a8efac1e4109134109013083e2bda5d186e0ddee727028",
+    "tests/test_kb_v1_runtime.py": "ab9e89a55ca39f8492f000580bd06c1e4ec6fbca2b0f8a286ae907de95bd3109",
+    "tests/test_merge_visual_logic_retry.py": "2642df789b21689b8bcc144e0040548077f7286c24f1bcf60a099a7beff99b3c",
+    "tests/test_render_pdf_pages_to_images.py": "4391d6ab2edd7c684d1c7af99d3c1454aab223a24f152c921b1c0fb7814a8d48",
+    "tests/test_source_provenance.py": "6d1e7f69080f8b59bfd10a7f441c75da145f2361d47549b5aefa832824e18ce6",
+    "tests/test_validate_visual_logic_outputs.py": "250077d98c18696a22694e7ac11a886e5f06e56586685d02ee981d567853990b"
+  },
+  "scope": "Repository tests in the available environment. Missing private fixtures are explicitly skipped. This is not clinical validation or a fresh dependency installation test."
+}

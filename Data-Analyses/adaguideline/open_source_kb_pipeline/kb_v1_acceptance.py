@@ -132,10 +132,10 @@ def run_checks(bundle, source_cases, output):
         "visual_records": sum(r['content_type'].startswith('visual_') for r in records),
         "page_previews_in_index": sum(r['content_type'] == 'figure_or_page' for r in records),
         "symlink_files": sum(p.is_symlink() for p in bundle.rglob('*'))}
-    relocated = output / "可移植测试 with spaces" / "bundle"
+    relocated = output / "\u53ef\u79fb\u690d\u6d4b\u8bd5 with spaces" / "bundle"
     shutil.copytree(bundle, relocated, symlinks=False)
     verify_bundle(relocated, allow_candidate=True)
-    long_text = cases[0]["retrieval_query"] * 9 + " Final condition retained: 中文测试 and final evidence context."
+    long_text = cases[0]["retrieval_query"] * 9 + " Final condition retained: \u4e2d\u6587\u6d4b\u8bd5 and final evidence context."
     with (output / "long_case.csv").open("x", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=["case_id", "vignette_text"])
         writer.writeheader()

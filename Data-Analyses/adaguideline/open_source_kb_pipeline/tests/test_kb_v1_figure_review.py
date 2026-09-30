@@ -46,7 +46,7 @@ class FigureFixture:
             "title": f"Synthetic Figure {number}", "revision": "r1", "source_pdf": str(self.pdf),
             "source_pdf_sha256": review.sha256_file(self.pdf), "page_numbers": [number], "printed_pages": [f"S{number}"],
             "image_path": str(self.image), "image_sha256": review.sha256_file(self.image),
-            "description_zh": "测试AI描述，不是临床指南。", "generation_note": "待核源文转录，非已批准原文。",
+            "description_zh": "\u6d4b\u8bd5AI\u63cf\u8ff0\uff0c\u4e0d\u662f\u4e34\u5e8a\u6307\u5357\u3002", "generation_note": "\u5f85\u6838\u6e90\u6587\u8f6c\u5f55\uff0c\u975e\u5df2\u6279\u51c6\u539f\u6587\u3002",
             "source_blocks": [
                 {"id": "heading", "kind": "heading", "region": "top", "text": "Synthetic scope"},
                 {"id": "node", "kind": "node", "region": "center", "text": "Synthetic condition and action"},
@@ -55,9 +55,9 @@ class FigureFixture:
             ],
             "paths": [{"path_id": "path-1", "title": "Synthetic path", "kind": "decision_path",
                        "source_block_ids": ["heading", "node"], "footnote_ids": ["fn"],
-                       "logic_text_zh": "测试路径，附限定。", "critical_checks": ["检查限定是否完整"]}],
-            "symbols": [{"symbol": "*", "kind": "footnote_reference", "meaning_zh": "测试脚注标记", "source_block_ids": ["fn"]}],
-            "open_questions": [], "review_checklist": ["核对所有源文", "核对全部路径与脚注"],
+                       "logic_text_zh": "\u6d4b\u8bd5\u8def\u5f84\uff0c\u9644\u9650\u5b9a\u3002", "critical_checks": ["\u68c0\u67e5\u9650\u5b9a\u662f\u5426\u5b8c\u6574"]}],
+            "symbols": [{"symbol": "*", "kind": "footnote_reference", "meaning_zh": "\u6d4b\u8bd5\u811a\u6ce8\u6807\u8bb0", "source_block_ids": ["fn"]}],
+            "open_questions": [], "review_checklist": ["\u6838\u5bf9\u6240\u6709\u6e90\u6587", "\u6838\u5bf9\u5168\u90e8\u8def\u5f84\u4e0e\u811a\u6ce8"],
         }
 
     def prepare(self, name="review", document=None):
@@ -102,7 +102,7 @@ class FigureReviewTests(unittest.TestCase):
             self.assertIn(block["text"], markdown)
         self.assertIn(self.fixture.document["paths"][0]["logic_text_zh"], markdown)
         self.assertIn("sources/source.pdf#page=1", markdown)
-        self.assertIn("待核转录", markdown)
+        self.assertIn("\u5f85\u6838\u8f6c\u5f55", markdown)
 
     def test_source_transcription_uses_literal_quotes_and_hard_line_breaks(self):
         document = copy.deepcopy(self.fixture.document)
@@ -224,9 +224,9 @@ class FigureReviewTests(unittest.TestCase):
             lambda d: d.update(reviewed_at="2026-09-28"),
             lambda d: d.update(notes=""),
             lambda d: d.update(checklist_confirmations={}),
-            lambda d: d["checklist_confirmations"].update({"核对所有源文": False}),
-            lambda d: d["checklist_confirmations"].update({"核对所有源文": "true"}),
-            lambda d: d["checklist_confirmations"].update({"核对所有源文": 1}),
+            lambda d: d["checklist_confirmations"].update({"\u6838\u5bf9\u6240\u6709\u6e90\u6587": False}),
+            lambda d: d["checklist_confirmations"].update({"\u6838\u5bf9\u6240\u6709\u6e90\u6587": "true"}),
+            lambda d: d["checklist_confirmations"].update({"\u6838\u5bf9\u6240\u6709\u6e90\u6587": 1}),
         ]
         for index, modify in enumerate(variations):
             decision = self.fixture.decision()
@@ -341,7 +341,7 @@ class FigureReviewTests(unittest.TestCase):
         document["source_pdf"] = self.fixture.pdf.name
         document["image_path"] = self.fixture.image.name
         directory, _ = self.fixture.prepare(document=document)
-        copied = self.root / "移动 包 with spaces"
+        copied = self.root / "\u79fb\u52a8 \u5305 with spaces"
         shutil.copytree(directory, copied)
         self.fixture.pdf.unlink()
         self.fixture.image.unlink()

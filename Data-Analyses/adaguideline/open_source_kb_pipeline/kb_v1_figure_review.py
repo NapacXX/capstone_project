@@ -365,32 +365,32 @@ def _source_quote(text: str) -> str:
 
 
 def _review_markdown(document: dict[str, Any], mapping: dict[str, str]) -> str:
-    lines = [f"# {document['title']} — 图表级审核候选", "",
-             "尚未人工批准。以下源文是待核转录，不保证准确；中文描述、路径和符号解释均为AI整理。",
-             "本包只供完整图表审核，不能单独发布某条路径，也不替代原623条审核门槛。", "",
-             f"图表ID：{document['figure_id']}；修订：{document['revision']}",
-             f"PDF页：{document['page_numbers']}；印刷页：{document['printed_pages']}",
-             f"[源PDF](<{mapping['source_pdf']}#page={document['page_numbers'][0]}>) · [整图](<{mapping['image']}>)", "",
-             "## AI整理说明", "", document["description_zh"], "", document["generation_note"], "",
-             "## 待核原文转录（不是已批准原文）", ""]
+    lines = [f"# {document['title']} — \u56fe\u8868\u7ea7\u5ba1\u6838\u5019\u9009", "",
+             "\u5c1a\u672a\u4eba\u5de5\u6279\u51c6\u3002\u4ee5\u4e0b\u6e90\u6587\u662f\u5f85\u6838\u8f6c\u5f55\uff0c\u4e0d\u4fdd\u8bc1\u51c6\u786e\uff1b\u4e2d\u6587\u63cf\u8ff0\u3001\u8def\u5f84\u548c\u7b26\u53f7\u89e3\u91ca\u5747\u4e3aAI\u6574\u7406\u3002",
+             "\u672c\u5305\u53ea\u4f9b\u5b8c\u6574\u56fe\u8868\u5ba1\u6838\uff0c\u4e0d\u80fd\u5355\u72ec\u53d1\u5e03\u67d0\u6761\u8def\u5f84\uff0c\u4e5f\u4e0d\u66ff\u4ee3\u539f623\u6761\u5ba1\u6838\u95e8\u69db\u3002", "",
+             f"\u56fe\u8868ID\uff1a{document['figure_id']}\uff1b\u4fee\u8ba2\uff1a{document['revision']}",
+             f"PDF\u9875\uff1a{document['page_numbers']}\uff1b\u5370\u5237\u9875\uff1a{document['printed_pages']}",
+             f"[\u6e90PDF](<{mapping['source_pdf']}#page={document['page_numbers'][0]}>) · [\u6574\u56fe](<{mapping['image']}>)", "",
+             "## AI\u6574\u7406\u8bf4\u660e", "", document["description_zh"], "", document["generation_note"], "",
+             "## \u5f85\u6838\u539f\u6587\u8f6c\u5f55\uff08\u4e0d\u662f\u5df2\u6279\u51c6\u539f\u6587\uff09", ""]
     for row in document["source_blocks"]:
         lines += [f"### {row['id']} · {row['kind']} · {row['region']}", "", _source_quote(row["text"]), ""]
-    lines += ["## AI整理的路径（逐条核对条件与完整依赖）", ""]
+    lines += ["## AI\u6574\u7406\u7684\u8def\u5f84\uff08\u9010\u6761\u6838\u5bf9\u6761\u4ef6\u4e0e\u5b8c\u6574\u4f9d\u8d56\uff09", ""]
     for row in document["paths"]:
         lines += [f"### {row['path_id']} · {row['title']} · {row['kind']}", "", row["logic_text_zh"], "",
-                  f"源文块：{', '.join(row['source_block_ids'])}", f"脚注块：{', '.join(row['footnote_ids']) or '未列出；需人工核对是否真的没有'}", "",
-                  "关键核对项：", "", *[f"- {item}" for item in row["critical_checks"]], ""]
-    lines += ["## 符号与关系", ""]
+                  f"\u6e90\u6587\u5757\uff1a{', '.join(row['source_block_ids'])}", f"\u811a\u6ce8\u5757\uff1a{', '.join(row['footnote_ids']) or '\u672a\u5217\u51fa\uff1b\u9700\u4eba\u5de5\u6838\u5bf9\u662f\u5426\u771f\u7684\u6ca1\u6709'}", "",
+                  "\u5173\u952e\u6838\u5bf9\u9879\uff1a", "", *[f"- {item}" for item in row["critical_checks"]], ""]
+    lines += ["## \u7b26\u53f7\u4e0e\u5173\u7cfb", ""]
     for row in document["symbols"]:
-        lines += [f"- {row['symbol']} · {row['kind']}：{row['meaning_zh']}；源文块：{', '.join(row['source_block_ids'])}"]
-    lines += ["", "## 待解决问题", ""]
-    lines += [f"- {row['question_id']} [{row['severity']}]：{row['text']}" for row in document["open_questions"]]
+        lines += [f"- {row['symbol']} · {row['kind']}\uff1a{row['meaning_zh']}\uff1b\u6e90\u6587\u5757\uff1a{', '.join(row['source_block_ids'])}"]
+    lines += ["", "## \u5f85\u89e3\u51b3\u95ee\u9898", ""]
+    lines += [f"- {row['question_id']} [{row['severity']}]\uff1a{row['text']}" for row in document["open_questions"]]
     if not document["open_questions"]:
-        lines += ["未列出问题不等于已证明无错误，仍须人工核对。"]
-    lines += ["", "## 人工确认清单（尚未填写）", "", *[f"- [ ] {item}" for item in document["review_checklist"]], "",
-              "复制 human_decision_template.json 到独立工作文件后填写；不可修改被冻结的文档来沿用旧批准。",
-              "批准必须绑定当前完整内容指纹，填写本人、带时区时间、备注，确认所有清单项且无blocking问题。",
-              "内容修订后必须建立新审核包并重新确认。机器不验证真实身份或临床正确性。", ""]
+        lines += ["\u672a\u5217\u51fa\u95ee\u9898\u4e0d\u7b49\u4e8e\u5df2\u8bc1\u660e\u65e0\u9519\u8bef\uff0c\u4ecd\u987b\u4eba\u5de5\u6838\u5bf9\u3002"]
+    lines += ["", "## \u4eba\u5de5\u786e\u8ba4\u6e05\u5355\uff08\u5c1a\u672a\u586b\u5199\uff09", "", *[f"- [ ] {item}" for item in document["review_checklist"]], "",
+              "\u590d\u5236 human_decision_template.json \u5230\u72ec\u7acb\u5de5\u4f5c\u6587\u4ef6\u540e\u586b\u5199\uff1b\u4e0d\u53ef\u4fee\u6539\u88ab\u51bb\u7ed3\u7684\u6587\u6863\u6765\u6cbf\u7528\u65e7\u6279\u51c6\u3002",
+              "\u6279\u51c6\u5fc5\u987b\u7ed1\u5b9a\u5f53\u524d\u5b8c\u6574\u5185\u5bb9\u6307\u7eb9\uff0c\u586b\u5199\u672c\u4eba\u3001\u5e26\u65f6\u533a\u65f6\u95f4\u3001\u5907\u6ce8\uff0c\u786e\u8ba4\u6240\u6709\u6e05\u5355\u9879\u4e14\u65e0blocking\u95ee\u9898\u3002",
+              "\u5185\u5bb9\u4fee\u8ba2\u540e\u5fc5\u987b\u5efa\u7acb\u65b0\u5ba1\u6838\u5305\u5e76\u91cd\u65b0\u786e\u8ba4\u3002\u673a\u5668\u4e0d\u9a8c\u8bc1\u771f\u5b9e\u8eab\u4efd\u6216\u4e34\u5e8a\u6b63\u786e\u6027\u3002", ""]
     return "\n".join(lines)
 
 

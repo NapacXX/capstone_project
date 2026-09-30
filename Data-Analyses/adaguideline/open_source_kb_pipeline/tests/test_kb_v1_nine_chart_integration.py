@@ -298,7 +298,7 @@ class NineChartIntegrationTests(unittest.TestCase):
         self.assertIn(note, (output / "evidence.md").read_text())
 
     def test_nine_chart_bundle_relocates_without_original_absolute_paths(self):
-        relocated = self.root / "中文 path with spaces" / "bundle"
+        relocated = self.root / "\u4e2d\u6587 path with spaces" / "bundle"
         shutil.copytree(self.bundle, relocated)
         program = (
             "import json,sys; sys.path.insert(0,sys.argv[1]); "

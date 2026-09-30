@@ -6,6 +6,8 @@ Start with [the current delivery guide](KB_V1_FINAL_DELIVERY.md) for the
 versioned nine-chart KB, offline retrieval and teammate setup. See
 [the published test summary](test_reports/20260929/README.md) for measured
 results and limitations, including the additional ten-case test.
+The [September 30 source compatibility check](test_reports/20260930/README.md)
+records the subsequent Unicode-source cleanup and its automated test results.
 
 This repository contains the retrieval/build/review code, automated tests and
 sanitized result summaries. The current source-bearing KB bundle, ADA PDF,

@@ -346,7 +346,7 @@ class ApprovedChartIntegrationTests(unittest.TestCase):
             runtime.verify_bundle(mutated)
 
     def test_relocated_chart_bundle_verifies_from_different_working_directory(self):
-        relocated = self.root / "中文 folder with spaces" / "release"
+        relocated = self.root / "\u4e2d\u6587 folder with spaces" / "release"
         if not relocated.exists():
             shutil.copytree(self.bundle, relocated)
         program = (

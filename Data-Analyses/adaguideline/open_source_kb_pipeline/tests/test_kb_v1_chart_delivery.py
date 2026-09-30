@@ -122,7 +122,7 @@ class ChartDeliveryTests(unittest.TestCase):
     def test_whole_tree_materializes_and_relocates_with_unicode_spaces(self):
         import shutil
         self.package()
-        relocated = self.root / "中文 folder" / "teammate copy"
+        relocated = self.root / "\u4e2d\u6587 folder" / "teammate copy"
         shutil.copytree(self.output, relocated)
         self.assertEqual(delivery.verify_delivery(relocated)["kb_version"], "synthetic-v1")
         self.assertFalse(any(path.is_symlink() for path in relocated.rglob("*")))

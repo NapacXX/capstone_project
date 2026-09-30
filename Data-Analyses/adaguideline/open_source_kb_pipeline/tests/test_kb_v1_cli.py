@@ -30,8 +30,8 @@ class CommandTests(unittest.TestCase):
 
     def test_single_case_uses_full_file_and_text_mode(self):
         with tempfile.TemporaryDirectory() as folder:
-            p = Path(folder) / "病例 input.txt"
-            p.write_text("Full case with Unicode 中文 and line\nbreak", encoding="utf-8")
+            p = Path(folder) / "\u75c5\u4f8b input.txt"
+            p.write_text("Full case with Unicode \u4e2d\u6587 and line\nbreak", encoding="utf-8")
             captured = {}
             def retrieve(bundle, source, output, mode, topk, allow):
                 import csv

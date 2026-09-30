@@ -127,7 +127,7 @@ class PinnedWholeChartAuditTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.bundle = Path(self.tmp.name) / "中文 path with spaces" / "bundle"
+        self.bundle = Path(self.tmp.name) / "\u4e2d\u6587 path with spaces" / "bundle"
         shutil.copytree(self.template, self.bundle)
         self.root = self.bundle / release.AUDIT_RELATIVE
         self.records = copy.deepcopy(self.original["records"])
@@ -290,7 +290,7 @@ class PinnedSupplementContractTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.bundle = Path(self.tmp.name) / "中文 supplemental bundle"
+        self.bundle = Path(self.tmp.name) / "\u4e2d\u6587 supplemental bundle"
         shutil.copytree(self.template, self.bundle)
         self.root = self.bundle / release.AUDIT_RELATIVE
         self.supplement = self.root / "supplement"

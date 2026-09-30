@@ -112,17 +112,17 @@ class EnglishFigureReviewTests(unittest.TestCase):
 
     def test_cjk_leakage_rejected_in_each_review_text_area(self):
         mutations = [
-            lambda d: d.update(description_en="English 中文"),
-            lambda d: d.update(generation_note="English 中文"),
-            lambda d: d["source_blocks"][0].update(region="中文 region"),
-            lambda d: d["source_blocks"][0].update(text="中文 source"),
-            lambda d: d["paths"][0].update(title="中文 path"),
-            lambda d: d["paths"][0].update(logic_text_en="中文 logic"),
-            lambda d: d["paths"][0].update(critical_checks=["中文 check"]),
-            lambda d: d["symbols"][0].update(meaning_en="中文 meaning"),
-            lambda d: d.update(open_questions=[{"question_id": "q1", "severity": "nonblocking", "text": "中文 question"}]),
-            lambda d: d.update(review_checklist=["中文 review"]),
-            lambda d: d.update(printed_pages=["第1页"]),
+            lambda d: d.update(description_en="English \u4e2d\u6587"),
+            lambda d: d.update(generation_note="English \u4e2d\u6587"),
+            lambda d: d["source_blocks"][0].update(region="\u4e2d\u6587 region"),
+            lambda d: d["source_blocks"][0].update(text="\u4e2d\u6587 source"),
+            lambda d: d["paths"][0].update(title="\u4e2d\u6587 path"),
+            lambda d: d["paths"][0].update(logic_text_en="\u4e2d\u6587 logic"),
+            lambda d: d["paths"][0].update(critical_checks=["\u4e2d\u6587 check"]),
+            lambda d: d["symbols"][0].update(meaning_en="\u4e2d\u6587 meaning"),
+            lambda d: d.update(open_questions=[{"question_id": "q1", "severity": "nonblocking", "text": "\u4e2d\u6587 question"}]),
+            lambda d: d.update(review_checklist=["\u4e2d\u6587 review"]),
+            lambda d: d.update(printed_pages=["\u7b2c1\u9875"]),
         ]
         for index, mutate in enumerate(mutations):
             document = copy.deepcopy(self.document)
@@ -130,7 +130,7 @@ class EnglishFigureReviewTests(unittest.TestCase):
             with self.subTest(index=index), self.assertRaisesRegex(ValueError, "CJK/Han"):
                 review.validate_document(document, self.fixture.scope)
         document, scope = copy.deepcopy(self.document), copy.deepcopy(self.fixture.scope)
-        document["title"] = scope["figures"][0]["title"] = "中文 title"
+        document["title"] = scope["figures"][0]["title"] = "\u4e2d\u6587 title"
         with self.assertRaisesRegex(ValueError, "CJK/Han"):
             review.validate_document(document, scope)
 
@@ -145,7 +145,7 @@ class EnglishFigureReviewTests(unittest.TestCase):
         review.validate_document(document, self.fixture.scope)
 
     def test_cjk_source_paths_are_allowed_and_portable_copy_is_still_valid(self):
-        pdf, image = self.root / "源材料 ADA.pdf", self.root / "原图 空格.png"
+        pdf, image = self.root / "\u6e90\u6750\u6599 ADA.pdf", self.root / "\u539f\u56fe \u7a7a\u683c.png"
         shutil.copyfile(self.fixture.pdf, pdf)
         shutil.copyfile(self.fixture.image, image)
         document = copy.deepcopy(self.document)

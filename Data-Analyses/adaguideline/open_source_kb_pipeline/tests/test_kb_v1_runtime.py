@@ -111,7 +111,7 @@ class BundleTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
-        self.bundle = self.root / "中文 知识库"
+        self.bundle = self.root / "\u4e2d\u6587 \u77e5\u8bc6\u5e93"
         self.records, self.units = make_bundle(self.bundle)
 
     def tearDown(self):
@@ -292,7 +292,7 @@ class BundleTests(unittest.TestCase):
     def test_candidate_retrieval_and_relative_source_link_outside_cwd(self):
         cases_path = self.root / "cases.csv"
         cases_path.write_text("case_id,vignette_text\nC1,kidney disease\nC1,kidney disease\n", encoding="utf-8-sig")
-        output = self.root / "中文 输出" / "run 1"
+        output = self.root / "\u4e2d\u6587 \u8f93\u51fa" / "run 1"
         original = Path.cwd()
         try:
             os.chdir(self.root)
@@ -306,7 +306,7 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(evidence["evidence"][0]["source"]["relative_path"], "sources/test.pdf")
         markdown = (output / "evidence.md").read_text()
         self.assertIn("REVIEW CANDIDATE", markdown)
-        self.assertIn("../../中文 知识库/sources/test.pdf#page=1", markdown)
+        self.assertIn("../../\u4e2d\u6587 \u77e5\u8bc6\u5e93/sources/test.pdf#page=1", markdown)
         with self.assertRaises(FileExistsError):
             runtime.retrieve_cases(self.bundle, cases_path, output, allow_candidate=True)
 
@@ -412,7 +412,7 @@ class TokenAndRankingTests(unittest.TestCase):
                 self.assertEqual(runtime.expected_visual_retrieval_text(row), validator.build_retrieval_record(row)["retrieval_text"])
 
     def test_windows_preserve_all_source_characters_and_symbols(self):
-        text = "  A + $\n eGFR <30 AND not pregnancy; 中文 test trailing  "
+        text = "  A + $\n eGFR <30 AND not pregnancy; \u4e2d\u6587 test trailing  "
         windows = runtime.token_windows(text, FakeTokenizer(), max_length=6, overlap=1)
         coverage = np.zeros(len(text), dtype=bool)
         for window in windows:

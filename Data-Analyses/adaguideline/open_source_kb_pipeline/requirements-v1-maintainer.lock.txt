@@ -1,0 +1,3 @@
+-r requirements-v1-consumer.lock.txt
+# FAISS is used only for maintainer numerical-equivalence acceptance checks.
+faiss-cpu==1.8.0

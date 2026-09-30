@@ -1,5 +1,23 @@
 # Open-Source ADA Guideline Knowledge Base Pipeline
 
+## Current KB v1 release and tests
+
+Start with [the current delivery guide](KB_V1_FINAL_DELIVERY.md) for the
+versioned nine-chart KB, offline retrieval and teammate setup. See
+[the published test summary](test_reports/20260929/README.md) for measured
+results and limitations, including the additional ten-case test.
+
+This repository contains the retrieval/build/review code, automated tests and
+sanitized result summaries. The current source-bearing KB bundle, ADA PDF,
+model snapshot, whole-chart approval corpus and case-level outputs are shared
+separately through authorized team channels, not added by this publication.
+Legacy review artifacts already tracked in `manual_review_packages/` describe
+the earlier candidate workflow and are not the current nine-chart release.
+Cloning the code alone is not a download of the finished knowledge base.
+
+The instructions below document the earlier extraction pipeline. Teammates
+querying an approved KB bundle do not need Ollama or a generation API key.
+
 This folder builds a local, auditable retrieval knowledge base from a guideline
 PDF. Visual-model output is treated as untrusted evidence: it is tiled,
 schema-checked, validated against its source provenance, and held outside the
